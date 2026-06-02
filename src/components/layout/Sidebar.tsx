@@ -73,12 +73,20 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="px-8 pb-8 pt-6 border-t border-border/70">
-        <div className="smallcaps text-muted-foreground mb-2">Sources</div>
-        <p className="font-serif text-[0.85rem] leading-relaxed text-muted-foreground italic">
-          Cormen et&nbsp;al., Sedgewick &amp; Wayne, Laaksonen,
-          MIT&nbsp;OCW, cp-algorithms.
-        </p>
+      <div className="px-8 pb-8 pt-6 border-t border-border/70 space-y-5">
+        <div>
+          <div className="smallcaps text-muted-foreground mb-2">Sources</div>
+          <p className="font-serif text-[0.85rem] leading-relaxed text-muted-foreground italic">
+            Cormen et&nbsp;al., Sedgewick &amp; Wayne, Laaksonen,
+            MIT&nbsp;OCW, cp-algorithms.
+          </p>
+        </div>
+        <div>
+          <div className="smallcaps text-muted-foreground mb-2">Edited by</div>
+          <p className="font-display text-[0.95rem] leading-snug">
+            Himanshu <em>Nakrani</em>
+          </p>
+        </div>
       </div>
     </aside>
   );
