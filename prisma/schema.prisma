@@ -1,0 +1,286 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+  engine   = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile?
+  submissions   Submission[]
+  progress      UserProblemProgress[]
+  customLists   CustomList[]
+}
+
+model Profile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  streak        Int       @default(0)
+  longestStreak Int       @default(0)
+  lastActive    DateTime  @default(now())
+}
+
+model Track {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  modules     Module[]
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  trackId     String
+  track       Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String   @unique
+  description String?
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  topics      Topic[]
+}
+
+model Topic {
+  id          String   @id @default(cuid())
+  moduleId    String
+  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String   @unique
+  description String?
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  problems    ProblemTopic[]
+  articles    Article[]
+}
+
+model Problem {
+  id                   String             @id @default(cuid())
+  slug                 String             @unique
+  title                String
+  difficulty           Difficulty
+  statementMd          String
+  inputFormatMd        String?
+  outputFormatMd       String?
+  constraintsMd        String?
+  examplesJson         Json
+  starterCodeJson      Json
+  referenceSolutionsJson Json?
+  timeLimitMs          Int                @default(1000)
+  memoryLimitMb        Int                @default(256)
+  acceptanceRate       Float              @default(0.0)
+  isPremium            Boolean            @default(false)
+  status               ProblemStatus      @default(PUBLISHED)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  topics               ProblemTopic[]
+  testCases            TestCase[]
+  hints                Hint[]
+  editorial            Editorial?
+  submissions          Submission[]
+  progress             UserProblemProgress[]
+  customListItems      CustomListItem[]
+
+  @@index([status, difficulty])
+}
+
+model ProblemTopic {
+  id        String   @id @default(cuid())
+  problemId String
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, topicId])
+}
+
+model TestCase {
+  id          String   @id @default(cuid())
+  problemId   String
+  problem     Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  input       String
+  output      String
+  isHidden    Boolean  @default(false)
+  order       Int
+  createdAt   DateTime @default(now())
+}
+
+model Hint {
+  id        String   @id @default(cuid())
+  problemId String
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  content   String
+  order     Int
+  createdAt DateTime @default(now())
+}
+
+model Editorial {
+  id          String   @id @default(cuid())
+  problemId   String   @unique
+  problem     Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  intuitionMd String
+  bruteForceMd String?
+  optimizedMd String
+  complexityMd String
+  edgeCasesMd String?
+  commonMistakesMd String?
+  followUpQuestionsMd String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Submission {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId     String
+  problem       Problem        @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  language      Language
+  sourceCode    String
+  status        SubmissionStatus @default(PENDING)
+  runtimeMs     Int?
+  memoryKb      Int?
+  testsPassed   Int?
+  totalTests    Int?
+  errorMessage  String?
+  createdAt     DateTime       @default(now())
+
+  @@index([userId, problemId, createdAt])
+}
+
+model UserProblemProgress {
+  id               String         @id @default(cuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId        String
+  problem          Problem        @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  status           ProgressStatus @default(NEW)
+  attempts         Int            @default(0)
+  solvedAt         DateTime?
+  lastAttemptedAt  DateTime?
+  hintsUsed        Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([userId, problemId])
+  @@index([userId, status])
+}
+
+model CustomList {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       CustomListItem[]
+}
+
+model CustomListItem {
+  id           String     @id @default(cuid())
+  listId       String
+  list         CustomList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  problemId    String
+  problem      Problem    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  order        Int
+  createdAt    DateTime   @default(now())
+
+  @@unique([listId, problemId])
+}
+
+model Article {
+  id              String         @id @default(cuid())
+  slug            String         @unique
+  title           String
+  summary         String
+  topicId         String
+  topic           Topic          @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  level           ArticleLevel
+  order           Int
+  contentMd       String         @db.Text
+  references      Json
+  prerequisites   Json?
+  estimatedMins   Int            @default(10)
+  status          ArticleStatus  @default(PUBLISHED)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([topicId, level, order])
+  @@index([status])
+}
+
+enum ArticleLevel {
+  FOUNDATION
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ProblemStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Language {
+  PYTHON
+  CPP
+  JAVA
+  JAVASCRIPT
+}
+
+enum SubmissionStatus {
+  PENDING
+  COMPILING
+  RUNNING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+  JUDGE_ERROR
+}
+
+enum ProgressStatus {
+  NEW
+  ATTEMPTED
+  SOLVED
+  NEEDS_REVISION
+  MASTERED
+}
