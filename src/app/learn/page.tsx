@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
 
+export const dynamic = "force-dynamic";
+
 const levelLabel: Record<ArticleLevel, string> = {
   FOUNDATION: "Foundation",
   INTERMEDIATE: "Intermediate",

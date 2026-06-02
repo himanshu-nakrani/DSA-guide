@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ArticleStatus } from "@/generated/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [articleCount, moduleCount, problemCount] = await Promise.all([
     prisma.article.count({ where: { status: ArticleStatus.PUBLISHED } }),

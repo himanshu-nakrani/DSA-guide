@@ -5,6 +5,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
 
+export const dynamic = "force-dynamic";
+
 type Reference = {
   title: string;
   author?: string;

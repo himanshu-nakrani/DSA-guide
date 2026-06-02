@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArticleStatus } from "@/generated/prisma";
 
+export const dynamic = "force-dynamic";
+
 function romanize(num: number): string {
   const map: [number, string][] = [
     [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
