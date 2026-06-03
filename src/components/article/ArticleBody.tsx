@@ -2,6 +2,7 @@ import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Viz } from "@/components/viz/Viz";
+import { VizCounterProvider } from "@/components/viz/_chrome";
 import { CopyButton } from "./CopyButton";
 import { ArticleLink, type ArticleLinkPreview } from "./ArticleLink";
 
@@ -22,6 +23,7 @@ export function ArticleBody({
   previews?: ArticlePreviewMap;
 }) {
   return (
+    <VizCounterProvider>
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
@@ -83,6 +85,7 @@ export function ArticleBody({
     >
       {markdown}
     </ReactMarkdown>
+    </VizCounterProvider>
   );
 }
 

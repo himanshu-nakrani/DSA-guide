@@ -90,7 +90,7 @@ export function ProgressNode({
             strokeLinecap="round"
             transform={`rotate(-90 ${size / 2} ${size / 2})`}
             strokeDasharray={`${dash} ${C}`}
-            style={{ transition: "stroke-dasharray 480ms var(--ease-out)" }}
+            style={{ transition: "stroke-dasharray var(--dur-slow) var(--ease-out)" }}
           />
         )}
       </svg>

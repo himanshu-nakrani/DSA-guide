@@ -31,7 +31,7 @@ export function ThemeToggle({ collapsed = false }: { collapsed?: boolean }) {
     setTheme(next);
     window.setTimeout(() => {
       document.documentElement.removeAttribute("data-theme-transition");
-    }, 260);
+    }, 240);
   };
 
   const Icon = theme === "dark" ? Sun : Moon;

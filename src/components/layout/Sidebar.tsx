@@ -60,8 +60,8 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`w-full ${widthClass} shrink-0 border-b md:border-b-0 md:border-r border-sidebar-border md:h-screen md:sticky md:top-0 flex flex-col bg-sidebar transition-[width] duration-300`}
-      style={{ transitionTimingFunction: "var(--ease-out)" }}
+      className={`w-full ${widthClass} shrink-0 border-b md:border-b-0 md:border-r border-sidebar-border md:h-screen md:sticky md:top-0 flex flex-col bg-sidebar transition-[width]`}
+      style={{ transitionDuration: "var(--dur-slow)", transitionTimingFunction: "var(--ease-out)" }}
     >
       <div className="px-3 md:px-4 py-4 md:pt-5 md:pb-4 border-b border-sidebar-border flex items-center justify-between gap-2">
         <Link

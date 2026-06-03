@@ -147,7 +147,7 @@ export function BFSHero() {
               stroke={taken ? "var(--primary)" : "currentColor"}
               strokeWidth={taken ? 1.8 : 1}
               strokeOpacity={taken ? 1 : 0.18}
-              style={{ transition: "stroke 320ms var(--ease-out), stroke-opacity 320ms var(--ease-out), stroke-width 320ms var(--ease-out)" }}
+              style={{ transition: "stroke var(--dur-base) var(--ease-spring), stroke-opacity var(--dur-base) var(--ease-spring), stroke-width var(--dur-base) var(--ease-spring)" }}
             />
           );
         })}
@@ -183,7 +183,7 @@ export function BFSHero() {
                 stroke={visited ? "var(--primary)" : "currentColor"}
                 strokeOpacity={visited ? 1 : 0.45}
                 strokeWidth={frontier ? 2 : 1.4}
-                style={{ transition: "fill 240ms var(--ease-out), stroke 240ms var(--ease-out), r 240ms var(--ease-spring)" }}
+                style={{ transition: "fill var(--dur-base) var(--ease-out), stroke var(--dur-base) var(--ease-out), r var(--dur-base) var(--ease-spring)" }}
               />
               {frontier && (
                 <circle
