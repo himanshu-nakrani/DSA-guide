@@ -5,71 +5,175 @@ summary: Single-source shortest paths in a graph with non-negative edge weights,
 topicSlug: shortest-paths
 level: INTERMEDIATE
 order: 1
-estimatedMins: 18
+estimatedMins: 20
 references:
   - { title: "Introduction to Algorithms, 4th ed., Ch. 22 (Single-Source Shortest Paths)", author: "Cormen, Leiserson, Rivest, Stein", type: "book" }
+  - { title: "A Note on Two Problems in Connexion with Graphs", author: "Edsger W. Dijkstra (1959)", type: "paper" }
   - { title: "Dijkstra's Algorithm", url: "https://cp-algorithms.com/graph/dijkstra.html", type: "web" }
 prerequisites: ["graph-traversals", "heap-priority-queue"]
 ---
 
 ## Overview
-Dijkstra's algorithm computes shortest paths from a single source to every reachable vertex in a graph with non-negative edge weights. It is the standard "shortest path with weights" answer when negative edges aren't present.
+Dijkstra's algorithm is the standard answer to *single-source shortest
+paths* when edge weights are non-negative. Given a source $s$ in a
+weighted graph, it computes the length of the shortest path from $s$ to
+every reachable vertex in $O((V + E) \log V)$ — efficient enough for road
+networks with tens of millions of edges and the foundation of every
+production routing engine you've ever used.
 
-## Prerequisites
-- Graph Representations and Traversal (BFS/DFS)
-- Heap and Priority Queue
+It is also the natural generalization of BFS: BFS works in unit-weight
+graphs by visiting in order of *number of edges*; Dijkstra visits in
+order of *total path weight*.
 
-## Core Idea
-Maintain a tentative distance $d[v]$ for every vertex, initialized to $\infty$ except $d[\text{source}] = 0$. Repeatedly:
-1. Pick the unprocessed vertex $u$ with the smallest tentative distance.
-2. Mark $u$ processed; its distance is now final.
-3. Relax every edge $u \to v$ with weight $w$: if $d[u] + w < d[v]$, update $d[v]$.
+## The Mental Model
 
-Correctness depends crucially on non-negativity: once a vertex is processed, no later relaxation can decrease its distance, because every future path passes through unprocessed vertices with distance $\ge d[u]$ and adds non-negative weight.
+Maintain a tentative distance $d[v]$ for every vertex, initialized to
+$\infty$ except $d[s] = 0$. Repeatedly:
 
-## Mechanics
+1. Pick the unsettled vertex $u$ with the smallest $d[u]$.
+2. Mark $u$ settled. Its distance is final.
+3. Relax every outgoing edge $u \to v$ with weight $w$: if $d[u] + w <
+   d[v]$, update $d[v]$.
 
-**With a binary heap**:
-```text
-dist[*] := infinity; dist[s] := 0
-heap := { (0, s) }
-while heap not empty:
-    (d, u) := heap.pop_min()
-    if d > dist[u]: continue        # stale entry
-    for each edge u -> v with weight w:
-        if dist[u] + w < dist[v]:
-            dist[v] := dist[u] + w
-            heap.push((dist[v], v))
+The trick is step 1 — finding the next vertex efficiently. A priority
+queue (min-heap) does it in $O(\log V)$ per operation.
+
+```viz
+{ "type": "dijkstra", "props": { "source": 0 } }
 ```
 
-Re-pushing instead of decrease-key is the "lazy" version. It can store $O(E)$ entries but stale ones are filtered on pop. This is what nearly all production implementations do.
+Step through and watch the *frontier* of settled vertices grow outward
+along the shortest-path tree. Once a vertex turns moss-green it is
+settled and its distance label will not change again.
 
-To reconstruct paths, maintain `parent[v]` updated whenever you relax an edge.
+## Why Non-Negativity Matters
 
-## Complexity
-- Binary heap (lazy): $O((V + E) \log V)$ time, $O(V + E)$ space.
-- Fibonacci heap with decrease-key: $O(E + V \log V)$.
-- Dense graph with an array as the priority queue: $O(V^2)$ — better than a heap when $E = \Theta(V^2)$.
-- Cannot handle negative edges. Even one is enough to break correctness.
+Dijkstra's correctness rests on a single invariant: when we settle vertex
+$u$, the only paths we could have missed pass through *unsettled* vertices
+$x$ with $d[x] \ge d[u]$. With non-negative edge weights, any such path
+adds non-negative weight, so it cannot beat $d[u]$. Hence $d[u]$ is final.
 
-## Common Patterns
-1. **Network shortest path**: routing, navigation, latency-based routing.
-2. **Modified state graphs**: include "remaining fuel," "number of stops," etc. as part of the vertex, and run Dijkstra on the product graph.
-3. **K-shortest paths**: extension via Yen's algorithm or a relaxation of Dijkstra that allows up to $K$ entries per node.
-4. **Bidirectional search**: run Dijkstra from both source and target, meeting in the middle. Useful in practice for large graphs.
+The argument fails the moment a single negative edge exists: a later
+relaxation could in principle shorten a vertex we already settled. Use
+Bellman-Ford for graphs with negative edges; the cost is $O(VE)$, but
+correctness returns.
 
-## Pitfalls
-- **Using on graphs with negative edges**. Use Bellman-Ford instead. Even a graph with a single negative edge but no negative cycle is wrong for Dijkstra.
-- **Forgetting the stale-entry check** in the lazy version. Without it, you process the same vertex multiple times.
-- **Heap of `Pair<int, int>`** with the wrong ordering. Min-heap on the first element (distance) is the convention; double-check your language's default.
-- **Integer overflow** when summing large weights. Use 64-bit if weights × $V$ can exceed $2^{31}$.
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Even one negative edge breaks the algorithm",
+  "body": "Don't try to repair Dijkstra by adding a constant to every weight — that scales paths by their edge count, not their original weight, and breaks shortest-path comparisons. Reach for Bellman-Ford or Johnson's algorithm instead."
+} }
+```
+
+## The Implementation
+
+The standard "lazy" version uses a binary heap (`std::priority_queue`,
+`heapq`, `PriorityQueue`) and re-pushes a vertex every time its distance
+improves. Stale heap entries are filtered on pop. No decrease-key needed.
+
+```python
+import heapq
+
+def dijkstra(n, adj, src):
+    INF = float("inf")
+    dist = [INF] * n
+    dist[src] = 0
+    heap = [(0, src)]
+    parent = [-1] * n
+    while heap:
+        d, u = heapq.heappop(heap)
+        if d > dist[u]:           # stale entry — skip
+            continue
+        for v, w in adj[u]:
+            nd = d + w
+            if nd < dist[v]:
+                dist[v] = nd
+                parent[v] = u
+                heapq.heappush(heap, (nd, v))
+    return dist, parent
+```
+
+The stale-entry filter is the line that turns a slow $O(V^2)$ implementation
+into an efficient one. Without it, vertices can be processed multiple times.
+
+To reconstruct a path from $s$ to $t$, walk `parent[]` back from $t$ until
+you reach $s$, then reverse.
+
+## The Tradeoffs Between Priority Queues
+
+| Priority queue              | Time bound                | When to use                          |
+| --------------------------- | ------------------------- | ------------------------------------ |
+| Array (linear scan)         | $O(V^2)$                  | Dense graphs, $E = \Theta(V^2)$.     |
+| Binary heap (lazy)          | $O((V + E) \log V)$       | Default. Production.                 |
+| Binary heap (decrease-key)  | $O((V + E) \log V)$       | Theoretical; rare in practice.       |
+| Fibonacci heap              | $O(E + V \log V)$         | Asymptotically optimal; large constants. |
+| Indexed priority queue      | $O((V + E) \log V)$       | Useful when decrease-key dominates.  |
+
+For most problems the lazy binary heap is correct, fast, and short to
+write. Reach for the array variant only when you've measured a dense
+graph and need the cache-friendly access pattern.
+
+## Variants You'll Meet
+
+- **Bidirectional Dijkstra** — launch the search from both source and
+  destination, terminate when they meet. Roughly halves the explored
+  area on real road networks.
+- **A\*** — Dijkstra augmented with a heuristic $h(v)$ that estimates the
+  remaining distance. Provided $h$ is admissible (never overestimates),
+  A\* is optimal and dramatically faster than vanilla Dijkstra on
+  geometric graphs.
+- **Modified-state Dijkstra** — combine the vertex with extra state like
+  *fuel remaining*, *number of stops*, or *parity of edges*. Run Dijkstra
+  on the product graph.
+- **K-shortest paths** — Yen's algorithm wraps Dijkstra to find the
+  second, third, ..., $K$-th shortest path.
+
+## Complexity Summary
+
+- Time: $\Theta((V + E) \log V)$ with a binary heap. Each edge contributes
+  at most one heap push; each vertex is popped at most once for real
+  processing.
+- Space: $\Theta(V + E)$ — adjacency list plus distance, parent, and heap
+  arrays.
+- Cannot handle negative edges. Period.
+
+## Common Pitfalls
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Forgetting the stale-entry check",
+  "body": "Without `if d > dist[u]: continue`, the lazy version re-processes already-settled vertices and the running time degrades. The check costs one comparison per pop and is non-negotiable."
+} }
+```
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Integer overflow on long paths",
+  "body": "Summing 10^5 edges of weight 10^9 overflows 32-bit. Default to 64-bit (long long, i64) for the distance array unless you've checked the bounds explicitly."
+} }
+```
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Wrong heap ordering",
+  "body": "Some languages (Java's PriorityQueue, Python's heapq) are min-heaps by default. Others are not. Confirm: the smallest distance should pop first. Storing (distance, vertex) tuples makes the ordering implicit and correct."
+} }
+```
 
 ## Practice
-- Network Delay Time.
-- Path with Maximum Probability (logarithm trick + Dijkstra).
-- Cheapest Flights Within K Stops (modified state graph).
-- Shortest Path in a Grid with Obstacles Elimination.
+- Network delay time.
+- Path with maximum probability (multiplicative weights — take logarithms
+  and run Dijkstra).
+- Cheapest flights within K stops (modified state: vertex × stops_used).
+- Shortest path in a grid with obstacle elimination (modified state:
+  cell × obstacles_removed).
+- Implement bidirectional Dijkstra.
 
 ## References
 1. Cormen, Leiserson, Rivest, Stein. *Introduction to Algorithms, 4th ed.*, Chapter 22.
-2. cp-algorithms.com. "Dijkstra's Algorithm".
+2. Dijkstra. *A Note on Two Problems in Connexion with Graphs.* Numerische Mathematik 1, 1959.
+3. cp-algorithms.com. "Dijkstra's Algorithm."

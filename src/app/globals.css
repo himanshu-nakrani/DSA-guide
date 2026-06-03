@@ -224,8 +224,20 @@
   font-size: 1.0625rem;
   line-height: 1.72;
   color: var(--foreground);
-  max-width: 65ch;
 }
+/* Keep prose lines comfortable, but let figures and tables span the column. */
+.essay > p,
+.essay > ul,
+.essay > ol,
+.essay > blockquote,
+.essay > h2,
+.essay > h3,
+.essay > h4 { max-width: 65ch; }
+.essay > figure { margin: 1.5em 0; max-width: 100%; }
+.essay > figure.viz button,
+.essay > figure.viz input,
+.essay > figure.viz table { font-family: var(--font-mono), monospace; }
+.essay > figure.viz pre { background: transparent; color: inherit; padding: 0; margin: 0; box-shadow: none; }
 .essay h2 {
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.55rem;

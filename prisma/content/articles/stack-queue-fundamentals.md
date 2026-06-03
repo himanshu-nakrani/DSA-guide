@@ -5,7 +5,7 @@ summary: The two simplest abstract data types — LIFO and FIFO — and the impl
 topicSlug: stacks-and-queues
 level: FOUNDATION
 order: 1
-estimatedMins: 12
+estimatedMins: 13
 references:
   - { title: "Introduction to Algorithms, 4th ed., Ch. 10", author: "Cormen, Leiserson, Rivest, Stein", type: "book" }
   - { title: "Algorithms, 4th ed., Ch. 1.3", author: "Sedgewick & Wayne", type: "book" }
@@ -13,55 +13,111 @@ prerequisites: ["array-fundamentals", "linked-list-fundamentals"]
 ---
 
 ## Overview
-A **stack** is a last-in-first-out (LIFO) collection: the last element pushed is the first popped. A **queue** is first-in-first-out (FIFO): the first enqueued is the first dequeued. Both are abstract types with simple interfaces and several practical implementations.
+A **stack** is a last-in, first-out (LIFO) collection: the last element
+pushed is the first popped. A **queue** is first-in, first-out (FIFO):
+the first enqueued is the first dequeued. Both are abstract types — they
+say *what* operations exist but not *how* — and both admit several
+equally correct implementations.
 
-## Prerequisites
-- Array Fundamentals
-- Linked List Fundamentals
+The point of restricting access to one end (stack) or two specific ends
+(queue) is that it makes the operations $O(1)$: there is less to keep
+track of, and no traversal is ever required.
 
-## Core Idea
-Stacks and queues are constraints, not implementations. A stack forbids access to anything but the top; a queue, anything but the head. The restriction is what makes the operations $O(1)$ — there is less to keep track of.
+## The Two ADTs Side by Side
 
-## Mechanics
+```viz
+{ "type": "stack-queue", "props": { "mode": "both", "initial": ["A", "B", "C", "D"] } }
+```
 
-**Stack operations**:
-- `push(x)`: insert on top.
-- `pop()`: remove and return the top.
-- `peek()` / `top()`: read the top without removing.
+Press *push*, *pop*, *enqueue*, *dequeue* and watch how the two
+structures differ. In the stack, the most recent insertion is the next
+removal — the order is reversed. In the queue, the oldest insertion is
+the next removal — the order is preserved.
 
-**Queue operations**:
-- `enqueue(x)`: insert at the back.
-- `dequeue()`: remove and return the front.
-- `peek()` / `front()`: read the front.
+```viz
+{ "type": "callout", "props": {
+  "tone": "intuition",
+  "title": "Why the restriction earns you O(1)",
+  "body": "A general list supports insert/delete anywhere — costly, because you have to find the position. A stack and a queue let you touch only one or two designated ends, which means the implementation only ever has to maintain pointers (or indices) to those ends. No search, no shift, no traversal."
+} }
+```
 
-**Implementations**:
-- *Dynamic array* (e.g., `std::vector`, `ArrayList`): stack in $O(1)$ amortized. Queue is awkward because removing the front is $O(n)$.
-- *Linked list* (singly with both head and tail pointers): both stack and queue in $O(1)$.
-- *Circular buffer* / *ring buffer*: array-backed queue with $O(1)$ ops, fixed capacity.
-- *Two-stack queue*: simulate a queue with two stacks. Each element is moved at most twice across its lifetime — $O(1)$ amortized per operation.
+## Implementations
 
-**Deque** (double-ended queue) generalizes both: push/pop at either end in $O(1)$. `std::deque`, `collections.deque`, `ArrayDeque`.
+| Implementation              | Stack             | Queue             | Notes                                  |
+| --------------------------- | ----------------- | ----------------- | -------------------------------------- |
+| Dynamic array               | $O(1)$ amortized | front $O(n)$      | Use `vector`, `ArrayList` for stacks; awkward as a queue. |
+| Linked list (head + tail)   | $O(1)$            | $O(1)$            | Two pointers, no resize.               |
+| Circular buffer             | $O(1)$            | $O(1)$            | Fixed capacity, no allocation per op.  |
+| Two-stack queue             | n/a               | $O(1)$ amortized  | Famous interview trick.                |
+| Deque                       | $O(1)$            | $O(1)$            | Generalizes both. Prefer this default. |
 
-## Complexity
-- All operations $O(1)$ in standard implementations (amortized for dynamic arrays).
-- Space $O(n)$ for $n$ elements.
+In real code, reach for your language's deque type — `std::deque`,
+`collections.deque`, `ArrayDeque` — by default. It supports both stack
+and queue access patterns with constant-time guarantees and good
+constants.
 
-## Common Patterns
-1. **Stack for matched-pair problems**: parentheses, function call frames, the "next greater element" pattern (monotonic stack, covered separately).
-2. **Queue for BFS**: Level-order traversal of trees, shortest path in unweighted graphs.
-3. **Two-stack queue**: Classic "implement queue using stacks" interview question. The amortized argument is the lesson.
-4. **Stack to evaluate or convert expressions**: Shunting-yard (infix → postfix), postfix evaluation.
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Java's java.util.Stack is legacy",
+  "body": "It extends Vector and is synchronized for no reason that matters today. Use ArrayDeque as a stack: faster, cleaner API, same Big-O."
+} }
+```
 
-## Pitfalls
-- **Popping an empty stack / dequeuing an empty queue**. Most language libraries throw or return an undefined value. Always check.
-- **Using `Stack` in Java**. The legacy `java.util.Stack` extends `Vector` and is synchronized. Use `ArrayDeque` as a stack instead.
-- **Using a `List` as a queue in Python**. `list.pop(0)` is $O(n)$. Use `collections.deque`.
-- **Treating two-stack queue as constant-time per operation**. It is $O(1)$ amortized, not per call — a single dequeue can move $n$ elements.
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Python's list is not a queue",
+  "body": "list.pop(0) is O(n) because it shifts everything left. Use collections.deque for FIFO access."
+} }
+```
+
+## Why They Show Up Everywhere
+
+Stacks and queues power a surprising fraction of the algorithms in this
+guide. A few examples to keep in mind:
+
+- **Function calls** — every language uses a call stack to remember
+  return addresses and locals. Recursion is a stack in disguise.
+- **Iterative DFS** — explicit stack replaces the call stack.
+- **Iterative BFS** — queue holds the frontier; FIFO ordering is what
+  makes BFS find shortest paths.
+- **Backtracking** — push a choice, recurse, pop on undo.
+- **Parsing** — expression evaluation, balanced-brackets checking,
+  shunting-yard, function call expansion.
+- **Monotonic stack/queue** — push only values that beat the current top,
+  used for "next greater element" and sliding-window max in $O(n)$.
+
+## The Two-Stack Queue
+
+The classic interview question: build a queue using only two stacks. The
+amortized analysis is worth understanding because the pattern repeats.
+
+```python
+class Queue:
+    def __init__(self):
+        self.inbox, self.outbox = [], []
+    def enqueue(self, x):
+        self.inbox.append(x)
+    def dequeue(self):
+        if not self.outbox:
+            while self.inbox:
+                self.outbox.append(self.inbox.pop())
+        return self.outbox.pop()
+```
+
+Each element is pushed onto `inbox`, eventually moved once onto `outbox`,
+and popped once from `outbox`. Total work per element across its lifetime
+is $O(1)$, so amortized cost is $O(1)$ per operation even though a single
+dequeue can move $n$ items.
 
 ## Practice
 - Implement a queue using two stacks.
-- Implement a stack with a `getMin()` operation in $O(1)$.
-- Evaluate a postfix expression.
+- Build a stack with an $O(1)$ `getMin()` operation.
+- Evaluate a postfix expression with a stack.
+- Validate balanced parentheses.
+- Level-order traversal of a tree using a queue.
 
 ## References
 1. Cormen, Leiserson, Rivest, Stein. *Introduction to Algorithms, 4th ed.*, Chapter 10.

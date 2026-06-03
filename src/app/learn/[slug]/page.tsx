@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
+import { ArticleBody } from "@/components/article/ArticleBody";
 
 export const dynamic = "force-dynamic";
 
@@ -89,9 +88,7 @@ export default async function ArticlePage({
           style={{ ["--i" as string]: 2 }}
         >
           <div className="essay dropcap min-w-0">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {stripFirstReferencesSection(article.contentMd)}
-            </ReactMarkdown>
+            <ArticleBody markdown={stripFirstReferencesSection(article.contentMd)} />
             <div className="ornament mt-16 mb-2 text-muted-foreground/60">
               <span>❦</span>
             </div>
