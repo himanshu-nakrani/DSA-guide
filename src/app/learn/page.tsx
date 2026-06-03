@@ -12,9 +12,9 @@ const levelLabel: Record<ArticleLevel, string> = {
 };
 
 const levelStyle: Record<ArticleLevel, string> = {
-  FOUNDATION: "bg-primary/10 text-primary border-primary/20",
-  INTERMEDIATE: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-  ADVANCED: "bg-rose-500/10 text-rose-700 border-rose-500/20",
+  FOUNDATION: "bg-[#2563eb]/10 text-[#2563eb] border-[#2563eb]/20",
+  INTERMEDIATE: "bg-[#0f766e]/10 text-[#0f766e] border-[#0f766e]/20",
+  ADVANCED: "bg-[#c2410c]/10 text-[#c2410c] border-[#c2410c]/20",
 };
 
 export default async function LearnPage() {
@@ -63,7 +63,7 @@ export default async function LearnPage() {
           Library
         </div>
         <h1
-          className="font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05] font-semibold tracking-tight"
+          className="font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05] font-semibold"
           style={{ ["--i" as string]: 1 }}
         >
           Learn
@@ -117,7 +117,7 @@ function ModuleSection({
           {String(moduleNumber).padStart(2, "0")}
         </span>
         <div>
-          <h2 className="font-display text-2xl font-semibold tracking-tight">
+          <h2 className="font-display text-2xl font-semibold">
             {moduleName}
           </h2>
           {description && (

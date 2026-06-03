@@ -21,9 +21,9 @@ const levelLabel: Record<ArticleLevel, string> = {
 };
 
 const levelStyle: Record<ArticleLevel, string> = {
-  FOUNDATION: "bg-primary/10 text-primary border-primary/20",
-  INTERMEDIATE: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-  ADVANCED: "bg-rose-500/10 text-rose-700 border-rose-500/20",
+  FOUNDATION: "bg-[#2563eb]/10 text-[#2563eb] border-[#2563eb]/20",
+  INTERMEDIATE: "bg-[#0f766e]/10 text-[#0f766e] border-[#0f766e]/20",
+  ADVANCED: "bg-[#c2410c]/10 text-[#c2410c] border-[#c2410c]/20",
 };
 
 export default async function ArticlePage({
@@ -82,7 +82,7 @@ export default async function ArticlePage({
       <article className="max-w-5xl mx-auto px-12 py-12 bloom">
         {/* Title block */}
         <header className="mb-10 max-w-3xl" style={{ ["--i" as string]: 0 }}>
-          <h1 className="font-display text-[clamp(2.25rem,4.5vw,3.5rem)] leading-[1.05] font-semibold tracking-tight">
+          <h1 className="font-display text-[clamp(2.25rem,4.5vw,3.5rem)] leading-[1.05] font-semibold">
             {article.title}
           </h1>
           <p className="text-xl text-muted-foreground mt-4 leading-relaxed">
@@ -189,7 +189,7 @@ function FootLink({
           </span>
         )}
       </div>
-      <div className="font-display text-base font-semibold tracking-tight">
+      <div className="font-display text-base font-semibold">
         {title}
       </div>
     </Link>

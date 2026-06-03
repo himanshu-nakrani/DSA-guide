@@ -21,7 +21,7 @@ export default async function HomePage() {
             Open curriculum · 32 articles
           </div>
           <h1
-            className="font-display text-[clamp(2.5rem,5.5vw,4.25rem)] leading-[1.05] tracking-tight font-semibold"
+            className="font-display text-[clamp(2.5rem,5.5vw,4.25rem)] leading-[1.05] font-semibold"
             style={{ ["--i" as string]: 1 }}
           >
             Learn data structures and algorithms{" "}
@@ -70,7 +70,7 @@ export default async function HomePage() {
       <section className="px-12 py-20 max-w-6xl mx-auto">
         <div className="mb-10">
           <div className="eyebrow mb-3">What&rsquo;s inside</div>
-          <h2 className="font-display text-3xl font-semibold tracking-tight">
+          <h2 className="font-display text-3xl font-semibold">
             Three places to spend your time
           </h2>
         </div>
@@ -145,7 +145,7 @@ function FeatureCard({
           </span>
         )}
       </div>
-      <h3 className="font-display text-lg font-semibold tracking-tight">
+      <h3 className="font-display text-lg font-semibold">
         {title}
       </h3>
       <p className="text-sm text-muted-foreground mt-2 leading-relaxed">

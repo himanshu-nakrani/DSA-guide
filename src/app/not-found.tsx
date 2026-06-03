@@ -12,7 +12,7 @@ export default function NotFound() {
           404
         </div>
         <h1
-          className="font-display text-2xl font-semibold mt-4 tracking-tight"
+          className="font-display text-2xl font-semibold mt-4"
           style={{ ["--i" as string]: 1 }}
         >
           Page not found

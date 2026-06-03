@@ -42,7 +42,7 @@ export default async function RoadmapPage() {
           Curriculum
         </div>
         <h1
-          className="font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05] font-semibold tracking-tight"
+          className="font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05] font-semibold"
           style={{ ["--i" as string]: 1 }}
         >
           Roadmap
@@ -86,7 +86,7 @@ export default async function RoadmapPage() {
               <div className={`pt-1 ${isLast ? "pb-0" : "pb-5"}`}>
                 <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                   <div className="flex items-baseline justify-between gap-4 flex-wrap mb-2">
-                    <h2 className="font-display text-lg font-semibold tracking-tight">
+                    <h2 className="font-display text-lg font-semibold">
                       {module.name}
                     </h2>
                     <div className="text-[0.7rem] font-mono text-muted-foreground tabular-nums flex items-center gap-2">

@@ -14,7 +14,7 @@ export default function ProblemsPage() {
             Coming soon
           </div>
           <h1
-            className="font-display text-3xl font-semibold tracking-tight"
+            className="font-display text-3xl font-semibold"
             style={{ ["--i" as string]: 1 }}
           >
             The problem workspace

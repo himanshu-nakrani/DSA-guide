@@ -4,7 +4,7 @@ import * as React from "react";
 
 /**
  * Common chrome around a visualization: rounded card, soft shadow, caption,
- * optional controls slot. Modern-SaaS aesthetic.
+ * optional controls slot.
  */
 export function VizFrame({
   caption,
@@ -77,7 +77,7 @@ export function useTicker(active: boolean, intervalMs: number, onTick: () => voi
   }, [active, intervalMs]);
 }
 
-/** Indigo-led palette for SVG fills/strokes, matched to the SaaS theme. */
+/** Scholar Blue palette for SVG fills/strokes. */
 export const PALETTE = {
   ink: "var(--foreground)",
   paper: "var(--background)",
@@ -85,9 +85,9 @@ export const PALETTE = {
   border: "var(--border)",
   primary: "var(--primary)",
   destructive: "var(--destructive)",
-  c1: "oklch(0.55 0.20 270)", // indigo (primary)
-  c2: "oklch(0.65 0.16 165)", // teal
-  c3: "oklch(0.70 0.16 65)",  // amber
-  c4: "oklch(0.58 0.22 27)",  // red
-  c5: "oklch(0.55 0.16 320)", // violet
+  c1: "#2563eb", // blue
+  c2: "#0f766e", // teal
+  c3: "#b7791f", // amber
+  c4: "#c2410c", // burnt orange
+  c5: "#64748b", // slate
 };
