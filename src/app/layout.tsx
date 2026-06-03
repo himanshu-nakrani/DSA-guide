@@ -1,32 +1,13 @@
 import type { Metadata } from "next";
-import { Fraunces, Newsreader, JetBrains_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 
-const fraunces = Fraunces({
-  variable: "--font-display",
-  subsets: ["latin"],
-  display: "swap",
-  axes: ["opsz", "SOFT"],
-});
-
-const newsreader = Newsreader({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  display: "swap",
-  style: ["normal", "italic"],
-});
-
-const jetbrains = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "DSA Guide — A Practitioner's Treatise on Data Structures and Algorithms",
+  title: "DSA Guide — A structured curriculum on data structures and algorithms",
   description:
-    "A structured curriculum of algorithms and data structures, drawn from CLRS, Sedgewick, Laaksonen, and cp-algorithms.",
+    "A modern, interactive curriculum of data structures and algorithms — drawn from CLRS, Sedgewick, Laaksonen, and cp-algorithms.",
 };
 
 export default function RootLayout({
@@ -37,9 +18,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${newsreader.variable} ${jetbrains.variable} h-full`}
+      className={`${GeistSans.variable} ${GeistMono.variable} h-full`}
     >
-      <body className="paper min-h-full flex">
+      <body className="min-h-full flex bg-background text-foreground antialiased">
         <Sidebar />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </body>

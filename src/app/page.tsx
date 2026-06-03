@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ArticleStatus } from "@/generated/prisma";
+import { ArrowRight, BookOpen, Map, Code2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -12,113 +13,89 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Frontispiece — the title page of the volume. */}
-      <section className="flex-1 flex items-center justify-center px-12 py-20">
-        <div className="max-w-3xl w-full bloom">
-          <div className="text-center" style={{ ["--i" as string]: 0 }}>
-            <div className="smallcaps text-muted-foreground">Vol. I</div>
-            <div className="ornament mt-4 mb-10">
-              <span>§</span>
-            </div>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <section className="px-12 pt-24 pb-16 max-w-6xl mx-auto">
+        <div className="bloom max-w-3xl">
+          <div className="eyebrow mb-5" style={{ ["--i" as string]: 0 }}>
+            Open curriculum · 32 articles
           </div>
-
           <h1
-            className="font-display text-center"
+            className="font-display text-[clamp(2.5rem,5.5vw,4.25rem)] leading-[1.05] tracking-tight font-semibold"
             style={{ ["--i" as string]: 1 }}
           >
-            <span className="block text-[clamp(3rem,7vw,5.75rem)] leading-[0.95] font-medium tracking-tight">
-              A Practitioner&rsquo;s
-            </span>
-            <span className="block italic text-[clamp(3.25rem,7.5vw,6.25rem)] leading-[0.95] font-medium tracking-tight text-primary mt-2">
-              Treatise
-            </span>
-            <span className="block text-[clamp(1.4rem,2.5vw,2rem)] mt-6 font-normal text-muted-foreground tracking-wide">
-              on Data Structures &amp; Algorithms
-            </span>
+            Learn data structures and algorithms{" "}
+            <span className="text-primary">the way they were meant to be taught.</span>
           </h1>
-
-          <div className="ornament mt-12 mb-10" style={{ ["--i" as string]: 2 }}>
-            <span>·</span>
-            <span>·</span>
-            <span>·</span>
-          </div>
-
           <p
-            className="font-serif text-center text-[1.1rem] italic text-muted-foreground max-w-xl mx-auto leading-relaxed"
-            style={{ ["--i" as string]: 3 }}
+            className="text-lg text-muted-foreground mt-6 max-w-2xl leading-relaxed"
+            style={{ ["--i" as string]: 2 }}
           >
-            “Algorithms are concepts that have existence apart from any programming language.”
-            <span className="block not-italic smallcaps text-[0.65rem] mt-3">
-              — Robert Sedgewick
-            </span>
+            A structured curriculum drawn from CLRS, Sedgewick &amp; Wayne, and
+            Laaksonen, paired with interactive visualizations that make every
+            algorithm tangible. No fluff. No videos. Just essays you read once
+            and remember.
           </p>
-
           <div
-            className="mt-14 flex items-center justify-center gap-10"
-            style={{ ["--i" as string]: 4 }}
+            className="flex flex-wrap items-center gap-3 mt-8"
+            style={{ ["--i" as string]: 3 }}
           >
             <Link
               href="/learn"
-              className="group inline-flex items-baseline gap-3 font-display text-lg"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg font-medium text-sm shadow-sm hover:opacity-95 transition-opacity"
             >
-              <span className="link-quill">Open the Volume</span>
-              <span className="text-primary transition-transform group-hover:translate-x-1">
-                →
-              </span>
+              Start learning
+              <ArrowRight className="h-4 w-4" />
             </Link>
-            <span className="text-border" aria-hidden>
-              |
-            </span>
             <Link
               href="/roadmap"
-              className="font-display text-lg italic text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-2 bg-background text-foreground border border-border px-4 py-2.5 rounded-lg font-medium text-sm hover:bg-accent transition-colors"
             >
-              Survey the Roadmap
+              View the roadmap
             </Link>
-          </div>
-
-          {/* Colophon-style stats row. */}
-          <div
-            className="mt-20 grid grid-cols-3 gap-px bg-border max-w-2xl mx-auto"
-            style={{ ["--i" as string]: 5 }}
-          >
-            <Colophon value={moduleCount} label="Chapters" />
-            <Colophon value={articleCount} label="Articles" />
-            <Colophon value={problemCount} label="Problem Sets" />
           </div>
         </div>
       </section>
 
-      {/* Three editorial cards introducing the parts of the volume. */}
-      <section className="px-12 pb-20 max-w-6xl mx-auto w-full">
-        <div className="ornament mb-12">
-          <span>·</span>
+      {/* Stats strip */}
+      <section className="px-12 max-w-6xl mx-auto">
+        <div className="grid grid-cols-3 gap-px bg-border rounded-xl overflow-hidden border border-border bloom">
+          <Stat value={moduleCount} label="Modules" i={0} />
+          <Stat value={articleCount} label="Articles" i={1} />
+          <Stat value={`${problemCount}+`} label="Problems" i={2} />
         </div>
-        <div className="grid md:grid-cols-3 gap-px bg-border border border-border">
-          <ChapterCard
-            roman="I."
-            title="Learnings"
-            italic="The Articles"
-            blurb="Thirty-two essays from asymptotic notation to shortest paths, each drawn from primary sources and traced back to chapter and verse."
+      </section>
+
+      {/* Three feature cards */}
+      <section className="px-12 py-20 max-w-6xl mx-auto">
+        <div className="mb-10">
+          <div className="eyebrow mb-3">What&rsquo;s inside</div>
+          <h2 className="font-display text-3xl font-semibold tracking-tight">
+            Three places to spend your time
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-5">
+          <FeatureCard
+            icon={BookOpen}
+            title="Learn"
+            blurb="Thirty-two essays from asymptotic notation to shortest paths, each with embedded interactive visualizations and traced to primary sources."
             cta="Read the essays"
             href="/learn"
           />
-          <ChapterCard
-            roman="II."
+          <FeatureCard
+            icon={Map}
             title="Roadmap"
-            italic="A Curriculum"
-            blurb="A sixteen-chapter progression, ordered for the student who would build the discipline from foundation upward, in the manner of the classic textbooks."
+            blurb="A sixteen-module path through the curriculum, ordered foundations-first the way the classic textbooks teach the discipline."
             cta="Study the path"
             href="/roadmap"
           />
-          <ChapterCard
-            roman="III."
+          <FeatureCard
+            icon={Code2}
             title="Problems"
-            italic="Practica"
-            blurb="An interactive workspace for the application of theory. Forthcoming in the next edition; theory ought to precede mechanism."
-            cta="Forthcoming"
+            blurb="An interactive workspace for solving problems alongside the theory. Currently in development — every essay carries practice problems at the foot."
+            cta="Coming soon"
             href="/problems"
+            soon
           />
         </div>
       </section>
@@ -126,55 +103,57 @@ export default async function HomePage() {
   );
 }
 
-function Colophon({ value, label }: { value: number; label: string }) {
+function Stat({ value, label, i }: { value: number | string; label: string; i: number }) {
   return (
-    <div className="bg-background px-6 py-5 text-center">
-      <div className="font-display text-3xl tabular-nums">{value}</div>
-      <div className="smallcaps text-muted-foreground mt-1">{label}</div>
+    <div
+      className="bg-background px-6 py-7 text-center"
+      style={{ ["--i" as string]: i + 1 }}
+    >
+      <div className="font-display text-3xl font-semibold tabular-nums">{value}</div>
+      <div className="text-sm text-muted-foreground mt-1">{label}</div>
     </div>
   );
 }
 
-function ChapterCard({
-  roman,
+function FeatureCard({
+  icon: Icon,
   title,
-  italic,
   blurb,
   cta,
   href,
+  soon,
 }: {
-  roman: string;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   title: string;
-  italic: string;
   blurb: string;
   cta: string;
   href: string;
+  soon?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="group bg-card p-9 flex flex-col gap-5 transition-colors hover:bg-accent/40"
+      className="group block rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
     >
-      <div className="flex items-baseline justify-between">
-        <span className="font-display text-3xl text-muted-foreground/70">
-          {roman}
-        </span>
-        <span className="smallcaps text-muted-foreground/80">Part</span>
-      </div>
-      <div>
-        <h3 className="font-display text-2xl font-medium leading-tight">
-          {title}
-        </h3>
-        <div className="font-display italic text-muted-foreground text-lg leading-tight">
-          {italic}
+      <div className="flex items-center justify-between mb-4">
+        <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+          <Icon className="h-5 w-5" strokeWidth={1.75} />
         </div>
+        {soon && (
+          <span className="text-[0.65rem] font-mono uppercase tracking-[0.04em] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+            Soon
+          </span>
+        )}
       </div>
-      <p className="font-serif text-[0.96rem] leading-relaxed text-foreground/85 flex-1">
+      <h3 className="font-display text-lg font-semibold tracking-tight">
+        {title}
+      </h3>
+      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
         {blurb}
       </p>
-      <div className="inline-flex items-baseline gap-2 font-display text-base text-primary">
-        <span className="link-quill">{cta}</span>
-        <span className="transition-transform group-hover:translate-x-1">→</span>
+      <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+        {cta}
+        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
       </div>
     </Link>
   );

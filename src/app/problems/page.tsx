@@ -1,62 +1,52 @@
 import Link from "next/link";
+import { ArrowLeft, ArrowRight, Code2 } from "lucide-react";
 
 export default function ProblemsPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-12 py-20">
-      <div className="max-w-2xl w-full text-center bloom">
-        <div className="smallcaps text-muted-foreground" style={{ ["--i" as string]: 0 }}>
-          Part IV
-        </div>
+      <div className="max-w-xl w-full bloom">
+        <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+          <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-5">
+            <Code2 className="h-6 w-6" strokeWidth={1.75} />
+          </div>
 
-        <div className="ornament my-6" style={{ ["--i" as string]: 1 }}>
-          <span>§</span>
-        </div>
-
-        <h1
-          className="font-display text-[clamp(2.75rem,6vw,4.5rem)] leading-[0.95] font-medium tracking-tight"
-          style={{ ["--i" as string]: 2 }}
-        >
-          <em className="text-primary">Practica</em>
-        </h1>
-        <p
-          className="font-display italic text-2xl text-muted-foreground mt-3"
-          style={{ ["--i" as string]: 3 }}
-        >
-          forthcoming in the second edition
-        </p>
-
-        <div className="rule my-10" style={{ ["--i" as string]: 4 }} />
-
-        <p
-          className="font-serif text-[1.05rem] leading-relaxed text-foreground/85 italic max-w-lg mx-auto"
-          style={{ ["--i" as string]: 5 }}
-        >
-          The interactive workspace — wherein the reader shall apply the theory
-          to verified problems — is presently in preparation. Until its issue,
-          the essays of Part&nbsp;II carry the practical examples and the
-          recommended exercises at the foot of each chapter.
-        </p>
-
-        <div
-          className="mt-12 flex items-center justify-center gap-10"
-          style={{ ["--i" as string]: 6 }}
-        >
-          <Link
-            href="/learn"
-            className="group inline-flex items-baseline gap-3 font-display text-lg"
+          <div className="eyebrow mb-2" style={{ ["--i" as string]: 0 }}>
+            Coming soon
+          </div>
+          <h1
+            className="font-display text-3xl font-semibold tracking-tight"
+            style={{ ["--i" as string]: 1 }}
           >
-            <span className="link-quill">Return to the Essays</span>
-            <span className="text-primary transition-transform group-hover:translate-x-1">
-              →
-            </span>
-          </Link>
-          <span className="text-border" aria-hidden>|</span>
-          <Link
-            href="/roadmap"
-            className="font-display text-lg italic text-muted-foreground hover:text-foreground transition-colors"
+            The problem workspace
+          </h1>
+          <p
+            className="text-muted-foreground mt-3 leading-relaxed"
+            style={{ ["--i" as string]: 2 }}
           >
-            Consult the Roadmap
-          </Link>
+            An interactive workspace for applying the theory — code editor,
+            judge, hints, and editorial — is in development. Until it ships,
+            every essay in the library ends with a curated practice set.
+          </p>
+
+          <div
+            className="mt-6 flex items-center gap-3"
+            style={{ ["--i" as string]: 3 }}
+          >
+            <Link
+              href="/learn"
+              className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-95 transition-opacity"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to articles
+            </Link>
+            <Link
+              href="/roadmap"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+            >
+              See the roadmap
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

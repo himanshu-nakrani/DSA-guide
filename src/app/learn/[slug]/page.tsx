@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
 import { ArticleBody } from "@/components/article/ArticleBody";
+import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,12 @@ const levelLabel: Record<ArticleLevel, string> = {
   FOUNDATION: "Foundation",
   INTERMEDIATE: "Intermediate",
   ADVANCED: "Advanced",
+};
+
+const levelStyle: Record<ArticleLevel, string> = {
+  FOUNDATION: "bg-primary/10 text-primary border-primary/20",
+  INTERMEDIATE: "bg-amber-500/10 text-amber-700 border-amber-500/20",
+  ADVANCED: "bg-rose-500/10 text-rose-700 border-rose-500/20",
 };
 
 export default async function ArticlePage({
@@ -46,62 +53,59 @@ export default async function ArticlePage({
 
   return (
     <div className="min-h-screen">
-      {/* Top metadata bar — runs above the article body. */}
+      {/* Breadcrumb / metadata bar */}
       <div className="border-b border-border bg-[color:var(--sidebar)]">
-        <div className="max-w-5xl mx-auto px-12 py-5 flex items-center justify-between gap-6">
-          <nav className="font-mono text-[0.7rem] tracking-wider uppercase text-muted-foreground">
+        <div className="max-w-5xl mx-auto px-12 py-4 flex items-center justify-between gap-6">
+          <nav className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
             <Link href="/learn" className="hover:text-foreground transition-colors">
-              Learnings
+              Learn
             </Link>
-            <span className="mx-3 text-muted-foreground/50">/</span>
+            <span className="text-muted-foreground/50">/</span>
             <span>{article.topic.module.name}</span>
-            <span className="mx-3 text-muted-foreground/50">/</span>
+            <span className="text-muted-foreground/50">/</span>
             <span className="text-foreground">{article.topic.name}</span>
           </nav>
-          <div className="smallcaps text-muted-foreground hidden md:block">
-            {levelLabel[article.level]}
-            <span className="mx-2 text-muted-foreground/40">·</span>
-            <span className="tabular-nums">{article.estimatedMins} min</span>
+          <div className="hidden md:flex items-center gap-2">
+            <span
+              className={`text-[0.65rem] font-mono uppercase tracking-[0.04em] px-1.5 py-0.5 rounded border ${levelStyle[article.level]}`}
+            >
+              {levelLabel[article.level]}
+            </span>
+            <span className="inline-flex items-center gap-1 text-[0.7rem] font-mono text-muted-foreground tabular-nums">
+              <Clock className="h-3 w-3" />
+              {article.estimatedMins}m
+            </span>
           </div>
         </div>
       </div>
 
-      <article className="max-w-5xl mx-auto px-12 py-16 bloom">
-        {/* Article title block */}
-        <header className="mb-12 max-w-3xl" style={{ ["--i" as string]: 0 }}>
-          <div className="smallcaps text-muted-foreground mb-3">
-            §{idx + 1} &nbsp;·&nbsp; an essay
-          </div>
-          <h1 className="font-display text-[clamp(2.5rem,5vw,4rem)] leading-[1.02] font-medium tracking-tight">
+      <article className="max-w-5xl mx-auto px-12 py-12 bloom">
+        {/* Title block */}
+        <header className="mb-10 max-w-3xl" style={{ ["--i" as string]: 0 }}>
+          <h1 className="font-display text-[clamp(2.25rem,4.5vw,3.5rem)] leading-[1.05] font-semibold tracking-tight">
             {article.title}
           </h1>
-          <p className="font-serif italic text-xl text-muted-foreground mt-5 leading-relaxed">
+          <p className="text-xl text-muted-foreground mt-4 leading-relaxed">
             {article.summary}
           </p>
         </header>
 
-        <div className="rule mb-12" style={{ ["--i" as string]: 1 }} />
-
-        {/* Two-column layout: essay on the left, references in the margin. */}
+        {/* Body + marginalia */}
         <div
-          className="grid lg:grid-cols-[minmax(0,1fr)_16rem] gap-12 lg:gap-16"
-          style={{ ["--i" as string]: 2 }}
+          className="grid lg:grid-cols-[minmax(0,1fr)_15rem] gap-10 lg:gap-14"
+          style={{ ["--i" as string]: 1 }}
         >
-          <div className="essay dropcap min-w-0">
+          <div className="essay min-w-0">
             <ArticleBody markdown={stripFirstReferencesSection(article.contentMd)} />
-            <div className="ornament mt-16 mb-2 text-muted-foreground/60">
-              <span>❦</span>
-            </div>
           </div>
 
-          {/* Marginalia: references. Sticky on large screens. */}
           {references.length > 0 && (
-            <aside className="lg:sticky lg:top-8 lg:self-start space-y-5 lg:border-l lg:border-border lg:pl-8">
-              <div className="smallcaps text-muted-foreground">References</div>
-              <ol className="space-y-4">
+            <aside className="lg:sticky lg:top-8 lg:self-start space-y-3 lg:border-l lg:border-border lg:pl-6">
+              <div className="eyebrow">References</div>
+              <ol className="space-y-3.5">
                 {references.map((ref, i) => (
-                  <li key={i} className="font-serif text-[0.88rem] leading-snug">
-                    <span className="font-mono text-[0.65rem] text-primary mr-2 tabular-nums">
+                  <li key={i} className="text-[0.85rem] leading-snug">
+                    <span className="font-mono text-[0.65rem] text-primary mr-1.5 tabular-nums">
                       [{String(i + 1).padStart(2, "0")}]
                     </span>
                     {ref.url ? (
@@ -114,10 +118,12 @@ export default async function ArticlePage({
                         {ref.title}
                       </a>
                     ) : (
-                      <span className="italic">{ref.title}</span>
+                      <span>{ref.title}</span>
                     )}
                     {ref.author && (
-                      <div className="text-muted-foreground mt-0.5">{ref.author}</div>
+                      <div className="text-muted-foreground text-xs mt-0.5">
+                        {ref.author}
+                      </div>
                     )}
                   </li>
                 ))}
@@ -126,20 +132,20 @@ export default async function ArticlePage({
           )}
         </div>
 
-        {/* Foot navigation — previous / next chapter signatures. */}
+        {/* Prev/Next nav */}
         <nav
-          className="mt-20 grid sm:grid-cols-2 gap-px bg-border border border-border"
-          style={{ ["--i" as string]: 3 }}
+          className="mt-16 grid sm:grid-cols-2 gap-3"
+          style={{ ["--i" as string]: 2 }}
         >
           {prev ? (
             <FootLink direction="prev" label="Previous" title={prev.title} href={`/learn/${prev.slug}`} />
           ) : (
-            <FootBlank label="No essay precedes" />
+            <FootBlank label="No previous article" />
           )}
           {next ? (
             <FootLink direction="next" label="Next" title={next.title} href={`/learn/${next.slug}`} />
           ) : (
-            <FootBlank label="No essay follows" />
+            <FootBlank label="No next article" />
           )}
         </nav>
       </article>
@@ -147,8 +153,7 @@ export default async function ArticlePage({
   );
 }
 
-/** The article markdown already ends in a "## References" section we render
- *  separately in the margin. Strip it from the body so it isn't duplicated. */
+/** Strip the trailing `## References` section so we render it in the margin instead. */
 function stripFirstReferencesSection(md: string): string {
   const idx = md.search(/\n##\s+References\s*\n/);
   return idx === -1 ? md : md.slice(0, idx);
@@ -169,15 +174,23 @@ function FootLink({
   return (
     <Link
       href={href}
-      className={`group bg-card p-8 transition-colors hover:bg-accent/40 ${
+      className={`group rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md hover:-translate-y-0.5 ${
         isPrev ? "text-left" : "text-right"
       }`}
     >
-      <div className="smallcaps text-muted-foreground mb-2">
-        {isPrev ? "← " : ""}{label}{isPrev ? "" : " →"}
+      <div className="eyebrow mb-1.5 flex items-center gap-1.5">
+        {isPrev ? (
+          <>
+            <ArrowLeft className="h-3 w-3" /> {label}
+          </>
+        ) : (
+          <span className="ml-auto flex items-center gap-1.5">
+            {label} <ArrowRight className="h-3 w-3" />
+          </span>
+        )}
       </div>
-      <div className="font-display text-xl italic leading-tight">
-        <span className="link-quill">{title}</span>
+      <div className="font-display text-base font-semibold tracking-tight">
+        {title}
       </div>
     </Link>
   );
@@ -185,8 +198,8 @@ function FootLink({
 
 function FootBlank({ label }: { label: string }) {
   return (
-    <div className="bg-card/60 p-8 text-muted-foreground">
-      <div className="font-display italic text-base">{label}</div>
+    <div className="rounded-xl border border-dashed border-border bg-muted/30 p-5 text-muted-foreground">
+      <div className="text-sm">{label}</div>
     </div>
   );
 }

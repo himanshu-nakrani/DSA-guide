@@ -1,23 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArticleStatus } from "@/generated/prisma";
+import { ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-
-function romanize(num: number): string {
-  const map: [number, string][] = [
-    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
-  ];
-  let n = num;
-  let out = "";
-  for (const [v, s] of map) {
-    while (n >= v) {
-      out += s;
-      n -= v;
-    }
-  }
-  return out;
-}
 
 export default async function RoadmapPage() {
   const track = await prisma.track.findUnique({
@@ -44,33 +30,33 @@ export default async function RoadmapPage() {
   if (!track) {
     return (
       <div className="p-16">
-        <p className="font-serif italic text-muted-foreground">Roadmap not found.</p>
+        <p className="text-muted-foreground">Roadmap not found.</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl mx-auto px-12 py-16">
-      <header className="bloom mb-16">
-        <div className="smallcaps text-muted-foreground" style={{ ["--i" as string]: 0 }}>
-          Part III
+      <header className="bloom mb-14">
+        <div className="eyebrow mb-3" style={{ ["--i" as string]: 0 }}>
+          Curriculum
         </div>
         <h1
-          className="font-display text-[clamp(3rem,6vw,4.5rem)] leading-[0.95] mt-2 font-medium tracking-tight"
+          className="font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05] font-semibold tracking-tight"
           style={{ ["--i" as string]: 1 }}
         >
-          The <em className="text-primary">Roadmap</em>
+          Roadmap
         </h1>
         <p
-          className="font-serif text-lg italic text-muted-foreground mt-4 max-w-2xl"
+          className="text-lg text-muted-foreground mt-4 max-w-2xl"
           style={{ ["--i" as string]: 2 }}
         >
           {track.description}
         </p>
-        <div className="rule mt-10" style={{ ["--i" as string]: 3 }} />
       </header>
 
-      <ol className="space-y-14 bloom">
+      {/* Vertical step timeline */}
+      <ol className="bloom">
         {track.modules.map((module, i) => {
           const articleCount = module.topics.reduce(
             (s, t) => s + t.articles.length,
@@ -82,59 +68,61 @@ export default async function RoadmapPage() {
           );
           const firstArticle =
             module.topics.flatMap((t) => t.articles)[0] ?? null;
+          const isLast = i === track.modules.length - 1;
 
           return (
             <li
               key={module.id}
-              className="grid grid-cols-[6rem_1fr] gap-x-8"
+              className="relative grid grid-cols-[3rem_1fr] gap-5"
               style={{ ["--i" as string]: i }}
             >
-              <div className="font-display text-[2.2rem] leading-none text-muted-foreground/60 tabular-nums pt-1">
-                {romanize(module.order)}.
+              <div className="flex flex-col items-center">
+                <div className="h-10 w-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-mono text-sm font-medium tabular-nums shrink-0">
+                  {String(module.order).padStart(2, "0")}
+                </div>
+                {!isLast && <div className="flex-1 w-px bg-border my-1" aria-hidden />}
               </div>
-              <div className="border-b border-border pb-6">
-                <div className="flex items-baseline justify-between gap-6 flex-wrap">
-                  <div className="min-w-0">
-                    <h2 className="font-display text-2xl font-medium leading-tight">
+
+              <div className={`pt-1 ${isLast ? "pb-0" : "pb-5"}`}>
+                <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                  <div className="flex items-baseline justify-between gap-4 flex-wrap mb-2">
+                    <h2 className="font-display text-lg font-semibold tracking-tight">
                       {module.name}
                     </h2>
-                    {module.description && (
-                      <p className="font-serif italic text-muted-foreground mt-1">
-                        {module.description}
-                      </p>
-                    )}
+                    <div className="text-[0.7rem] font-mono text-muted-foreground tabular-nums flex items-center gap-2">
+                      <span>{articleCount} {articleCount === 1 ? "article" : "articles"}</span>
+                      {problemCount > 0 && (
+                        <>
+                          <span className="text-muted-foreground/40">·</span>
+                          <span>{problemCount} {problemCount === 1 ? "problem" : "problems"}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="smallcaps text-muted-foreground/80 shrink-0">
-                    <span className="tabular-nums">{articleCount}</span>{" "}
-                    {articleCount === 1 ? "essay" : "essays"}
-                    <span className="mx-2 text-muted-foreground/40">·</span>
-                    <span className="tabular-nums">{problemCount}</span>{" "}
-                    {problemCount === 1 ? "problem" : "problems"}
-                  </div>
-                </div>
 
-                {firstArticle && (
-                  <div className="mt-5">
-                    <Link
-                      href={`/learn/${firstArticle.slug}`}
-                      className="group inline-flex items-baseline gap-2 font-display text-base text-primary"
-                    >
-                      <span className="link-quill">Begin: {firstArticle.title}</span>
-                      <span className="transition-transform group-hover:translate-x-1">
-                        →
-                      </span>
-                    </Link>
-                  </div>
-                )}
+                  {module.description && (
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {module.description}
+                    </p>
+                  )}
+
+                  {firstArticle && (
+                    <div className="mt-3">
+                      <Link
+                        href={`/learn/${firstArticle.slug}`}
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
+                      >
+                        Start: {firstArticle.title}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
             </li>
           );
         })}
       </ol>
-
-      <div className="ornament mt-20">
-        <span>❦</span>
-      </div>
     </div>
   );
 }
