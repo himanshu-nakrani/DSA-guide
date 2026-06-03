@@ -1,84 +1,247 @@
 ---
 slug: topological-sort
 title: Topological Sort
-summary: Order the vertices of a DAG so every edge points forward — Kahn's BFS and DFS postorder give the two standard algorithms.
+summary: "Order the vertices of a DAG so every edge points forward — Kahn's BFS algorithm and DFS post-order, both in O(V+E), plus cycle detection and DAG DP."
 topicSlug: graph-fundamentals
 level: INTERMEDIATE
 order: 2
-estimatedMins: 16
+estimatedMins: 20
 references:
-  - { title: "Introduction to Algorithms, 4th ed., Ch. 22 (Elementary Graph Algorithms)", author: "Cormen, Leiserson, Rivest, Stein", type: "book" }
+  - { title: "Introduction to Algorithms, 4th ed., Ch. 22", author: "Cormen, Leiserson, Rivest, Stein", type: "book" }
   - { title: "Topological Sorting", url: "https://cp-algorithms.com/graph/topological-sort.html", type: "web" }
+  - { title: "The Algorithm Design Manual, Ch. 7", author: "Steven Skiena", type: "book" }
 prerequisites: ["graph-traversals"]
 ---
 
 ## Overview
-A topological order of a directed acyclic graph (DAG) is a linear ordering of vertices such that for every edge $u \to v$, $u$ appears before $v$. Topological order exists iff the graph is acyclic; it is unique iff there is a Hamiltonian path. Build systems, course prerequisites, and scheduling problems are all topological sorts in disguise.
+A *topological sort* of a directed graph is an ordering of its
+vertices such that every edge $u \to v$ has $u$ appearing before $v$.
+Such an order exists iff the graph is a *directed acyclic graph*
+(DAG); a cycle would force a vertex to come before itself.
 
-## Prerequisites
-- Graph Representations and Traversal (BFS/DFS)
+Topological sort is the backbone of dependency resolution — build
+systems, course prerequisites, package managers, spreadsheet
+recalculation, function inlining order in a compiler. It also enables
+*DAG DP*: a single pass over a topological ordering computes optimal
+values for all vertices in $O(V + E)$.
 
-## Core Idea
-Two algorithms, each natural in a different traversal:
-1. **Kahn's algorithm (BFS-based)**: repeatedly remove a vertex with in-degree 0.
-2. **DFS-based**: run DFS; emit each vertex on its way out (post-order); reverse the emission order.
+## Two Algorithms, Both Linear
 
-Both run in $O(V + E)$.
+The two standard approaches:
 
-## Mechanics
+- **Kahn's algorithm (BFS-based).** Repeatedly remove a vertex with
+  in-degree zero. The order in which vertices are removed is a
+  topological order.
+- **DFS post-order reversal.** Run DFS; output each vertex when its
+  recursion *returns*. Reverse the resulting list.
 
-**Kahn's algorithm**:
-```text
-compute in-degree of every vertex
-queue := all vertices with in-degree 0
-order := []
-while queue not empty:
-    u := queue.pop()
-    order.append(u)
-    for each edge u -> v:
-        in-degree[v] -= 1
-        if in-degree[v] == 0: queue.push(v)
-if len(order) < V: graph has a cycle
-return order
+Both run in $\Theta(V + E)$. Choose by what else you need:
+
+- Kahn detects cycles naturally (if some vertices remain unprocessed
+  at the end, they form a cycle).
+- DFS yields finishing times, useful for strongly connected components
+  (Kosaraju, Tarjan).
+- Kahn is easier to parallelize (all in-degree-zero vertices can be
+  processed concurrently).
+
+## Kahn's Algorithm
+
+```python
+from collections import deque
+
+def kahn(n, adj):
+    in_deg = [0] * n
+    for u in range(n):
+        for v in adj[u]:
+            in_deg[v] += 1
+    q = deque(u for u in range(n) if in_deg[u] == 0)
+    order = []
+    while q:
+        u = q.popleft()
+        order.append(u)
+        for v in adj[u]:
+            in_deg[v] -= 1
+            if in_deg[v] == 0:
+                q.append(v)
+    if len(order) != n:
+        return None    # cycle exists
+    return order
 ```
 
-**DFS post-order**:
-```text
-visited := empty set
-order := []
-dfs(u):
-    visited.add(u)
-    for each edge u -> v:
-        if v not in visited: dfs(v)
-    order.append(u)
-for each vertex u: if u not in visited: dfs(u)
-reverse(order)
+The frontier is a queue of "currently free" vertices — those with no
+unresolved dependencies. Removing one might free others; add them to
+the queue. When the queue is empty, you have either a complete
+ordering or a non-empty residual that must contain a cycle.
+
+```viz
+{ "type": "architecture", "props": {
+  "caption": "Kahn's algorithm — process by in-degree zero",
+  "cols": 12, "rows": 4, "height": 280,
+  "boxes": [
+    { "id": "init", "label": "compute in-degree for every vertex", "col": 0, "row": 0, "colSpan": 6, "emphasis": "muted" },
+    { "id": "q0",   "label": "enqueue all vertices with in-degree 0", "col": 6, "row": 0, "colSpan": 6, "emphasis": "primary" },
+    { "id": "deq",  "label": "dequeue u → output u", "col": 0, "row": 2, "colSpan": 4 },
+    { "id": "decr", "label": "for each edge u→v: decrement in-degree[v]", "col": 4, "row": 2, "colSpan": 5 },
+    { "id": "push", "label": "if in-degree[v] hits 0: enqueue v", "col": 9, "row": 2, "colSpan": 3, "emphasis": "primary" }
+  ],
+  "arrows": [
+    { "from": "init", "to": "q0" },
+    { "from": "q0",   "to": "deq" },
+    { "from": "deq",  "to": "decr" },
+    { "from": "decr", "to": "push" },
+    { "from": "push", "to": "deq" }
+  ]
+} }
 ```
 
-For cycle detection during DFS, also maintain a "currently on the recursion stack" set; an edge into a vertex in that set indicates a back edge — i.e., a cycle.
+## DFS Post-Order
 
-## Complexity
-- Time: $O(V + E)$ for both algorithms.
-- Space: $O(V)$ for the queue/stack and auxiliary arrays.
+```python
+def dfs_topo(n, adj):
+    WHITE, GRAY, BLACK = 0, 1, 2
+    color = [WHITE] * n
+    order = []
+    has_cycle = False
 
-## Common Patterns
-1. **Course schedule / dependency resolution**: detect a cycle = unsatisfiable; otherwise return any topological order.
-2. **DP on a DAG**: compute values in topological order so each node's dependencies are already resolved. Examples: longest path in a DAG, shortest path with negative weights in a DAG.
-3. **Lexicographically smallest topological order**: replace Kahn's queue with a min-heap. $O((V + E) \log V)$.
-4. **Multiple valid orders**: Kahn's lets you emit any order; useful for testing whether a candidate order is valid.
+    def dfs(u):
+        nonlocal has_cycle
+        color[u] = GRAY
+        for v in adj[u]:
+            if color[v] == GRAY:
+                has_cycle = True
+                return
+            if color[v] == WHITE:
+                dfs(v)
+        color[u] = BLACK
+        order.append(u)
+
+    for u in range(n):
+        if color[u] == WHITE:
+            dfs(u)
+            if has_cycle: return None
+    return list(reversed(order))
+```
+
+Three colors: white (unvisited), gray (in the current recursion
+stack), black (finished). Encountering a gray vertex is a *back edge*
+— the cycle indicator. Black vertices are off-limits but harmless;
+they have already been ordered.
+
+The reverse-of-post-order trick is one of those CS pearls. The
+finishing time of $u$ is *after* the finishing time of every vertex
+reachable from $u$ — so reversed finishing order puts $u$ before
+everything it depends on.
+
+## Worked Example: Course Schedule
+
+Given $n$ courses and prerequisite pairs `(a, b)` meaning "$a$ depends
+on $b$", produce an order in which the courses can be taken. Build
+adjacency `b → a` (the dependency points to the dependent), run Kahn,
+and either return the order or fail because of a cycle.
+
+```python
+def find_order(n, prereqs):
+    adj = [[] for _ in range(n)]
+    for a, b in prereqs:
+        adj[b].append(a)
+    return kahn(n, adj)
+```
+
+For 4 courses with prereqs `(1,0), (2,0), (3,1), (3,2)`, one valid
+order is `[0, 1, 2, 3]` or `[0, 2, 1, 3]`. Both respect the
+dependencies.
+
+## DAG DP
+
+Once you have a topological order, you can DP across the DAG in a
+single forward pass:
+
+```python
+# Longest path in a DAG
+def longest_path(n, adj_with_weight, order):
+    dist = [0] * n
+    for u in order:
+        for v, w in adj_with_weight[u]:
+            if dist[u] + w > dist[v]:
+                dist[v] = dist[u] + w
+    return max(dist)
+```
+
+This is $O(V + E)$ — strictly faster than Bellman-Ford for the
+shortest- or longest-path problem when the graph is a DAG.
+
+Common DAG-DP problems:
+
+- Longest increasing subsequence (model the array as a DAG of "$j$
+  can follow $i$ if $a_i < a_j$").
+- Course schedule with maximum value, where each course pays $v_i$.
+- Critical-path method in project planning.
+- Word-break counting (string positions become vertices).
 
 ## Pitfalls
-- **Running on a graph with a cycle**. Kahn's leaves vertices unprocessed; DFS still emits an order but it's not topological. Always check for cycles explicitly.
-- **Confusing the DFS order**. The reversed post-order is topological; the pre-order is not.
-- **Counting in-degrees wrong** when the graph has parallel edges or self-loops.
-- **Using topological sort on undirected graphs**. The concept doesn't apply — there's no edge direction.
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Cycles are not always obvious",
+  "body": "If you build the graph wrong (edges pointing the wrong direction), Kahn quietly produces a wrong order on what looks like a valid topological sort. Always verify: 'for every edge u → v, u must appear before v'. If you cannot verify, the order is suspect."
+} }
+```
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "DFS on dense or deep DAGs",
+  "body": "Recursive DFS topological sort blows the stack on a chain of 10^5 vertices. Either lift the recursion limit, use the iterative form (explicit stack + two-pass for post-order), or switch to Kahn."
+} }
+```
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Ambiguous order is the rule, not the exception",
+  "body": "Most DAGs admit many valid topological orders. Your algorithm picks one; a tester comparing exact orders against a reference will fail. Verify by edge constraint, not by string equality."
+} }
+```
+
+## Lexicographic Topological Sort
+
+When the problem asks for the *lexicographically smallest* topological
+order, replace Kahn's queue with a min-heap. Cost rises to $O((V + E)
+\log V)$, the same as Dijkstra, but the output is uniquely determined.
+
+```python
+import heapq
+
+def lex_kahn(n, adj):
+    in_deg = [0] * n
+    for u in range(n):
+        for v in adj[u]:
+            in_deg[v] += 1
+    heap = [u for u in range(n) if in_deg[u] == 0]
+    heapq.heapify(heap)
+    order = []
+    while heap:
+        u = heapq.heappop(heap)
+        order.append(u)
+        for v in adj[u]:
+            in_deg[v] -= 1
+            if in_deg[v] == 0:
+                heapq.heappush(heap, v)
+    return order if len(order) == n else None
+```
 
 ## Practice
-- Course Schedule / Course Schedule II.
-- Alien Dictionary.
-- Longest Path in a DAG.
-- Parallel Courses.
+- Course schedule I (can you complete all courses?).
+- Course schedule II (output a valid order).
+- Alien dictionary (derive a letter order from sorted word list).
+- Longest path in a DAG.
+- Minimum height trees (multi-source BFS from the leaves inward).
+- Build order for a project with task dependencies.
+- Detect a cycle in a directed graph two ways: DFS three-coloring,
+  and Kahn (output size less than $V$).
 
 ## References
 1. Cormen, Leiserson, Rivest, Stein. *Introduction to Algorithms, 4th ed.*, Chapter 22.
-2. cp-algorithms.com. "Topological Sorting".
+2. Skiena. *The Algorithm Design Manual*, Chapter 7.
+3. cp-algorithms.com. "Topological Sorting."

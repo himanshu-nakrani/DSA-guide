@@ -1,60 +1,232 @@
 ---
 slug: hash-collisions-load-factor
 title: Collision Handling and Load Factor
-summary: Chaining vs open addressing, why load factor governs performance, and what makes a real-world hash table degrade.
+summary: "Chaining versus open addressing, why load factor is the single knob that controls hash table performance, and what real implementations do when the table gets full."
 topicSlug: hashing
 level: INTERMEDIATE
 order: 2
-estimatedMins: 16
+estimatedMins: 20
 references:
-  - { title: "Introduction to Algorithms, 4th ed., Ch. 11 (Hash Tables)", author: "Cormen, Leiserson, Rivest, Stein", type: "book" }
-  - { title: "Algorithms, 4th ed., Ch. 3.4 (Hash Tables)", author: "Sedgewick & Wayne", type: "book" }
+  - { title: "Introduction to Algorithms, 4th ed., Ch. 11", author: "Cormen, Leiserson, Rivest, Stein", type: "book" }
+  - { title: "Algorithms, 4th ed., Ch. 3.4", author: "Sedgewick & Wayne", type: "book" }
 prerequisites: ["hash-tables"]
 ---
 
 ## Overview
-A hash table's $O(1)$ average behavior holds only when collisions are rare and the table is not too full. Two design choices govern this: the **collision resolution** strategy and the **load factor**. Both are tunable, and both are why your favorite language's hash map sometimes degrades.
+A hash table's amortized $O(1)$ operations rest on two engineering
+choices that the introductory article only sketched: how to handle
+*collisions* (two keys hashing to the same bucket) and how to manage
+*load factor* (how full the table gets before performance degrades).
+This article goes deeper on both. The right answers are not the same
+for every workload, and the wrong answer turns $O(1)$ into $O(n)$.
 
-## Prerequisites
-- Hash Tables
+## The Two Collision Strategies
 
-## Core Idea
-Two keys $k_1 \ne k_2$ can hash to the same slot. The table must either store both at that slot (chaining) or relocate one of them (open addressing). The choice trades cache behavior against worst-case clustering.
+### Chaining
 
-## Mechanics
+Each bucket holds a *secondary container* — almost always a linked
+list, sometimes a dynamic array or even a tree — of all entries that
+hash there. Insert prepends to the chain; lookup walks the chain
+comparing keys.
 
-**Chaining**: Each slot holds a linked list (or small dynamic array, or — at high load — a balanced tree, as Java's `HashMap` does). Insertion is $O(1)$; lookup walks the chain.
+```viz
+{ "type": "hash-table", "props": {
+  "size": 7,
+  "initial": ["apple", "pear", "fig", "kiwi", "grape", "plum"],
+  "strategy": "chaining"
+} }
+```
 
-**Open addressing**: All entries live in the array itself. On collision, probe a sequence of slots until an empty one is found.
-- *Linear probing*: probe $h(k), h(k)+1, h(k)+2, \ldots$ Simple and cache-friendly but suffers from **primary clustering** — long runs of occupied slots grow disproportionately.
-- *Quadratic probing*: probe $h(k), h(k)+1, h(k)+4, h(k)+9, \ldots$ Mitigates primary but introduces secondary clustering.
-- *Double hashing*: probe $h_1(k), h_1(k)+h_2(k), h_1(k)+2 h_2(k), \ldots$ Mixes the probe sequence per key and approaches uniform hashing in theory.
+The expected lookup cost is $1 + \alpha$ where $\alpha = n / m$ is the
+load factor — one to find the bucket, $\alpha$ on average to walk the
+chain. Insert is $O(1)$ (prepend); delete is $O(1 + \alpha)$ (scan,
+unlink).
 
-**Load factor** $\alpha = n / m$ where $n$ is the number of stored items and $m$ is the table size.
-- Chaining: expected probe length is $1 + \alpha$. Tolerates $\alpha > 1$.
-- Open addressing: expected probe count is $\frac{1}{1 - \alpha}$ for unsuccessful search under uniform hashing. Performance collapses as $\alpha \to 1$. Real implementations rehash at $\alpha \approx 0.5$–$0.75$.
+The key property: load factor can exceed 1 without breaking anything.
+Chains just get longer. Performance degrades smoothly.
 
-## Complexity
-- Average insert / lookup / delete: $O(1)$ assuming a good hash and bounded load factor.
-- Worst case under adversarial input or a bad hash: $O(n)$.
-- Resize (rehash all entries into a larger table) is $O(n)$ but amortizes to $O(1)$ per insert.
+### Open Addressing
 
-## Common Patterns
-1. **Java `HashMap`'s treeification**: When a single bucket grows past 8 entries (and the table is large enough), the chain becomes a red-black tree, capping worst-case lookup at $O(\log n)$ per bucket. The classic defense against hash-flooding.
-2. **Robin Hood hashing**: An open-addressing variant that minimizes the variance of probe distances. Widely used in Rust's `HashMap`.
-3. **Random seeding**: Modern hash maps mix in a per-process random seed so an attacker cannot precompute colliding keys (hash-flooding mitigation).
+Every entry lives in the bucket array itself. On collision, *probe*
+forward according to some sequence — linear ($h + 1$, $h + 2$, …),
+quadratic ($h + 1^2$, $h + 2^2$, …), or *double hashing* ($h + i \cdot
+h_2(k)$) — until you find an empty slot or the key.
+
+```viz
+{ "type": "hash-table", "props": {
+  "size": 7,
+  "initial": ["apple", "pear", "fig", "kiwi", "grape", "plum"],
+  "strategy": "linear-probing"
+} }
+```
+
+The expected lookup cost is $1 / (1 - \alpha)$. As $\alpha \to 1$ the
+cost diverges. The load factor *must* stay strictly below 1; in
+practice, real open-addressing tables rehash when $\alpha$ exceeds
+0.7.
+
+Open addressing wins on cache behavior — every probe accesses
+contiguous memory rather than pointer-chasing through chain nodes. The
+cost is that the table breaks at high load, where chaining still works.
+
+## Comparison Table
+
+| Property                       | Chaining           | Open addressing            |
+| ------------------------------ | ------------------ | -------------------------- |
+| Lookup cost                    | $1 + \alpha$       | $1 / (1 - \alpha)$         |
+| Max useful load factor         | ~10 (degrades smoothly) | ~0.7 (degrades sharply) |
+| Cache behavior                 | poor (pointer chase) | excellent (linear scan)  |
+| Memory per entry               | key + value + pointer | key + value only        |
+| Delete                         | unlink chain node  | tombstone or rehash window |
+| Adversarial worst case         | $O(n)$ chain       | $O(n)$ scan                |
+
+In production:
+
+- Java `HashMap` — chaining. Since Java 8, long chains convert to
+  red-black trees, capping worst-case lookup at $O(\log n)$ even under
+  attack.
+- Python `dict` — open addressing with a perturbed probe sequence.
+- Go `map` — chaining with bucket arrays of 8 entries each.
+- C++ `std::unordered_map` — chaining (required by the standard).
+- Rust `HashMap` — open addressing (Robin Hood hashing, by default
+  with SipHash for adversary resistance).
+
+## Probing Sequences in Detail
+
+Linear probing (`h + i`) is simple and cache-friendly but suffers from
+*primary clustering* — once a cluster forms, every new insertion that
+hashes anywhere into it lands at its end, extending it further.
+Lookups degrade as clusters merge.
+
+Quadratic probing (`h + i^2`) breaks clusters but introduces *secondary
+clustering*: keys with the same initial hash follow the same probe
+sequence. It also requires careful table-size choice ($m$ a power of 2
+with a quadratic of $i(i+1)/2$, or $m$ prime with restrictions) to
+guarantee that the probe sequence visits every slot.
+
+Double hashing uses a second independent hash for the probe step.
+It eliminates both primary and secondary clustering and is the
+strongest theoretical choice. The cost is the second hash computation
+per probe.
+
+Robin Hood hashing — a linear-probing variant — equalizes probe
+distances by displacing entries during insertion. Lookups improve
+because no entry sits far from its home if a closer slot is occupied
+by a richer entry.
+
+## Rehashing — The Hidden Cost
+
+When the load factor crosses a threshold, the table allocates a new
+bucket array (typically doubled in size), re-hashes every entry, and
+frees the old one. Per-rehash cost is $\Theta(n)$. Across $n$
+insertions the total rehash work is $\Theta(n)$, so amortized cost is
+still $O(1)$ per insert.
+
+```viz
+{ "type": "architecture", "props": {
+  "caption": "Hash table lifecycle: insert → grow → rehash",
+  "cols": 12, "rows": 4, "height": 280,
+  "boxes": [
+    { "id": "ins", "label": "insert", "sub": "O(1) amortized", "col": 0, "row": 0, "colSpan": 3, "emphasis": "primary" },
+    { "id": "loc", "label": "load factor monitor", "sub": "alpha = n / m", "col": 4, "row": 0, "colSpan": 4 },
+    { "id": "grow", "label": "grow trigger", "sub": "alpha > threshold", "col": 9, "row": 0, "colSpan": 3, "emphasis": "warn" },
+    { "id": "alloc", "label": "allocate new bucket array", "sub": "size 2m", "col": 1, "row": 2, "colSpan": 4 },
+    { "id": "rehash", "label": "re-hash and re-insert all n entries", "sub": "O(n) once per growth", "col": 6, "row": 2, "colSpan": 5, "emphasis": "primary" }
+  ],
+  "arrows": [
+    { "from": "ins",   "to": "loc" },
+    { "from": "loc",   "to": "grow" },
+    { "from": "grow",  "to": "alloc" },
+    { "from": "alloc", "to": "rehash" }
+  ]
+} }
+```
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Rehash is a tail-latency event",
+  "body": "Amortized O(1) means the rehash cost is spread; the single push that triggers it still takes O(n). Real-time systems prefer pre-sized tables or incremental rehashing (Redis 'progressive rehash' moves a few buckets per operation) to flatten the spike."
+} }
+```
+
+## Why Load Factor Is the Only Knob That Matters
+
+Two tables, same hash function, same key distribution, different
+sizes. The one with $\alpha = 0.3$ has short chains (or short probe
+sequences) and lookups average about 1.3 cache lines. The one with
+$\alpha = 0.95$ has long chains and lookups average 10+ cache lines.
+The absolute size matters not at all; the *ratio* of entries to
+buckets is the entire performance story.
+
+This is why "memory vs. speed" is a tunable in real implementations:
+
+- Java `HashMap` defaults to 0.75 — chosen to balance memory and lookup.
+- Python `dict` resizes when 2/3 full.
+- Go `map` resizes at ~6.5 entries per bucket.
+
+You can usually tune the threshold via constructor parameters
+(`new HashMap<>(initialCapacity, loadFactor)` in Java). For
+predictable, latency-sensitive workloads, pick a lower load factor and
+pre-size the table.
+
+## Adversarial Hashing — Hash-Flooding
+
+If an attacker can predict your hash function and craft input keys
+that all hash to the same bucket, they can drive your $O(1)$
+operations to $O(n)$ per call and DoS your service. This attack —
+*hash flooding* — has hit Rails, PHP, Java HTTP frameworks, and more.
+
+Defenses:
+
+- **Per-process random seed.** CPython, Java, and Rust randomize the
+  hash seed at process start. Two processes give different orderings
+  for the same input.
+- **Keyed cryptographic hash.** Rust uses SipHash, which is fast and
+  resistant to forgery without the seed.
+- **Fallback to balanced tree.** Java 8 `HashMap` converts a chain to
+  a red-black tree once it exceeds 8 entries, capping worst case at
+  $O(\log n)$ even if the seed leaks.
+- **Avoid `unordered_map` in competitive programming when inputs are
+  untrusted.** `std::map` (a balanced BST) is $O(\log n)$ guaranteed.
 
 ## Pitfalls
-- **Setting initial capacity too low**. Repeated resizes thrash. If you know the final size, allocate for it.
-- **Using a non-uniform hash function**. Hashing tuples by XOR or by adding components produces clusters; use a proper mixer (FNV, MurmurHash, SipHash, language-built-ins).
-- **Storing keys with mutable hash**. If a key's hash code changes after insertion, the table cannot find it. Make keys effectively immutable.
-- **Assuming iteration order**. Most hash tables do not preserve insertion order. Python's `dict` does (since 3.7); Java's `HashMap` does not — use `LinkedHashMap` if order matters.
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Modifying a key after insertion",
+  "body": "If a key's hash code changes after insertion, the table cannot find it. Mutable objects make terrible hash keys. Either freeze them (Python's tuple, Java's immutable records) or copy the relevant fields before insertion."
+} }
+```
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Linear probing with tombstones",
+  "body": "Open addressing with deletes leaves 'tombstone' markers — empty slots that still terminate insert searches. Without periodic cleanup, the table fills with tombstones and probe sequences grow. Either tombstone-and-compact, or use a different probing scheme that handles deletion (Robin Hood does)."
+} }
+```
+
+```viz
+{ "type": "callout", "props": {
+  "tone": "pitfall",
+  "title": "Believing O(1) on competitive inputs",
+  "body": "If your input is adversarial — a contest judge that knows your hash function — std::unordered_map can be forced to O(n) per operation. Use a custom hash (typically xor with a random constant) or switch to std::map."
+} }
+```
 
 ## Practice
-- Implement a hash set with linear probing and dynamic resize.
-- Compare lookup times on a uniformly-distributed key set vs. one designed to collide.
-- Measure throughput of `HashMap` and `TreeMap` as a function of load factor.
+- Implement chaining with a singly linked list. Measure average chain
+  length at $\alpha = 0.5, 0.75, 1.0$.
+- Implement open addressing with linear probing. Measure probe count
+  at the same loads.
+- Implement Robin Hood hashing.
+- Custom hash for `int` in `std::unordered_map` that defeats hash
+  flooding (xor with a random constant per process).
+- Resize policy experiment: build $10^6$ inserts with thresholds
+  0.5, 0.75, 0.9. Compare total time and peak memory.
 
 ## References
 1. Cormen, Leiserson, Rivest, Stein. *Introduction to Algorithms, 4th ed.*, Chapter 11.
-2. Sedgewick & Wayne. *Algorithms, 4th ed.*, Chapter 3.4.
+2. Sedgewick & Wayne. *Algorithms, 4th ed.*, Section 3.4.
