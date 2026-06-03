@@ -5,7 +5,7 @@ export default function ProblemsPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-12 py-20">
       <div className="max-w-xl w-full bloom">
-        <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+        <div className="surface-card p-8">
           <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-5">
             <Code2 className="h-6 w-6" strokeWidth={1.75} />
           </div>
@@ -14,7 +14,7 @@ export default function ProblemsPage() {
             Coming soon
           </div>
           <h1
-            className="font-display text-3xl font-semibold"
+            className="font-display text-3xl md:text-4xl font-medium tracking-[-0.015em]"
             style={{ ["--i" as string]: 1 }}
           >
             The problem workspace

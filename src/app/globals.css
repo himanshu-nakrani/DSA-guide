@@ -3,13 +3,14 @@
 @import "shadcn/tailwind.css";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -41,52 +42,153 @@
   --color-card: var(--card);
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.5rem;
-  --radius-2xl: 0.75rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
 }
 
-/* Scholar Blue: a calm technical notebook palette for long-form study. */
+/* =========================================================================
+   Inkwell — duotone editorial system.
+   Default: dark. Light is a first-class companion.
+   ========================================================================= */
+
+:root,
+[data-theme="light"] {
+  --background: #f5f1e8;
+  --surface-1: #fbf8f1;
+  --surface-2: #efe9d8;
+  --foreground: #1a1d22;
+  --card: #fbf8f1;
+  --card-foreground: #1a1d22;
+  --popover: #fbf8f1;
+  --popover-foreground: #1a1d22;
+  --primary: #c2410c;
+  --primary-foreground: #fbf8f1;
+  --secondary: #efe9d8;
+  --secondary-foreground: #1a1d22;
+  --muted: #efe9d8;
+  --muted-foreground: #6b7280;
+  --accent: #f3e7d3;
+  --accent-foreground: #8a2f08;
+  --destructive: #b91c1c;
+  --border: #e2dccc;
+  --border-strong: #c8c0ac;
+  --input: #e2dccc;
+  --ring: #c2410c;
+  --chart-1: #c2410c;
+  --chart-2: #1d4ed8;
+  --chart-3: #0f766e;
+  --chart-4: #b7791f;
+  --chart-5: #6b7280;
+  --code-bg: #1a1d22;
+  --code-fg: #e8e4d9;
+  --code-border: #2d333c;
+  --radius: 0.625rem;
+  --sidebar: #efe9d8;
+  --sidebar-foreground: #1a1d22;
+  --sidebar-primary: #c2410c;
+  --sidebar-primary-foreground: #fbf8f1;
+  --sidebar-accent: #f3e7d3;
+  --sidebar-accent-foreground: #8a2f08;
+  --sidebar-border: #e2dccc;
+  --sidebar-ring: #c2410c;
+  --shadow-card:
+    0 1px 0 0 rgba(26, 29, 34, 0.04),
+    0 1px 2px 0 rgba(26, 29, 34, 0.04),
+    0 8px 24px -12px rgba(26, 29, 34, 0.08);
+  --shadow-pop:
+    0 1px 0 0 rgba(26, 29, 34, 0.06),
+    0 12px 32px -8px rgba(26, 29, 34, 0.18);
+  --gradient-surface: linear-gradient(
+    180deg,
+    rgba(26, 29, 34, 0.015) 0%,
+    rgba(26, 29, 34, 0) 60%
+  );
+}
+
+[data-theme="dark"] {
+  --background: #0b0d10;
+  --surface-1: #13161b;
+  --surface-2: #191d23;
+  --foreground: #e8e4d9;
+  --card: #13161b;
+  --card-foreground: #e8e4d9;
+  --popover: #191d23;
+  --popover-foreground: #e8e4d9;
+  --primary: #ffd166;
+  --primary-foreground: #0b0d10;
+  --secondary: #191d23;
+  --secondary-foreground: #e8e4d9;
+  --muted: #191d23;
+  --muted-foreground: #8b94a3;
+  --accent: #22272f;
+  --accent-foreground: #ffd166;
+  --destructive: #f87171;
+  --border: #22272f;
+  --border-strong: #2d333c;
+  --input: #22272f;
+  --ring: #ffd166;
+  --chart-1: #ffd166;
+  --chart-2: #7c9eff;
+  --chart-3: #5eead4;
+  --chart-4: #f0abfc;
+  --chart-5: #8b94a3;
+  --code-bg: #0f1115;
+  --code-fg: #e8e4d9;
+  --code-border: #22272f;
+  --sidebar: #0d1014;
+  --sidebar-foreground: #e8e4d9;
+  --sidebar-primary: #ffd166;
+  --sidebar-primary-foreground: #0b0d10;
+  --sidebar-accent: #22272f;
+  --sidebar-accent-foreground: #ffd166;
+  --sidebar-border: #22272f;
+  --sidebar-ring: #ffd166;
+  --shadow-card:
+    0 1px 0 0 rgba(255, 255, 255, 0.03) inset,
+    0 1px 2px 0 rgba(0, 0, 0, 0.5),
+    0 12px 32px -16px rgba(0, 0, 0, 0.6);
+  --shadow-pop:
+    0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 48px -16px rgba(0, 0, 0, 0.7);
+  --gradient-surface: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0) 60%
+  );
+}
+
+/* Motion tokens — apply consistent easing/durations across the app. */
 :root {
-  --background: #fafaf7;
-  --foreground: #1f2933;
-  --card: #ffffff;
-  --card-foreground: #1f2933;
-  --popover: #ffffff;
-  --popover-foreground: #1f2933;
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --secondary: #eef2f6;
-  --secondary-foreground: #1f2933;
-  --muted: #eef2f6;
-  --muted-foreground: #667085;
-  --accent: #e8f1ff;
-  --accent-foreground: #164cbd;
-  --destructive: #c2410c;
-  --border: #e2ded6;
-  --input: #e2ded6;
-  --ring: #2563eb;
-  --chart-1: #2563eb;
-  --chart-2: #0f766e;
-  --chart-3: #b7791f;
-  --chart-4: #c2410c;
-  --chart-5: #64748b;
-  --radius: 0.5rem;
-  --sidebar: #f2f0ea;
-  --sidebar-foreground: #1f2933;
-  --sidebar-primary: #2563eb;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e8f1ff;
-  --sidebar-accent-foreground: #164cbd;
-  --sidebar-border: #e2ded6;
-  --sidebar-ring: #2563eb;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur-base: 240ms;
+  --dur-slow: 480ms;
+}
+
+/* Theme transitions — only on user-initiated theme changes. */
+html[data-theme-transition] *,
+html[data-theme-transition] *::before,
+html[data-theme-transition] *::after {
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    fill var(--dur-base) var(--ease-out),
+    stroke var(--dur-base) var(--ease-out) !important;
+  transition-delay: 0 !important;
 }
 
 @layer base {
   html {
     font-family: var(--font-sans);
-    font-feature-settings: "cv11", "ss01";
+    font-feature-settings: "cv11", "ss01", "cv09";
+    color-scheme: light dark;
   }
+  html[data-theme="dark"] { color-scheme: dark; }
+  html[data-theme="light"] { color-scheme: light; }
+
   body {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -95,22 +197,34 @@
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-sans);
-    letter-spacing: 0;
+    letter-spacing: -0.005em;
     font-weight: 600;
   }
   ::selection {
-    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+    color: var(--foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
 
 .font-mono { font-family: var(--font-mono); }
-.font-display { font-family: var(--font-sans); font-weight: 600; letter-spacing: 0; }
+.font-display {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 30, "WONK" 0;
+}
 
-/* Eyebrow / tag labels (was: smallcaps). */
+/* Eyebrow / tag labels. */
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 500;
   color: var(--muted-foreground);
@@ -124,7 +238,7 @@
   background-position: 0 100%;
   background-repeat: no-repeat;
   background-size: 0 2px;
-  transition: background-size 250ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: background-size 250ms var(--ease-out);
   padding-bottom: 2px;
 }
 .link-quill:hover,
@@ -134,13 +248,23 @@
 
 /* Soft fade-in for content blocks. */
 @keyframes fadeUp {
-  0%   { opacity: 0; transform: translateY(4px); }
+  0%   { opacity: 0; transform: translateY(6px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 .bloom > * {
   opacity: 0;
-  animation: fadeUp 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation: fadeUp 0.55s var(--ease-out) forwards;
   animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* Card surface — used by cards, sidebar callouts, popovers. */
+.surface-card {
+  background:
+    var(--gradient-surface),
+    var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
 }
 
 /* Pill / tag for level + duration. */
@@ -148,26 +272,28 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   font-weight: 500;
-  padding: 0.25rem 0.625rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 9999px;
   background: var(--secondary);
-  color: var(--secondary-foreground);
+  color: var(--muted-foreground);
   border: 1px solid var(--border);
 }
 .pill-primary {
-  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
   color: var(--primary);
-  border-color: color-mix(in srgb, var(--primary) 20%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 28%, transparent);
 }
 
-/* Article body — modern, scannable, sans-serif. */
+/* Article body — modern, scannable. */
 .essay {
   font-family: var(--font-sans);
   font-size: 1.0625rem;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--foreground);
 }
 .essay > p,
@@ -179,17 +305,20 @@
 .essay > h4 { max-width: 70ch; }
 .essay > figure { margin: 1.75em 0; max-width: 100%; }
 .essay h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  margin-top: 2.25em;
-  margin-bottom: 0.6em;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.65rem;
+  letter-spacing: -0.015em;
+  margin-top: 2.4em;
+  margin-bottom: 0.55em;
+  font-variation-settings: "SOFT" 30;
 }
 .essay h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  margin-top: 1.6em;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  margin-top: 1.7em;
   margin-bottom: 0.4em;
 }
 .essay p { margin: 0.9em 0; }
@@ -197,6 +326,7 @@
 .essay ul { list-style: disc; }
 .essay ol { list-style: decimal; }
 .essay li { margin: 0.35em 0; padding-left: 0.25em; }
+.essay li::marker { color: var(--muted-foreground); }
 .essay strong { font-weight: 600; color: var(--foreground); }
 .essay em { font-style: italic; }
 .essay a {
@@ -212,22 +342,23 @@
 .essay code {
   font-family: var(--font-mono);
   font-size: 0.88em;
-  padding: 0.125em 0.375em;
+  padding: 0.125em 0.4em;
   background: var(--muted);
-  border-radius: 0.25rem;
+  border-radius: 0.3rem;
   border: 1px solid var(--border);
+  color: var(--foreground);
 }
 .essay pre {
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  line-height: 1.65;
-  background: #111827;
-  color: #eef2f6;
+  line-height: 1.7;
+  background: var(--code-bg);
+  color: var(--code-fg);
   padding: 1.15rem 1.3rem;
-  border-radius: 0.75rem;
-  margin: 1.3em 0;
+  border-radius: var(--radius-xl);
+  margin: 1.5em 0;
   overflow-x: auto;
-  border: 1px solid #1f2937;
+  border: 1px solid var(--code-border);
 }
 .essay pre code {
   background: transparent;
@@ -237,36 +368,38 @@
   border: none;
 }
 .essay blockquote {
-  margin: 1.3em 0;
-  padding: 0.75em 1.1em;
-  border-left: 3px solid var(--primary);
-  background: color-mix(in srgb, var(--primary) 5%, var(--card));
-  border-radius: 0 0.5rem 0.5rem 0;
+  margin: 1.4em 0;
+  padding: 0.85em 1.2em;
+  border-left: 2px solid var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, var(--card));
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   color: var(--foreground);
 }
 .essay table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.3em 0;
+  margin: 1.4em 0;
   font-size: 0.93em;
 }
 .essay table th {
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 500;
   text-align: left;
-  border-bottom: 1px solid var(--border);
-  padding: 0.6rem 0.8rem 0.6rem 0;
+  border-bottom: 1px solid var(--border-strong, var(--border));
+  padding: 0.65rem 0.8rem 0.65rem 0;
   color: var(--muted-foreground);
 }
 .essay table td {
-  padding: 0.65rem 0.8rem 0.65rem 0;
+  padding: 0.7rem 0.8rem 0.7rem 0;
   border-bottom: 1px solid var(--border);
   vertical-align: top;
 }
 .essay hr {
   border: 0;
-  margin: 2em 0;
+  margin: 2.2em 0;
   height: 1px;
   background: var(--border);
 }
@@ -283,4 +416,98 @@
 .essay > figure.viz button,
 .essay > figure.viz input {
   font-family: var(--font-mono);
+}
+
+/* Subtle scrollbars in dark, classy in light. */
+@media (pointer: fine) {
+  ::-webkit-scrollbar { width: 12px; height: 12px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
+    border: 3px solid var(--background);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--muted-foreground) 55%, transparent);
+  }
+}
+
+/* Focus mode — invoked by FocusMode component setting `data-focus-mode` on <html>. */
+html[data-focus-mode] aside[class*="bg-sidebar"] { display: none; }
+html[data-focus-mode] .reader-chrome { opacity: 0.4; }
+html[data-focus-mode] .reader-chrome:hover { opacity: 1; }
+html[data-focus-mode] .reader-toc { display: none; }
+html[data-focus-mode] .reader-grid { grid-template-columns: minmax(0, 1fr) !important; }
+html[data-focus-mode] .reader-article {
+  padding-top: 1.5rem;
+  max-width: 48rem;
+}
+
+/* Copy button on code blocks — sits inside the .code-block wrapper. */
+.code-block { position: relative; }
+.code-block .copy-button {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.4rem;
+  color: color-mix(in srgb, var(--code-fg) 70%, transparent);
+  background: color-mix(in srgb, var(--code-fg) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--code-fg) 12%, transparent);
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.code-block:hover .copy-button,
+.code-block:focus-within .copy-button {
+  opacity: 1;
+  transform: translateY(0);
+}
+.code-block .copy-button:hover {
+  color: var(--code-fg);
+  background: color-mix(in srgb, var(--code-fg) 14%, transparent);
+}
+.code-block .copy-button[data-state="copied"] {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 32%, transparent);
+}
+
+/* Article-link hover-card popover. */
+.preview-card {
+  position: fixed;
+  z-index: 60;
+  width: 22rem;
+  max-width: calc(100vw - 1.5rem);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+.preview-card[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .bloom > * { opacity: 1; transform: none; }
 }
