@@ -33,8 +33,8 @@ export default async function ArticlePage({
 }) {
   const { slug } = await params;
 
-  const article = await prisma.article.findUnique({
-    where: { slug },
+  const article = await prisma.article.findFirst({
+    where: { slug, status: ArticleStatus.PUBLISHED },
     include: { topic: { include: { module: true } } },
   });
 

@@ -18,7 +18,7 @@ export default async function HomePage() {
       <section className="px-12 pt-24 pb-16 max-w-6xl mx-auto">
         <div className="bloom max-w-3xl">
           <div className="eyebrow mb-5" style={{ ["--i" as string]: 0 }}>
-            Open curriculum · 32 articles
+            Open curriculum · {articleCount} articles
           </div>
           <h1
             className="font-display text-[clamp(2.5rem,5.5vw,4.25rem)] leading-[1.05] font-semibold"

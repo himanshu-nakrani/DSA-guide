@@ -188,7 +188,7 @@ async function seedTaxonomy() {
   const topicSlugs = MODULES.flatMap((m) => m.topics.map((t) => t.slug));
 
   for (const mod of MODULES) {
-    const module = await prisma.module.upsert({
+    const dbModule = await prisma.module.upsert({
       where: { slug: mod.slug },
       update: { name: mod.name, description: mod.description, order: mod.order, trackId: track.id },
       create: {
@@ -209,9 +209,9 @@ async function seedTaxonomy() {
           name: topic.name,
           description: topic.description,
           order: topic.order,
-          moduleId: module.id,
-        },
-      });
+        moduleId: dbModule.id,
+      },
+    });
     }
   }
 

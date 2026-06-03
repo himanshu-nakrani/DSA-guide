@@ -20,9 +20,9 @@ export default function RootLayout({
       lang="en"
       className={`${GeistSans.variable} ${GeistMono.variable} h-full`}
     >
-      <body className="min-h-full flex bg-background text-foreground antialiased">
+      <body className="min-h-full flex flex-col md:flex-row bg-background text-foreground antialiased">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 min-w-0 md:overflow-y-auto">{children}</main>
       </body>
     </html>
   );

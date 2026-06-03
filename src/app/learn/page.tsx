@@ -41,14 +41,22 @@ export default async function LearnPage() {
   type TopicWithArticles = (typeof topics)[number];
   const modulesMap = new Map<
     string,
-    { order: number; description: string | null; topics: TopicWithArticles[] }
+    {
+      order: number;
+      id: string;
+      name: string;
+      description: string | null;
+      topics: TopicWithArticles[];
+    }
   >();
   for (const topic of topics) {
-    const m = modulesMap.get(topic.module.name);
+    const m = modulesMap.get(topic.module.id);
     if (m) m.topics.push(topic);
     else
-      modulesMap.set(topic.module.name, {
+      modulesMap.set(topic.module.id, {
         order: topic.module.order,
+        id: topic.module.id,
+        name: topic.module.name,
         description: topic.module.description,
         topics: [topic],
       });
@@ -78,11 +86,11 @@ export default async function LearnPage() {
       </header>
 
       <div className="space-y-14 bloom">
-        {Array.from(modulesMap.entries()).map(([moduleName, moduleData], idx) => (
+        {Array.from(modulesMap.values()).map((moduleData, idx) => (
           <ModuleSection
-            key={moduleName}
+            key={moduleData.id}
             moduleNumber={moduleData.order}
-            moduleName={moduleName}
+            moduleName={moduleData.name}
             description={moduleData.description}
             topics={moduleData.topics}
             i={idx}
