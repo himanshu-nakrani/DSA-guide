@@ -64,7 +64,7 @@ npm install
 Create a `.env` file in the root directory and add your database URL:
 
 ```env
-DATABASE_URL="******host:port/dbname?sslmode=require"
+DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=require"
 ```
 
 ### 4. Database Setup
