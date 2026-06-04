@@ -4,6 +4,12 @@ export const alt = "DSA Guide — A structured curriculum on data structures and
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+const PAPER = "#f7f3ea";
+const INK = "#14212e";
+const INK_BLUE = "#1f3d7a";
+const RULE = "rgba(20, 33, 46, 0.22)";
+const PENCIL = "#6b6457";
+
 export default async function OpenGraphImage() {
   return new ImageResponse(
     (
@@ -13,89 +19,115 @@ export default async function OpenGraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background:
-            "radial-gradient(60% 70% at 18% 0%, rgba(255,209,102,0.18), transparent 70%), #0b0d10",
-          color: "#e8e4d9",
-          padding: "72px 80px",
+          background: PAPER,
+          color: INK,
+          padding: "64px 72px",
           fontFamily: "ui-sans-serif, system-ui, sans-serif",
+          position: "relative",
         }}
       >
-        {/* Graph-paper grid */}
+        {/* faint ruled top + bottom band like a printed page header */}
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "linear-gradient(to right, rgba(232,228,217,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(232,228,217,0.04) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
+            top: 48,
+            left: 72,
+            right: 72,
+            height: 1,
+            background: RULE,
+            display: "flex",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: 48,
+            left: 72,
+            right: 72,
+            height: 1,
+            background: RULE,
             display: "flex",
           }}
         />
 
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {/* running header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
           <BrandGlyph />
           <div
             style={{
               fontFamily: "ui-monospace, monospace",
-              fontSize: 18,
+              fontSize: 16,
               letterSpacing: 4,
               textTransform: "uppercase",
-              color: "#8b94a3",
+              color: PENCIL,
               display: "flex",
             }}
           >
-            DSA Guide · Inkwell
+            DSA Guide · Manuscript ed.
           </div>
         </div>
 
+        {/* title */}
         <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               gap: 24,
-              maxWidth: 880,
+              maxWidth: 960,
             }}
           >
             <div
               style={{
                 display: "flex",
-                fontSize: 88,
-                lineHeight: 1.02,
-                letterSpacing: -2,
+                fontSize: 92,
+                lineHeight: 1.04,
+                letterSpacing: -1.5,
                 fontWeight: 500,
+                fontFamily: "Georgia, serif",
               }}
             >
               <div style={{ display: "flex", flexWrap: "wrap" }}>
-                Data structures and algorithms,{" "}
-                <span style={{ color: "#ffd166", display: "flex" }}>
-                  taught the way they were meant to be.
+                Data structures &amp; algorithms,{" "}
+                <span
+                  style={{
+                    color: INK_BLUE,
+                    fontStyle: "italic",
+                    display: "flex",
+                  }}
+                >
+                  annotated.
                 </span>
               </div>
             </div>
             <div
               style={{
                 display: "flex",
-                fontSize: 28,
+                fontSize: 26,
                 lineHeight: 1.45,
-                color: "#8b94a3",
-                maxWidth: 760,
+                color: PENCIL,
+                maxWidth: 820,
+                fontFamily: "Georgia, serif",
               }}
             >
-              A structured curriculum drawn from CLRS, Sedgewick &amp; Wayne, and
-              Laaksonen — paired with interactive visualizations.
+              A printed-feeling curriculum drawn from CLRS, Sedgewick &amp;
+              Wayne, and Laaksonen — paired with interactive figures.
             </div>
           </div>
         </div>
 
+        {/* colophon */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             fontFamily: "ui-monospace, monospace",
-            fontSize: 18,
-            color: "#8b94a3",
+            fontSize: 16,
+            color: PENCIL,
+            letterSpacing: 2,
+            textTransform: "uppercase",
+            marginBottom: 12,
           }}
         >
           <span style={{ display: "flex" }}>Open curriculum · 2026</span>
@@ -109,17 +141,24 @@ export default async function OpenGraphImage() {
 
 function BrandGlyph() {
   return (
-    <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="6" fill="rgba(255,209,102,0.12)" stroke="rgba(255,209,102,0.32)" />
-      <path d="M5 6 L12 12" stroke="#e8e4d9" strokeOpacity="0.4" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M19 6 L12 12" stroke="#e8e4d9" strokeOpacity="0.4" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M5 18 L12 12" stroke="#e8e4d9" strokeOpacity="0.4" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M12 12 L19 18" stroke="#ffd166" strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="5" cy="6" r="1.6" fill="#e8e4d9" fillOpacity="0.55" />
-      <circle cx="19" cy="6" r="1.6" fill="#e8e4d9" fillOpacity="0.55" />
-      <circle cx="5" cy="18" r="1.6" fill="#e8e4d9" fillOpacity="0.55" />
-      <circle cx="12" cy="12" r="1.9" fill="#e8e4d9" />
-      <circle cx="19" cy="18" r="2" fill="#ffd166" />
+    <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="23"
+        height="23"
+        rx="1"
+        fill={PAPER}
+        stroke={INK}
+        strokeOpacity="0.55"
+      />
+      <path
+        d="M6 4 L6 20 L11 20 C16 20 19 16.5 19 12 C19 7.5 16 4 11 4 Z"
+        stroke={INK}
+        strokeWidth="1.6"
+        fill="none"
+      />
+      <path d="M14 7 L20 13" stroke={INK_BLUE} strokeWidth="1.8" />
     </svg>
   );
 }

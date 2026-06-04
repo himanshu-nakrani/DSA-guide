@@ -12,6 +12,12 @@ const levelLabel: Record<ArticleLevel, string> = {
   ADVANCED: "Advanced",
 };
 
+const PAPER = "#f7f3ea";
+const INK = "#14212e";
+const INK_BLUE = "#1f3d7a";
+const RULE = "rgba(20, 33, 46, 0.22)";
+const PENCIL = "#6b6457";
+
 export default async function ArticleOpenGraphImage({
   params,
 }: {
@@ -32,7 +38,19 @@ export default async function ArticleOpenGraphImage({
   if (!article) {
     return new ImageResponse(
       (
-        <div style={{ display: "flex", width: "100%", height: "100%", background: "#0b0d10", color: "#e8e4d9", alignItems: "center", justifyContent: "center", fontSize: 48 }}>
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            height: "100%",
+            background: PAPER,
+            color: INK,
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 48,
+            fontFamily: "Georgia, serif",
+          }}
+        >
           DSA Guide
         </div>
       ),
@@ -48,73 +66,106 @@ export default async function ArticleOpenGraphImage({
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background:
-            "radial-gradient(60% 70% at 18% 0%, rgba(255,209,102,0.18), transparent 70%), #0b0d10",
-          color: "#e8e4d9",
-          padding: "64px 80px",
+          background: PAPER,
+          color: INK,
+          padding: "64px 72px",
           fontFamily: "ui-sans-serif, system-ui, sans-serif",
           position: "relative",
         }}
       >
+        {/* ruled top + bottom hairlines */}
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "linear-gradient(to right, rgba(232,228,217,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(232,228,217,0.04) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
+            top: 48,
+            left: 72,
+            right: 72,
+            height: 1,
+            background: RULE,
+            display: "flex",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: 48,
+            left: 72,
+            right: 72,
+            height: 1,
+            background: RULE,
             display: "flex",
           }}
         />
 
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {/* running header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
           <BrandGlyph />
           <div
             style={{
               fontFamily: "ui-monospace, monospace",
-              fontSize: 16,
-              letterSpacing: 4,
+              fontSize: 15,
+              letterSpacing: 3,
               textTransform: "uppercase",
-              color: "#8b94a3",
+              color: PENCIL,
               display: "flex",
             }}
           >
-            DSA Guide · Module {String(article.topic.module.order).padStart(2, "0")} · {article.topic.module.name}
+            DSA Guide · § {String(article.topic.module.order).padStart(2, "0")} ·{" "}
+            {article.topic.module.name}
           </div>
         </div>
 
-        {/* Body */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 24, maxWidth: 980 }}>
+        {/* body */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 22,
+            maxWidth: 1000,
+          }}
+        >
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             <span
               style={{
                 display: "flex",
                 fontFamily: "ui-monospace, monospace",
-                fontSize: 16,
+                fontSize: 14,
                 letterSpacing: 2,
                 textTransform: "uppercase",
-                padding: "6px 12px",
-                border: "1px solid rgba(255,209,102,0.4)",
-                color: "#ffd166",
-                background: "rgba(255,209,102,0.08)",
-                borderRadius: 999,
+                padding: "4px 10px",
+                border: `1px solid ${INK_BLUE}`,
+                color: INK_BLUE,
+                background: "transparent",
+                borderRadius: 2,
               }}
             >
               {levelLabel[article.level]}
             </span>
-            <span style={{ fontFamily: "ui-monospace, monospace", color: "#8b94a3", fontSize: 18, display: "flex" }}>
-              {article.estimatedMins} min read · {article.topic.name}
+            <span
+              style={{
+                fontFamily: "ui-monospace, monospace",
+                color: PENCIL,
+                fontSize: 16,
+                display: "flex",
+                letterSpacing: 1.5,
+                textTransform: "uppercase",
+              }}
+            >
+              {article.estimatedMins} min · {article.topic.name}
             </span>
           </div>
 
           <div
             style={{
               display: "flex",
+              fontFamily: "Georgia, serif",
               fontSize: article.title.length > 60 ? 64 : 80,
-              lineHeight: 1.05,
-              letterSpacing: -2,
+              lineHeight: 1.04,
+              letterSpacing: -1.5,
               fontWeight: 500,
+              color: INK,
             }}
           >
             {article.title}
@@ -123,9 +174,10 @@ export default async function ArticleOpenGraphImage({
           <div
             style={{
               display: "flex",
-              fontSize: 26,
+              fontFamily: "Georgia, serif",
+              fontSize: 24,
               lineHeight: 1.45,
-              color: "#8b94a3",
+              color: PENCIL,
               maxWidth: 940,
             }}
           >
@@ -133,19 +185,24 @@ export default async function ArticleOpenGraphImage({
           </div>
         </div>
 
-        {/* Footer */}
+        {/* colophon */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             fontFamily: "ui-monospace, monospace",
-            fontSize: 18,
-            color: "#8b94a3",
+            fontSize: 15,
+            color: PENCIL,
+            letterSpacing: 2,
+            textTransform: "uppercase",
+            marginBottom: 12,
           }}
         >
           <span style={{ display: "flex" }}>CLRS · Sedgewick · Laaksonen</span>
-          <span style={{ display: "flex", color: "#ffd166" }}>dsa.guide/learn/{slug}</span>
+          <span style={{ display: "flex", color: INK_BLUE }}>
+            dsa.guide/learn/{slug}
+          </span>
         </div>
       </div>
     ),
@@ -160,17 +217,24 @@ function truncate(s: string, n: number) {
 
 function BrandGlyph() {
   return (
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="6" fill="rgba(255,209,102,0.12)" stroke="rgba(255,209,102,0.32)" />
-      <path d="M5 6 L12 12" stroke="#e8e4d9" strokeOpacity="0.4" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M19 6 L12 12" stroke="#e8e4d9" strokeOpacity="0.4" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M5 18 L12 12" stroke="#e8e4d9" strokeOpacity="0.4" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M12 12 L19 18" stroke="#ffd166" strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="5" cy="6" r="1.6" fill="#e8e4d9" fillOpacity="0.55" />
-      <circle cx="19" cy="6" r="1.6" fill="#e8e4d9" fillOpacity="0.55" />
-      <circle cx="5" cy="18" r="1.6" fill="#e8e4d9" fillOpacity="0.55" />
-      <circle cx="12" cy="12" r="1.9" fill="#e8e4d9" />
-      <circle cx="19" cy="18" r="2" fill="#ffd166" />
+    <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="23"
+        height="23"
+        rx="1"
+        fill={PAPER}
+        stroke={INK}
+        strokeOpacity="0.55"
+      />
+      <path
+        d="M6 4 L6 20 L11 20 C16 20 19 16.5 19 12 C19 7.5 16 4 11 4 Z"
+        stroke={INK}
+        strokeWidth="1.6"
+        fill="none"
+      />
+      <path d="M14 7 L20 13" stroke={INK_BLUE} strokeWidth="1.8" />
     </svg>
   );
 }
