@@ -55,7 +55,7 @@ export function ArticleToc({ items }: { items: TocItem[] }) {
   return (
     <nav aria-label="Table of contents" className="space-y-2">
       <div className="eyebrow">On this page</div>
-      <ol className="space-y-0.5 border-l border-border">
+      <ol className="space-y-0.5 border-l border-[color:var(--rule)]">
         {items.map((item, i) => {
           const isActive = item.id === activeId;
           return (
@@ -63,13 +63,13 @@ export function ArticleToc({ items }: { items: TocItem[] }) {
               <a
                 href={`#${item.id}`}
                 aria-current={isActive ? "true" : undefined}
-                className={`relative block pl-4 -ml-px py-1 text-[0.82rem] leading-snug border-l transition-colors ${
+                className={`relative block pl-4 -ml-px py-1 text-[0.8rem] leading-snug border-l transition-colors ${
                   isActive
-                    ? "text-primary border-l-primary font-medium"
-                    : "text-muted-foreground border-l-transparent hover:text-foreground"
+                    ? "text-[color:var(--ink-blue)] border-l-[color:var(--ink-blue)] font-medium"
+                    : "text-muted-foreground border-l-transparent hover:text-[color:var(--ink-blue)]"
                 }`}
               >
-                <span className="font-mono text-[0.65rem] text-muted-foreground/70 mr-1.5 tabular-nums">
+                <span className="font-mono text-[0.6rem] text-muted-foreground/70 mr-1.5 tabular-nums">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 {item.text}

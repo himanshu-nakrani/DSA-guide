@@ -6,13 +6,15 @@ import { ArticleBody } from "@/components/article/ArticleBody";
 import { ArticleToc } from "@/components/article/ArticleToc";
 import { ReadingProgress } from "@/components/article/ReadingProgress";
 import { FocusMode } from "@/components/article/FocusMode";
+import { SearchTrigger } from "@/components/article/SearchTrigger";
+import { ReadingChip } from "@/components/article/ReadingChip";
 import { ArticleLink } from "@/components/article/ArticleLink";
 import { ReadTracker } from "@/components/article/ReadTracker";
 import { extractH2Toc } from "@/lib/toc";
 import { getSearchIndex } from "@/lib/searchIndex";
 import { ViewTransition } from "react";
 import type { ArticlePreviewMap } from "@/components/article/ArticleBody";
-import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -47,12 +49,9 @@ const levelLabel: Record<ArticleLevel, string> = {
 };
 
 const levelStyle: Record<ArticleLevel, string> = {
-  FOUNDATION:
-    "bg-[color:var(--chart-2)]/10 text-[color:var(--chart-2)] border-[color:var(--chart-2)]/25",
-  INTERMEDIATE:
-    "bg-[color:var(--chart-3)]/12 text-[color:var(--chart-3)] border-[color:var(--chart-3)]/25",
-  ADVANCED:
-    "bg-[color:var(--primary)]/12 text-[color:var(--primary)] border-[color:var(--primary)]/25",
+  FOUNDATION: "pill",
+  INTERMEDIATE: "pill",
+  ADVANCED: "pill pill-primary",
 };
 
 export default async function ArticlePage({
@@ -110,30 +109,29 @@ export default async function ArticlePage({
       <ReadTracker slug={article.slug} />
       <ReadingProgress targetSelector="#article-root" />
 
-      {/* Breadcrumb / metadata bar */}
-      <div className="reader-chrome border-b border-border bg-[color:var(--surface-1,var(--card))] transition-opacity duration-300">
-        <div className="max-w-6xl mx-auto px-6 md:px-12 py-4 flex items-center justify-between gap-6">
-          <nav className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap min-w-0">
-            <Link href="/learn" className="hover:text-foreground transition-colors">
+      {/* Breadcrumb / metadata bar — printed running header */}
+      <div className="reader-chrome border-b border-[color:var(--rule)] transition-opacity duration-300">
+        <div className="max-w-6xl mx-auto px-6 md:px-12 py-3 flex items-center justify-between gap-6">
+          <nav className="text-[0.72rem] font-mono uppercase tracking-[0.12em] text-muted-foreground flex items-center gap-2 flex-wrap min-w-0">
+            <Link href="/learn" className="hover:text-[color:var(--ink-blue)] transition-colors">
               Learn
             </Link>
-            <span className="text-muted-foreground/50">/</span>
+            <span className="text-muted-foreground/50">·</span>
             <span className="truncate">{article.topic.module.name}</span>
-            <span className="text-muted-foreground/50">/</span>
+            <span className="text-muted-foreground/50">·</span>
             <span className="text-foreground truncate">{article.topic.name}</span>
           </nav>
           <div className="flex items-center gap-3 shrink-0">
             <div className="hidden md:flex items-center gap-2">
-              <span
-                className={`text-[0.65rem] font-mono uppercase tracking-[0.04em] px-1.5 py-0.5 rounded border ${levelStyle[article.level]}`}
-              >
+              <span className={levelStyle[article.level]}>
                 {levelLabel[article.level]}
               </span>
-              <span className="inline-flex items-center gap-1 text-[0.7rem] font-mono text-muted-foreground tabular-nums">
-                <Clock className="h-3 w-3" />
-                {article.estimatedMins}m
-              </span>
+              <ReadingChip
+                targetSelector="#article-root"
+                totalMins={article.estimatedMins}
+              />
             </div>
+            <SearchTrigger />
             <FocusMode />
           </div>
         </div>
@@ -143,36 +141,44 @@ export default async function ArticlePage({
         id="article-root"
         className="reader-article max-w-6xl mx-auto px-6 md:px-12 py-12 bloom"
       >
-        {/* Title block */}
+        {/* Title block — manuscript page header */}
         <header className="mb-10 max-w-3xl" style={{ ["--i" as string]: 0 }}>
+          <div className="eyebrow mb-4">
+            <span className="text-[color:var(--ink-blue)] mr-2">§</span>
+            {article.topic.module.name}
+          </div>
           <ViewTransition name={`article-title-${article.slug}`}>
-            <h1 className="font-display text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.02] font-medium tracking-[-0.02em]">
+            <h1 className="font-display font-medium text-[clamp(2rem,4.5vw,3.25rem)] leading-[1.08]">
               {article.title}
             </h1>
           </ViewTransition>
-          <p className="text-xl text-muted-foreground mt-4 leading-relaxed max-w-2xl">
+          <p className="text-[1.1rem] mt-4 leading-relaxed max-w-2xl text-[color:var(--ink-soft)]">
             {article.summary}
           </p>
+          <div aria-hidden className="mt-8 h-px bg-[color:var(--rule-strong)]" />
         </header>
 
-        {/* Body + right rail (TOC + references) */}
+        {/* Body + right rail (TOC + references). At xl widths the `.essay`
+            itself becomes a 2-column subgrid (body + 13rem marginalia gutter)
+            so margin-tone annotations sit beside the paragraph they belong to. */}
         <div
-          className="reader-grid grid lg:grid-cols-[minmax(0,1fr)_16rem] gap-10 lg:gap-14"
+          className="reader-grid grid lg:grid-cols-[minmax(0,1fr)_15rem] gap-10 lg:gap-12"
           style={{ ["--i" as string]: 1 }}
         >
           <div className="essay min-w-0">
             <ArticleBody markdown={bodyMd} previews={previews} />
           </div>
 
-          <aside className="reader-toc hidden lg:block lg:sticky lg:top-8 lg:self-start space-y-8">
+
+          <aside className="reader-toc hidden lg:block lg:sticky lg:top-8 lg:self-start space-y-9 font-sans">
             {tocItems.length > 0 && <ArticleToc items={tocItems} />}
             {references.length > 0 && (
-              <div className="space-y-3 border-l border-border pl-6">
-                <div className="eyebrow">References</div>
-                <ol className="space-y-3.5">
+              <div className="space-y-3 border-l border-[color:var(--rule)] pl-5">
+                <div className="eyebrow">Sources</div>
+                <ol className="space-y-3">
                   {references.map((ref, i) => (
-                    <li key={i} className="text-[0.82rem] leading-snug">
-                      <span className="font-mono text-[0.65rem] text-primary mr-1.5 tabular-nums">
+                    <li key={i} className="text-[0.78rem] leading-snug">
+                      <span className="font-mono text-[0.62rem] text-[color:var(--ink-blue)] mr-1.5 tabular-nums">
                         [{String(i + 1).padStart(2, "0")}]
                       </span>
                       {ref.url ? (
@@ -188,7 +194,7 @@ export default async function ArticlePage({
                         <span>{ref.title}</span>
                       )}
                       {ref.author && (
-                        <div className="text-muted-foreground text-xs mt-0.5">
+                        <div className="text-muted-foreground text-[0.72rem] mt-0.5 font-pencil">
                           {ref.author}
                         </div>
                       )}
@@ -200,9 +206,10 @@ export default async function ArticlePage({
           </aside>
         </div>
 
-        {/* Prev/Next nav */}
+        {/* Prev/Next nav — manuscript folio links */}
+        <div aria-hidden className="mt-16 rule-section with-ornament" />
         <nav
-          className="reader-chrome mt-16 grid sm:grid-cols-2 gap-3 transition-opacity duration-300"
+          className="reader-chrome grid sm:grid-cols-2 gap-3 transition-opacity duration-300"
           style={{ ["--i" as string]: 2 }}
         >
           {prev ? (
@@ -265,11 +272,11 @@ function FootLink({
         estimatedMins: article.estimatedMins,
         moduleName,
       }}
-      className={`group surface-card !p-5 block transition-all hover:-translate-y-0.5 hover:border-[color:color-mix(in_srgb,var(--primary)_45%,var(--border))] ${
+      className={`group block p-5 border border-[color:var(--rule)] rounded-sm transition-colors hover:border-[color:var(--ink-blue)] ${
         isPrev ? "text-left" : "text-right"
       }`}
     >
-      <div className="eyebrow mb-1.5 flex items-center gap-1.5">
+      <div className="eyebrow mb-2 flex items-center gap-1.5 text-[color:var(--pencil)]">
         {isPrev ? (
           <>
             <ArrowLeft className="h-3 w-3" /> {label}
@@ -280,7 +287,7 @@ function FootLink({
           </span>
         )}
       </div>
-      <div className="font-medium text-[1rem] tracking-[-0.005em]">
+      <div className="font-display text-[1.05rem] text-[color:var(--ink)] group-hover:text-[color:var(--ink-blue)] transition-colors">
         {article.title}
       </div>
     </ArticleLink>
@@ -289,7 +296,7 @@ function FootLink({
 
 function FootBlank({ label }: { label: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-muted/30 p-5 text-muted-foreground">
+    <div className="rounded-sm border border-dashed border-[color:var(--rule)] p-5 text-muted-foreground font-pencil">
       <div className="text-sm">{label}</div>
     </div>
   );
