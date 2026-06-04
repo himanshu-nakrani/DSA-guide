@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
 
@@ -12,9 +13,12 @@ const levelLabel: Record<ArticleLevel, string> = {
 };
 
 const levelStyle: Record<ArticleLevel, string> = {
-  FOUNDATION: "bg-[#2563eb]/10 text-[#2563eb] border-[#2563eb]/20",
-  INTERMEDIATE: "bg-[#0f766e]/10 text-[#0f766e] border-[#0f766e]/20",
-  ADVANCED: "bg-[#c2410c]/10 text-[#c2410c] border-[#c2410c]/20",
+  FOUNDATION:
+    "bg-[color:var(--chart-2)]/10 text-[color:var(--chart-2)] border-[color:var(--chart-2)]/25",
+  INTERMEDIATE:
+    "bg-[color:var(--chart-3)]/12 text-[color:var(--chart-3)] border-[color:var(--chart-3)]/25",
+  ADVANCED:
+    "bg-[color:var(--primary)]/12 text-[color:var(--primary)] border-[color:var(--primary)]/25",
 };
 
 export default async function LearnPage() {
@@ -125,7 +129,7 @@ function ModuleSection({
           {String(moduleNumber).padStart(2, "0")}
         </span>
         <div>
-          <h2 className="font-display text-2xl font-semibold">
+          <h2 className="font-display text-2xl font-medium tracking-[-0.015em]">
             {moduleName}
           </h2>
           {description && (
@@ -136,7 +140,7 @@ function ModuleSection({
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
+      <div className="surface-card overflow-hidden divide-y divide-border !p-0">
         {topics.flatMap((topic) =>
           topic.articles.map((article) => (
             <Link
@@ -146,9 +150,11 @@ function ModuleSection({
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-display text-base font-semibold text-foreground">
-                    {article.title}
-                  </h3>
+                  <ViewTransition name={`article-title-${article.slug}`}>
+                    <h3 className="text-[0.95rem] font-medium text-foreground tracking-[-0.005em]">
+                      {article.title}
+                    </h3>
+                  </ViewTransition>
                   <span
                     className={`text-[0.65rem] font-mono uppercase tracking-[0.04em] px-1.5 py-0.5 rounded border ${levelStyle[article.level]}`}
                   >

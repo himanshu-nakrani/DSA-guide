@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 import { ArticleStatus } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
+import { ArticleLink } from "@/components/article/ArticleLink";
+import { ProgressNode } from "@/components/roadmap/ProgressNode";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,9 @@ export default async function RoadmapPage() {
             (s, t) => s + t.problems.length,
             0,
           );
+          const moduleSlugs = module.topics.flatMap((t) =>
+            t.articles.map((a) => a.slug),
+          );
           const firstArticle =
             module.topics.flatMap((t) => t.articles)[0] ?? null;
           const isLast = i === track.modules.length - 1;
@@ -77,16 +81,15 @@ export default async function RoadmapPage() {
               style={{ ["--i" as string]: i }}
             >
               <div className="flex flex-col items-center">
-                <div className="h-10 w-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-mono text-sm font-medium tabular-nums shrink-0">
-                  {String(module.order).padStart(2, "0")}
-                </div>
+                <ProgressNode order={module.order} slugs={moduleSlugs} />
                 {!isLast && <div className="flex-1 w-px bg-border my-1" aria-hidden />}
               </div>
 
               <div className={`pt-1 ${isLast ? "pb-0" : "pb-5"}`}>
-                <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                <div className="surface-card p-5 transition-all hover:-translate-y-0.5 hover:border-[color:color-mix(in_srgb,var(--primary)_45%,var(--border))]">
+
                   <div className="flex items-baseline justify-between gap-4 flex-wrap mb-2">
-                    <h2 className="font-display text-lg font-semibold">
+                    <h2 className="font-display text-xl font-medium tracking-[-0.01em]">
                       {module.name}
                     </h2>
                     <div className="text-[0.7rem] font-mono text-muted-foreground tabular-nums flex items-center gap-2">
@@ -108,13 +111,20 @@ export default async function RoadmapPage() {
 
                   {firstArticle && (
                     <div className="mt-3">
-                      <Link
+                      <ArticleLink
                         href={`/learn/${firstArticle.slug}`}
+                        preview={{
+                          title: firstArticle.title,
+                          summary: firstArticle.summary,
+                          level: firstArticle.level,
+                          estimatedMins: firstArticle.estimatedMins,
+                          moduleName: module.name,
+                        }}
                         className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
                       >
                         Start: {firstArticle.title}
                         <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
+                      </ArticleLink>
                     </div>
                   )}
                 </div>

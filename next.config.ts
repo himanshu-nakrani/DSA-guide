@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   turbopack: {
     root,
   },
+  experimental: {
+    viewTransition: true,
+  },
 };
 
 export default nextConfig;
