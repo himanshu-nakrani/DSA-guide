@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ViewTransition } from "react";
 import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
+import { ReadBadge } from "@/components/article/ReadBadge";
+import { ReadTally } from "@/components/article/ReadTally";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +15,9 @@ const levelLabel: Record<ArticleLevel, string> = {
 };
 
 const levelStyle: Record<ArticleLevel, string> = {
-  FOUNDATION:
-    "bg-[color:var(--chart-2)]/10 text-[color:var(--chart-2)] border-[color:var(--chart-2)]/25",
-  INTERMEDIATE:
-    "bg-[color:var(--chart-3)]/12 text-[color:var(--chart-3)] border-[color:var(--chart-3)]/25",
-  ADVANCED:
-    "bg-[color:var(--primary)]/12 text-[color:var(--primary)] border-[color:var(--primary)]/25",
+  FOUNDATION: "pill",
+  INTERMEDIATE: "pill",
+  ADVANCED: "pill pill-primary",
 };
 
 export default async function LearnPage() {
@@ -67,26 +66,35 @@ export default async function LearnPage() {
   }
 
   const totalArticles = topics.reduce((s, t) => s + t.articles.length, 0);
+  const allSlugs = topics.flatMap((t) => t.articles.map((a) => a.slug));
 
   return (
-    <div className="max-w-5xl mx-auto px-12 py-16">
-      <header className="bloom mb-14">
-        <div className="eyebrow mb-3" style={{ ["--i" as string]: 0 }}>
+    <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
+      <header className="bloom mb-12">
+        <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
+          <span className="text-[color:var(--ink-blue)] mr-2">§</span>
           Library
         </div>
         <h1
-          className="font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05] font-semibold"
+          className="font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
           style={{ ["--i" as string]: 1 }}
         >
-          Learn
+          Table of Essays
         </h1>
         <p
-          className="text-lg text-muted-foreground mt-4 max-w-2xl"
+          className="text-[1.05rem] mt-3 max-w-2xl text-[color:var(--ink-soft)]"
           style={{ ["--i" as string]: 2 }}
         >
-          {totalArticles} articles across {modulesMap.size} modules — from
+          {totalArticles} essays across {modulesMap.size} modules — from
           asymptotic notation through shortest paths and dynamic programming.
         </p>
+        <div
+          className="mt-4 min-h-[1.25rem]"
+          style={{ ["--i" as string]: 3 }}
+        >
+          <ReadTally slugs={allSlugs} />
+        </div>
+        <div aria-hidden className="mt-6 h-px bg-[color:var(--rule-strong)]" />
       </header>
 
       <div className="space-y-14 bloom">
@@ -124,51 +132,50 @@ function ModuleSection({
 }) {
   return (
     <section style={{ ["--i" as string]: i }}>
-      <div className="flex items-baseline gap-4 mb-5">
-        <span className="font-mono text-sm text-muted-foreground tabular-nums">
+      <div className="flex items-baseline gap-4 mb-4">
+        <span className="font-mono text-[0.85rem] text-[color:var(--ink-blue)] tabular-nums tracking-[0.08em]">
           {String(moduleNumber).padStart(2, "0")}
         </span>
         <div>
-          <h2 className="font-display text-2xl font-medium tracking-[-0.015em]">
+          <h2 className="font-display text-[1.5rem] font-medium text-[color:var(--ink)]">
             {moduleName}
           </h2>
           {description && (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-[0.9rem] mt-1 text-[color:var(--ink-soft)]">
               {description}
             </p>
           )}
         </div>
       </div>
 
-      <div className="surface-card overflow-hidden divide-y divide-border !p-0">
+      <div className="border-t border-[color:var(--rule-strong)] border-b border-b-[color:var(--rule-strong)]">
         {topics.flatMap((topic) =>
-          topic.articles.map((article) => (
+          topic.articles.map((article, idx) => (
             <Link
               key={article.id}
               href={`/learn/${article.slug}`}
-              className="group flex items-start gap-4 px-5 py-4 hover:bg-accent/50 transition-colors"
+              className={`group flex items-start gap-4 px-1 py-3 transition-colors hover:bg-[color:var(--ink-blue-wash)] ${idx > 0 ? "border-t border-[color:var(--rule)]" : ""}`}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <ViewTransition name={`article-title-${article.slug}`}>
-                    <h3 className="text-[0.95rem] font-medium text-foreground tracking-[-0.005em]">
+                    <h3 className="font-display text-[1.05rem] font-medium text-[color:var(--ink)] group-hover:text-[color:var(--ink-blue)] transition-colors">
                       {article.title}
                     </h3>
                   </ViewTransition>
-                  <span
-                    className={`text-[0.65rem] font-mono uppercase tracking-[0.04em] px-1.5 py-0.5 rounded border ${levelStyle[article.level]}`}
-                  >
+                  <span className={levelStyle[article.level]}>
                     {levelLabel[article.level]}
                   </span>
                   <span className="text-[0.7rem] font-mono text-muted-foreground tabular-nums">
                     {article.estimatedMins}m
                   </span>
+                  <ReadBadge slug={article.slug} />
                 </div>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                <p className="text-[0.9rem] mt-1 leading-relaxed text-[color:var(--ink-soft)] max-w-2xl">
                   {article.summary}
                 </p>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground mt-1.5 shrink-0 transition-all group-hover:text-primary group-hover:translate-x-0.5" />
+              <ArrowRight className="h-4 w-4 text-muted-foreground mt-1.5 shrink-0 transition-all group-hover:text-[color:var(--ink-blue)] group-hover:translate-x-0.5" />
             </Link>
           )),
         )}
