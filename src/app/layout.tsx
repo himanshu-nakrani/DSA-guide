@@ -30,7 +30,13 @@ export const metadata: Metadata = {
     "A modern, interactive curriculum of data structures and algorithms — drawn from CLRS, Sedgewick, Laaksonen, and cp-algorithms.",
 };
 
-const themeBootstrap = `(()=>{try{const k='dsa.theme';const s=localStorage.getItem(k);const m=window.matchMedia('(prefers-color-scheme: light)').matches;const t=s||(m?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+// Bootstrap runs synchronously in <head> before paint:
+//   1. Resolve theme (localStorage → prefers-color-scheme → dark) and set
+//      data-theme so the first paint is the right palette.
+//   2. Gate the bloom stagger to the first navigation in a session — set
+//      data-bloom="on" once, then remember in sessionStorage so subsequent
+//      route changes inside the SPA don't re-stagger.
+const themeBootstrap = `(()=>{try{var d=document.documentElement;var k='dsa.theme';var s=localStorage.getItem(k);var m=window.matchMedia('(prefers-color-scheme: light)').matches;d.setAttribute('data-theme',s||(m?'light':'dark'));var b='inkwell:bloomed';if(!sessionStorage.getItem(b)){d.setAttribute('data-bloom','on');sessionStorage.setItem(b,'1');}}catch(e){document.documentElement.setAttribute('data-theme','dark');document.documentElement.setAttribute('data-bloom','on');}})();`;
 
 export default async function RootLayout({
   children,

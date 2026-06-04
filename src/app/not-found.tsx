@@ -6,13 +6,13 @@ export default function NotFound() {
     <div className="min-h-screen flex items-center justify-center px-12 py-20">
       <div className="max-w-md w-full text-center bloom">
         <div
-          className="font-display text-7xl leading-none text-primary font-semibold"
+          className="font-display text-7xl leading-none text-primary font-medium"
           style={{ ["--i" as string]: 0 }}
         >
           404
         </div>
         <h1
-          className="font-display text-2xl font-semibold mt-4"
+          className="font-display text-2xl font-medium mt-4 tracking-[-0.01em]"
           style={{ ["--i" as string]: 1 }}
         >
           Page not found
@@ -25,8 +25,12 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-95 transition-opacity"
-          style={{ ["--i" as string]: 3 }}
+          className="mt-6 inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-95 transition-opacity"
+          style={{
+            ["--i" as string]: 3,
+            boxShadow:
+              "0 8px 24px -12px color-mix(in srgb, var(--primary) 60%, transparent)",
+          }}
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to home

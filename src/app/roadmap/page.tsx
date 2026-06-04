@@ -43,7 +43,7 @@ export default async function RoadmapPage() {
           Curriculum
         </div>
         <h1
-          className="font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05] font-semibold"
+          className="font-display text-[clamp(2.5rem,5.5vw,4.25rem)] leading-[1.02] tracking-[-0.02em]"
           style={{ ["--i" as string]: 1 }}
         >
           Roadmap
