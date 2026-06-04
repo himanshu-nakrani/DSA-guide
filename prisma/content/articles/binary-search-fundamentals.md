@@ -44,6 +44,13 @@ roughly halves `R − L`, so after $k$ steps the window has size
 $\lceil n / 2^k \rceil$. The loop terminates when that's zero — i.e., after
 $\lceil \log_2 n \rceil$ steps.
 
+> [!MARGIN] M = (L + R) / 2
+> In practice write `L + (R - L) / 2` to dodge integer overflow when L and
+> R are near `INT_MAX`. The classic JDK binary-search bug, fixed in 2006.[^bloch]
+
+[^bloch]: Joshua Bloch, "Extra, Extra — Read All About It: Nearly All Binary
+Searches and Mergesorts are Broken" (Google Research blog, 2006).
+
 ```viz
 { "type": "callout", "props": {
   "tone": "intuition",
@@ -137,8 +144,8 @@ $O(\log n)$.
 { "type": "complexity-chart", "props": { "maxN": 256, "curves": ["1", "logn", "n"] } }
 ```
 
-The gap between the green log curve and the amber linear one is the entire
-reason this algorithm matters.
+The gap between the log curve and the linear one is the entire reason this
+algorithm matters.
 
 ## When Binary Search Does *Not* Apply
 

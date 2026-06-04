@@ -113,6 +113,10 @@ The result: in benchmarks an array scan often beats a linked-list scan by
 10× or more even though both are $\Theta(n)$. The Big-O is honest; the
 constants are not friendly.
 
+> [!MARGIN] Cache line, briefly
+> The unit your CPU reads at — 64 bytes on x86 and aarch64. The whole line
+> arrives even if you asked for one byte, so the next 63 are "free."
+
 ## Common Patterns
 
 Most array problems decompose into one of these three idioms:
