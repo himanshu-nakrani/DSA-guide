@@ -95,7 +95,7 @@ export function VizFrame({
     <>
       <div className="surface-card overflow-hidden !p-0">
         {header}
-        {body}
+        {!expanded && body}
         {footer}
       </div>
       {expanded && (
