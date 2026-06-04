@@ -107,7 +107,7 @@ function ArrayRow({
                       ? PALETTE.c3
                       : inWindow
                         ? "transparent"
-                        : `oklch(0.21 0.018 60 / 0.05)`,
+                        : "color-mix(in srgb, var(--pencil) 10%, transparent)",
                   color: isFound || isMid ? PALETTE.paper : inWindow ? PALETTE.ink : PALETTE.muted,
                   borderTop: "1px solid var(--foreground)",
                   borderBottom: "1px solid var(--foreground)",

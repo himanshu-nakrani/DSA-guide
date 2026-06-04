@@ -47,11 +47,11 @@ export function ReadingProgress({ targetSelector }: { targetSelector: string }) 
       className="fixed top-0 left-0 right-0 z-50 h-[2px] bg-transparent"
     >
       <div
-        className="h-full bg-primary will-change-[transform] origin-left"
+        className="h-full will-change-[transform] origin-left"
         style={{
+          background: "var(--ink-blue)",
           transform: `scaleX(${pct})`,
           transition: "transform 80ms linear",
-          boxShadow: "0 0 12px color-mix(in srgb, var(--primary) 55%, transparent)",
         }}
       />
     </div>

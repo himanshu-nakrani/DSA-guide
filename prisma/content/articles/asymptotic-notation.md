@@ -25,6 +25,11 @@ Concretely: if `T(n)` is the number of basic steps an algorithm performs on an
 input of size `n`, asymptotic notation classifies `T` by its *growth rate*
 rather than its exact value.
 
+> [!MARGIN] What "basic step" means
+> A basic step is anything that takes constant time on the abstract machine —
+> an arithmetic op, an array read, a pointer chase. We don't count cycles; we
+> count *operations*, then ask how that count scales.
+
 ## The Three Notations
 
 Three bounds appear over and over. They are formally defined for any pair of
@@ -78,6 +83,11 @@ $10^{15}$ will not finish today.
 Reading this table is a habit worth cultivating. Before you even open the
 editor, glance at the input limits in the problem statement and use it to rule
 out complexity classes:
+
+> [!MARGIN] Why 10⁸ per second
+> A back-of-envelope figure for a single modern CPU core running plain code,
+> no SIMD, no cache misses. Use it for sanity, not promises — real numbers
+> shift by an order of magnitude either way once memory access enters.
 
 - $n \le 20$ — $O(2^n)$ or $O(n!)$ might still be fine.
 - $n \le 10^3$ — $O(n^2)$ is the sweet spot.

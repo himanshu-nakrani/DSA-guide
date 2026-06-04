@@ -102,7 +102,7 @@ export function DPGrid({
                           background: isCurrent
                             ? PALETTE.c3
                             : filled
-                              ? `oklch(0.42 0.08 145 / 0.12)`
+                              ? "var(--ink-blue-wash)"
                               : "transparent",
                           color: isCurrent ? PALETTE.paper : PALETTE.ink,
                           fontWeight: isCurrent ? 600 : 400,

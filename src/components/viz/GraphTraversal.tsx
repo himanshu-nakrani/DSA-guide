@@ -132,7 +132,7 @@ export function GraphTraversal({
                       : visited
                         ? PALETTE.c1
                         : inFrontier
-                          ? `oklch(0.55 0.06 145 / 0.25)`
+                          ? "color-mix(in srgb, var(--pencil) 22%, transparent)"
                           : PALETTE.paper
                   }
                   stroke={PALETTE.ink}

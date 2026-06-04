@@ -37,23 +37,25 @@ export default async function RoadmapPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-12 py-16">
-      <header className="bloom mb-14">
-        <div className="eyebrow mb-3" style={{ ["--i" as string]: 0 }}>
+    <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
+      <header className="bloom mb-12">
+        <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
+          <span className="text-[color:var(--ink-blue)] mr-2">§</span>
           Curriculum
         </div>
         <h1
-          className="font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05] font-semibold"
+          className="font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
           style={{ ["--i" as string]: 1 }}
         >
-          Roadmap
+          The Roadmap
         </h1>
         <p
-          className="text-lg text-muted-foreground mt-4 max-w-2xl"
+          className="text-[1.05rem] mt-3 max-w-2xl text-[color:var(--ink-soft)]"
           style={{ ["--i" as string]: 2 }}
         >
           {track.description}
         </p>
+        <div aria-hidden className="mt-8 h-px bg-[color:var(--rule-strong)]" />
       </header>
 
       {/* Vertical step timeline */}
@@ -86,10 +88,10 @@ export default async function RoadmapPage() {
               </div>
 
               <div className={`pt-1 ${isLast ? "pb-0" : "pb-5"}`}>
-                <div className="surface-card p-5 transition-all hover:-translate-y-0.5 hover:border-[color:color-mix(in_srgb,var(--primary)_45%,var(--border))]">
+                <div className="p-5 border border-[color:var(--rule)] rounded-sm bg-[color:var(--surface-1)] transition-colors hover:border-[color:var(--ink-blue)]">
 
                   <div className="flex items-baseline justify-between gap-4 flex-wrap mb-2">
-                    <h2 className="font-display text-xl font-medium tracking-[-0.01em]">
+                    <h2 className="font-display text-[1.25rem] font-medium text-[color:var(--ink)]">
                       {module.name}
                     </h2>
                     <div className="text-[0.7rem] font-mono text-muted-foreground tabular-nums flex items-center gap-2">
@@ -104,7 +106,7 @@ export default async function RoadmapPage() {
                   </div>
 
                   {module.description && (
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-[0.9rem] leading-relaxed text-[color:var(--ink-soft)]">
                       {module.description}
                     </p>
                   )}
@@ -120,7 +122,7 @@ export default async function RoadmapPage() {
                           estimatedMins: firstArticle.estimatedMins,
                           moduleName: module.name,
                         }}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--ink-blue)] link-quill"
                       >
                         Start: {firstArticle.title}
                         <ArrowRight className="h-3.5 w-3.5" />

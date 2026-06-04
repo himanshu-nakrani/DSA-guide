@@ -3,34 +3,51 @@ import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center px-12 py-20">
-      <div className="max-w-md w-full text-center bloom">
-        <div
-          className="font-display text-7xl leading-none text-primary font-semibold"
-          style={{ ["--i" as string]: 0 }}
-        >
-          404
+    <div className="min-h-screen flex items-center justify-center px-6 md:px-12 py-20">
+      <div className="max-w-md w-full bloom">
+        <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
+          <span className="text-[color:var(--ink-blue)] mr-2">§</span>
+          Errata · 404
         </div>
         <h1
-          className="font-display text-2xl font-semibold mt-4"
+          className="font-display text-[clamp(2.25rem,5vw,3.25rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
           style={{ ["--i" as string]: 1 }}
         >
-          Page not found
+          This folio is missing from the binding.
         </h1>
         <p
-          className="text-muted-foreground mt-2"
+          className="text-[1.05rem] mt-4 leading-relaxed text-[color:var(--ink-soft)]"
           style={{ ["--i" as string]: 2 }}
         >
-          The page you&rsquo;re looking for doesn&rsquo;t exist or has been moved.
+          The page you&rsquo;re looking for doesn&rsquo;t exist — or it has
+          been moved to a new edition. Try searching, or return to the table
+          of contents.
         </p>
-        <Link
-          href="/"
-          className="mt-6 inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-95 transition-opacity"
+        <div
+          aria-hidden
+          className="my-7 h-px bg-[color:var(--rule-strong)]"
           style={{ ["--i" as string]: 3 }}
+        />
+        <div
+          className="flex flex-wrap items-center gap-3"
+          style={{ ["--i" as string]: 4 }}
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to home
-        </Link>
+          <Link href="/" className="btn-ink">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to the title page
+          </Link>
+          <Link href="/learn" className="btn-ghost">
+            Table of essays
+          </Link>
+        </div>
+        <p
+          className="font-pencil text-[0.85rem] mt-8 text-[color:var(--pencil)]"
+          style={{ ["--i" as string]: 5 }}
+        >
+          If you arrived here from a link in another article, please report
+          the typo — every page in the manuscript is supposed to find its
+          siblings.
+        </p>
       </div>
     </div>
   );

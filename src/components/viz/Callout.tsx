@@ -3,30 +3,24 @@
 import * as React from "react";
 
 /**
- * Callout: editorial side-note with a labeled tone. Used for "Pitfall",
- * "Intuition", "Why this works", etc. Plain text body; markdown not parsed.
+ * Callout — editorial side-note rendered through the manuscript annotation
+ * system. Mirrors the markdown `> [!TONE]` blockquotes so authored callouts
+ * inside viz blocks visually agree with margin notes in the body.
  */
-const TONE_COLORS: Record<string, { border: string; bg: string; label: string }> = {
-  intuition: {
-    border: "var(--primary)",
-    bg: "oklch(0.42 0.08 145 / 0.06)",
-    label: "var(--primary)",
-  },
-  pitfall: {
-    border: "var(--destructive)",
-    bg: "oklch(0.45 0.16 25 / 0.05)",
-    label: "var(--destructive)",
-  },
-  insight: {
-    border: "oklch(0.65 0.10 60)",
-    bg: "oklch(0.65 0.10 60 / 0.08)",
-    label: "oklch(0.45 0.10 60)",
-  },
-  note: {
-    border: "var(--border)",
-    bg: "transparent",
-    label: "var(--muted-foreground)",
-  },
+const TONE_CLASS: Record<string, string> = {
+  intuition: "tone-insight",
+  pitfall: "tone-pitfall",
+  insight: "tone-insight",
+  note: "tone-note",
+  margin: "tone-margin",
+};
+
+const TONE_DEFAULT_TITLE: Record<string, string> = {
+  intuition: "Intuition",
+  pitfall: "Pitfall",
+  insight: "Insight",
+  note: "Note",
+  margin: "Note",
 };
 
 export function Callout({
@@ -34,28 +28,16 @@ export function Callout({
   title,
   body,
 }: {
-  tone?: keyof typeof TONE_COLORS;
+  tone?: keyof typeof TONE_CLASS;
   title?: string;
   body?: string;
 }) {
-  const c = TONE_COLORS[tone] ?? TONE_COLORS.note;
+  const cls = TONE_CLASS[tone] ?? TONE_CLASS.note;
+  const label = title ?? TONE_DEFAULT_TITLE[tone] ?? "Note";
   return (
-    <aside
-      className="my-6 p-4"
-      style={{
-        borderLeft: `3px solid ${c.border}`,
-        background: c.bg,
-      }}
-    >
-      {title && (
-        <div
-          className="font-mono text-[0.65rem] uppercase tracking-[0.16em] mb-1"
-          style={{ color: c.label }}
-        >
-          {title}
-        </div>
-      )}
-      <div className="font-serif text-[0.95rem] leading-relaxed">{body}</div>
+    <aside className={`annotation ${cls}`} role="note">
+      <span className="annotation-label">{label}</span>
+      <p>{body}</p>
     </aside>
   );
 }

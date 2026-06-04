@@ -1,25 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Sun, Moon } from "lucide-react";
 
 type Theme = "light" | "dark";
 const STORAGE_KEY = "dsa.theme";
 
-function readTheme(): Theme {
-  if (typeof document === "undefined") return "dark";
+function getSnapshot(): Theme {
+  if (typeof document === "undefined") return "light";
   const attr = document.documentElement.getAttribute("data-theme");
-  return attr === "light" ? "light" : "dark";
+  return attr === "dark" ? "dark" : "light";
+}
+
+// Server snapshot has to match what the server actually rendered. The root
+// layout pins data-theme="light" on the server, so "light" is the honest
+// answer; the inline bootstrap script swaps the attribute before React
+// hydrates, and `suppressHydrationWarning` on the dynamic bits below lets
+// React reconcile to the real theme without a hydration error.
+function getServerSnapshot(): Theme {
+  return "light";
+}
+
+function subscribe(cb: () => void) {
+  if (typeof document === "undefined") return () => {};
+  const observer = new MutationObserver(cb);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+  return () => observer.disconnect();
 }
 
 export function ThemeToggle({ collapsed = false }: { collapsed?: boolean }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setTheme(readTheme());
-    setMounted(true);
-  }, []);
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggle = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
@@ -28,7 +41,6 @@ export function ThemeToggle({ collapsed = false }: { collapsed?: boolean }) {
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {}
-    setTheme(next);
     window.setTimeout(() => {
       document.documentElement.removeAttribute("data-theme-transition");
     }, 260);
@@ -42,17 +54,18 @@ export function ThemeToggle({ collapsed = false }: { collapsed?: boolean }) {
       type="button"
       onClick={toggle}
       aria-label={label}
-      title={mounted ? label : undefined}
+      title={label}
+      suppressHydrationWarning
       className={
         collapsed
-          ? "h-9 w-9 grid place-items-center rounded-md text-foreground/70 hover:bg-accent hover:text-foreground transition-colors"
-          : "inline-flex items-center gap-2 h-9 px-2.5 rounded-md text-sm text-foreground/75 hover:bg-accent hover:text-foreground transition-colors"
+          ? "h-9 w-9 grid place-items-center rounded-sm text-foreground/70 hover:text-[color:var(--ink-blue)] transition-colors"
+          : "inline-flex items-center gap-2 h-9 px-2.5 rounded-sm text-sm text-foreground/75 hover:text-[color:var(--ink-blue)] transition-colors"
       }
     >
-      <Icon className="h-4 w-4" strokeWidth={1.75} />
+      <Icon className="h-4 w-4" strokeWidth={1.5} suppressHydrationWarning />
       {!collapsed && (
-        <span className="font-medium">
-          {mounted ? (theme === "dark" ? "Light" : "Dark") : "Theme"}
+        <span className="font-medium" suppressHydrationWarning>
+          {theme === "dark" ? "Light" : "Dark"}
         </span>
       )}
     </button>

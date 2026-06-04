@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { BookOpen, Map, Code2, Home, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import type { SearchItem } from "@/lib/searchIndex";
 
 const navItems: { href: string; label: string; icon: LucideIcon; soon?: boolean }[] = [
   { href: "/", label: "Home", icon: Home },
@@ -15,116 +16,139 @@ const navItems: { href: string; label: string; icon: LucideIcon; soon?: boolean 
 ];
 
 const COLLAPSE_KEY = "dsa.sidebar.collapsed";
+const COLLAPSE_EVENT = "dsa:sidebar-collapse-change";
+const HTML_ATTR = "data-sidebar-collapsed";
 
-export function Sidebar() {
+function readCollapsed(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.documentElement.hasAttribute(HTML_ATTR);
+}
+
+function subscribeCollapsed(cb: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener(COLLAPSE_EVENT, cb);
+  window.addEventListener("storage", cb);
+  return () => {
+    window.removeEventListener(COLLAPSE_EVENT, cb);
+    window.removeEventListener("storage", cb);
+  };
+}
+
+function getCollapsedServer(): boolean {
+  return false;
+}
+
+function writeCollapsed(next: boolean) {
+  if (next) document.documentElement.setAttribute(HTML_ATTR, "");
+  else document.documentElement.removeAttribute(HTML_ATTR);
+  try {
+    localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+  } catch {}
+  window.dispatchEvent(new Event(COLLAPSE_EVENT));
+}
+
+/**
+ * Sidebar — printed-index navigation. Always renders the expanded DOM tree;
+ * collapsed state is driven by `<html data-sidebar-collapsed>` so CSS can
+ * hide labels and shrink the width before React hydrates. This avoids the
+ * visible flash when a user with a collapsed preference loads the page.
+ */
+export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const collapsed = useSyncExternalStore(
+    subscribeCollapsed,
+    readCollapsed,
+    getCollapsedServer,
+  );
 
-  useEffect(() => {
-    try {
-      setCollapsed(localStorage.getItem(COLLAPSE_KEY) === "1");
-    } catch {}
-    setMounted(true);
+  // When the user is reading an article, surface its title + module in the
+  // sidebar — the printed-manuscript equivalent of "you are here in the
+  // table of contents." Falls back to nothing on non-article routes.
+  const currentArticle = useMemo<
+    Extract<SearchItem, { kind: "article" }> | null
+  >(() => {
+    const m = /^\/learn\/([^/?#]+)/.exec(pathname);
+    if (!m) return null;
+    const href = `/learn/${m[1]}`;
+    const found = searchIndex.find(
+      (it) => it.kind === "article" && it.href === href,
+    );
+    return found && found.kind === "article" ? found : null;
+  }, [pathname, searchIndex]);
+
+  const toggle = useCallback(() => {
+    writeCollapsed(!readCollapsed());
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
         e.preventDefault();
-        setCollapsed((c) => {
-          const next = !c;
-          try {
-            localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
-          } catch {}
-          return next;
-        });
+        writeCollapsed(!readCollapsed());
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [mounted]);
-
-  const toggle = () => {
-    setCollapsed((c) => {
-      const next = !c;
-      try {
-        localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
-      } catch {}
-      return next;
-    });
-  };
-
-  const widthClass = collapsed ? "md:w-[68px]" : "md:w-64";
+  }, []);
 
   return (
     <aside
-      className={`w-full ${widthClass} shrink-0 border-b md:border-b-0 md:border-r border-sidebar-border md:h-screen md:sticky md:top-0 flex flex-col bg-sidebar transition-[width] duration-300`}
+      data-sidebar
+      className="dsa-sidebar w-full shrink-0 border-b md:border-b-0 md:border-r border-sidebar-border md:h-screen md:sticky md:top-0 flex flex-col bg-sidebar transition-[width] duration-300"
       style={{ transitionTimingFunction: "var(--ease-out)" }}
     >
-      <div className="px-3 md:px-4 py-4 md:pt-5 md:pb-4 border-b border-sidebar-border flex items-center justify-between gap-2">
+      <div className="dsa-sidebar-head px-3 md:px-4 py-4 md:pt-5 md:pb-4 border-b border-sidebar-border flex items-center justify-between gap-2">
         <Link
           href="/"
-          className={`flex items-center gap-2.5 group ${collapsed ? "md:justify-center md:w-full" : ""}`}
+          className="dsa-sidebar-brand flex items-center gap-2.5 group"
           aria-label="DSA Guide — home"
         >
           <BrandMark />
-          {!collapsed && (
-            <div className="md:block">
-              <div className="font-display text-[1rem] leading-none tracking-tight">
-                DSA Guide
-              </div>
-              <div className="font-mono text-[0.62rem] text-muted-foreground mt-1.5 tracking-[0.06em]">
-                INKWELL · v1.0
-              </div>
+          <div className="dsa-collapse-hide md:block leading-none">
+            <div className="font-display text-[1.05rem] tracking-[0.005em] text-[color:var(--ink)]">
+              DSA Guide
             </div>
-          )}
+            <div className="font-mono text-[0.6rem] text-muted-foreground mt-1.5 tracking-[0.14em] uppercase">
+              Manuscript ed.
+            </div>
+          </div>
         </Link>
-        {!collapsed && (
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label="Collapse sidebar (⌘\\)"
-            title="Collapse sidebar (⌘\\)"
-            className="hidden md:grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          >
-            <PanelLeftClose className="h-4 w-4" strokeWidth={1.75} />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label="Collapse sidebar (⌘\\)"
+          title="Collapse sidebar (⌘\\)"
+          className="dsa-collapse-hide hidden md:grid h-8 w-8 place-items-center rounded-sm text-muted-foreground hover:text-[color:var(--ink-blue)] transition-colors"
+        >
+          <PanelLeftClose className="h-4 w-4" strokeWidth={1.5} />
+        </button>
       </div>
 
-      <div
-        className={`hidden md:block ${collapsed ? "px-2" : "px-3"} pt-3`}
-      >
+      <div className="dsa-sidebar-search hidden md:block px-3 pt-3">
         <button
           type="button"
           onClick={() =>
             window.dispatchEvent(new CustomEvent("dsa:open-palette"))
           }
           title="Search (⌘K)"
-          className={`group w-full inline-flex items-center ${
-            collapsed ? "justify-center px-2" : "justify-between gap-2 px-3"
-          } py-2 rounded-md border border-border bg-[color:var(--surface-1,var(--card))] text-foreground/65 hover:text-foreground hover:border-[color:color-mix(in_srgb,var(--primary)_35%,var(--border))] transition-colors`}
+          className="group w-full inline-flex items-center justify-between gap-2 px-3 py-1.5 rounded-sm border border-[color:var(--rule-strong)] bg-transparent text-foreground/70 hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)] transition-colors"
         >
-          <span className="inline-flex items-center gap-2 text-sm">
-            <Search className="h-4 w-4" strokeWidth={1.75} />
-            {!collapsed && <span>Search</span>}
+          <span className="inline-flex items-center gap-2 text-[0.85rem]">
+            <Search className="h-3.5 w-3.5" strokeWidth={1.5} />
+            <span className="dsa-collapse-hide">Search</span>
           </span>
-          {!collapsed && (
-            <span className="font-mono text-[0.6rem] uppercase tracking-[0.06em] text-muted-foreground">
-              ⌘K
-            </span>
-          )}
+          <span className="dsa-collapse-hide font-mono text-[0.58rem] uppercase tracking-[0.1em] text-muted-foreground">
+            ⌘K
+          </span>
         </button>
       </div>
 
-      <nav
-        className={`flex md:flex-1 gap-1 overflow-x-auto px-3 py-2 md:py-4 md:space-y-0.5 md:block ${
-          collapsed ? "md:px-2" : ""
-        }`}
-      >
-        {navItems.map((item) => {
+      <div className="dsa-collapse-hide hidden md:block px-4 pt-5 pb-1.5">
+        <div className="eyebrow">Index</div>
+      </div>
+
+      <nav className="dsa-sidebar-nav flex md:flex-1 gap-1 overflow-x-auto px-3 py-2 md:py-1 md:space-y-0 md:block">
+        {navItems.map((item, i) => {
           const active =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -134,92 +158,95 @@ export function Sidebar() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               title={collapsed ? item.label : undefined}
-              className={`group relative flex shrink-0 items-center gap-2 md:gap-3 ${
-                collapsed ? "md:justify-center md:px-2" : "px-3"
-              } py-2 rounded-md text-sm transition-colors ${
+              className={`group relative flex shrink-0 items-center gap-2 md:gap-3 px-3 py-1.5 rounded-sm text-[0.92rem] transition-colors ${
                 active
-                  ? "bg-accent text-accent-foreground"
-                  : "text-foreground/75 hover:bg-accent hover:text-foreground"
+                  ? "text-[color:var(--ink-blue)] font-medium"
+                  : "text-foreground/80 hover:text-[color:var(--ink-blue)]"
               }`}
             >
               {active && (
                 <span
                   aria-hidden
-                  className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-r bg-primary"
+                  className="dsa-active-mark absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] bg-[color:var(--ink-blue)]"
                 />
               )}
-              <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-              {!collapsed && (
-                <>
-                  <span className="md:flex-1 font-medium">{item.label}</span>
-                  {item.soon && (
-                    <span className="text-[0.6rem] font-mono uppercase tracking-[0.06em] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                      Soon
-                    </span>
-                  )}
-                </>
+              <Icon className="h-4 w-4 shrink-0" strokeWidth={active ? 1.9 : 1.5} />
+              <span className="dsa-collapse-hide md:flex-1">
+                <span className="font-mono text-[0.6rem] text-muted-foreground mr-2 tabular-nums tracking-[0.1em]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                {item.label}
+              </span>
+              {item.soon && (
+                <span className="dsa-collapse-hide text-[0.55rem] font-mono uppercase tracking-[0.12em] text-muted-foreground border border-[color:var(--rule)] px-1 py-px rounded-[2px]">
+                  Soon
+                </span>
               )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Footer area: theme toggle + (optional) sources */}
-      <div
-        className={`hidden md:flex flex-col gap-3 border-t border-sidebar-border ${
-          collapsed ? "px-2 py-3 items-center" : "px-4 py-4"
-        }`}
-      >
-        <div className={collapsed ? "flex flex-col items-center gap-1" : "flex items-center justify-between"}>
-          <ThemeToggle collapsed={collapsed} />
-          {collapsed && (
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label="Expand sidebar (⌘\\)"
-              title="Expand sidebar (⌘\\)"
-              className="h-9 w-9 grid place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            >
-              <PanelLeftOpen className="h-4 w-4" strokeWidth={1.75} />
-            </button>
-          )}
-        </div>
-
-        {!collapsed && (
-          <div className="space-y-3 pt-1">
-            <div>
-              <div className="eyebrow mb-1.5">Sources</div>
-              <p className="text-[0.78rem] leading-relaxed text-muted-foreground">
-                CLRS, Sedgewick &amp; Wayne, Laaksonen, MIT&nbsp;OCW, cp-algorithms.
-              </p>
-            </div>
-            <div>
-              <div className="eyebrow mb-1.5">Maintained by</div>
-              <p className="text-[0.82rem] font-medium">Himanshu Nakrani</p>
+      {currentArticle && (
+        <div className="dsa-collapse-hide hidden md:block border-t border-sidebar-border px-4 py-4">
+          <div className="eyebrow mb-2">Reading</div>
+          <div className="flex items-start gap-2 -ml-3 pl-3 border-l-2 border-[color:var(--ink-blue)]">
+            <div className="min-w-0">
+              <div className="font-display text-[0.95rem] leading-snug text-[color:var(--ink-blue)]">
+                {currentArticle.title}
+              </div>
+              <div className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted-foreground mt-1 truncate">
+                {currentArticle.moduleName}
+              </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+      <div className="dsa-sidebar-foot hidden md:flex flex-col gap-3 border-t border-sidebar-border px-4 py-4">
+        <div className="dsa-sidebar-foot-row flex items-center justify-between">
+          <ThemeToggle collapsed={collapsed} />
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label="Expand sidebar (⌘\\)"
+            title="Expand sidebar (⌘\\)"
+            className="dsa-expand-show h-9 w-9 grid place-items-center rounded-sm text-muted-foreground hover:text-[color:var(--ink-blue)] transition-colors"
+          >
+            <PanelLeftOpen className="h-4 w-4" strokeWidth={1.5} />
+          </button>
+        </div>
+
+        <div className="dsa-collapse-hide space-y-3 pt-1">
+          <div>
+            <div className="eyebrow mb-1.5">Sources</div>
+            <p className="text-[0.78rem] leading-relaxed text-muted-foreground font-pencil">
+              CLRS, Sedgewick &amp; Wayne, Laaksonen, MIT&nbsp;OCW, cp-algorithms.
+            </p>
+          </div>
+          <div>
+            <div className="eyebrow mb-1.5">Editor</div>
+            <p className="text-[0.82rem] font-medium">Himanshu Nakrani</p>
+          </div>
+        </div>
       </div>
     </aside>
   );
 }
 
 /**
- * Brand glyph — a traced path through a tiny graph. Picks up `currentColor`
- * for the node stroke and `--primary` for the highlighted edge, so it adapts
- * to both themes automatically.
+ * Brand glyph — a small bookmark with a blue ink corner.
  */
 function BrandMark() {
   return (
     <span
       aria-hidden
-      className="relative h-8 w-8 rounded-lg grid place-items-center"
+      className="relative h-8 w-7 grid place-items-center"
       style={{
-        background:
-          "linear-gradient(180deg, color-mix(in srgb, var(--primary) 18%, transparent) 0%, color-mix(in srgb, var(--primary) 6%, transparent) 100%)",
-        border: "1px solid color-mix(in srgb, var(--primary) 28%, transparent)",
-        boxShadow:
-          "inset 0 1px 0 0 color-mix(in srgb, var(--primary) 22%, transparent)",
+        background: "var(--surface-1)",
+        border: "1px solid var(--rule-strong)",
+        borderRadius: "1px",
+        boxShadow: "1px 1px 0 0 var(--rule)",
       }}
     >
       <svg
@@ -227,22 +254,12 @@ function BrandMark() {
         className="h-4 w-4"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        {/* edges */}
-        <path d="M5 6 L12 12" opacity="0.35" />
-        <path d="M19 6 L12 12" opacity="0.35" />
-        <path d="M5 18 L12 12" opacity="0.35" />
-        {/* highlighted traced edge */}
-        <path d="M12 12 L19 18" stroke="var(--primary)" strokeWidth="2" />
-        {/* nodes */}
-        <circle cx="5" cy="6" r="1.6" fill="currentColor" opacity="0.55" />
-        <circle cx="19" cy="6" r="1.6" fill="currentColor" opacity="0.55" />
-        <circle cx="5" cy="18" r="1.6" fill="currentColor" opacity="0.55" />
-        <circle cx="12" cy="12" r="1.8" fill="currentColor" />
-        <circle cx="19" cy="18" r="1.8" fill="var(--primary)" stroke="var(--primary)" />
+        <path d="M6 4 L6 20 L11 20 C16 20 19 16.5 19 12 C19 7.5 16 4 11 4 Z" stroke="var(--ink)" />
+        <path d="M14 7 L20 13" stroke="var(--ink-blue)" strokeWidth="1.8" />
       </svg>
     </span>
   );

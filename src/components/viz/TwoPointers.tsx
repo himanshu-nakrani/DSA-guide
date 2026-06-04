@@ -86,7 +86,7 @@ export function TwoPointers({
                 <div
                   className="w-full text-center py-3 font-mono text-base tabular-nums border"
                   style={{
-                    background: found ? PALETTE.c1 : isL ? PALETTE.c3 : isR ? PALETTE.c5 : "transparent",
+                    background: found ? PALETTE.c1 : isL ? PALETTE.c3 : isR ? PALETTE.c2 : "transparent",
                     color: found || isL || isR ? PALETTE.paper : PALETTE.ink,
                     borderColor: PALETTE.ink,
                     opacity: inWindow ? 1 : 0.4,
@@ -100,7 +100,7 @@ export function TwoPointers({
                   ) : isL ? (
                     <span style={{ color: PALETTE.c3 }}>L</span>
                   ) : isR ? (
-                    <span style={{ color: PALETTE.c5 }}>R</span>
+                    <span style={{ color: PALETTE.c2 }}>R</span>
                   ) : null}
                 </div>
               </div>
@@ -122,7 +122,7 @@ export function TwoPointers({
           )}
           {f.action === "move-R" && (
             <span>
-              &gt; target ⇒ <span style={{ color: PALETTE.c5 }}>R--</span> (need smaller)
+              &gt; target ⇒ <span style={{ color: PALETTE.c2 }}>R--</span> (need smaller)
             </span>
           )}
           {f.action === "miss" && <span style={{ color: PALETTE.destructive }}>L ≥ R ⇒ no pair</span>}

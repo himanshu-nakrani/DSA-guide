@@ -6,8 +6,11 @@ export default function ProblemsPage() {
     <div className="min-h-screen flex items-center justify-center px-12 py-20">
       <div className="max-w-xl w-full bloom">
         <div className="surface-card p-8">
-          <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-5">
-            <Code2 className="h-6 w-6" strokeWidth={1.75} />
+          <div
+            className="h-11 w-11 rounded-sm grid place-items-center text-[color:var(--ink-blue)] border border-[color:var(--rule-strong)] mb-5"
+            style={{ background: "var(--surface-2)" }}
+          >
+            <Code2 className="h-5 w-5" strokeWidth={1.6} />
           </div>
 
           <div className="eyebrow mb-2" style={{ ["--i" as string]: 0 }}>
@@ -32,16 +35,13 @@ export default function ProblemsPage() {
             className="mt-6 flex items-center gap-3"
             style={{ ["--i" as string]: 3 }}
           >
-            <Link
-              href="/learn"
-              className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-95 transition-opacity"
-            >
+            <Link href="/learn" className="btn-ink">
               <ArrowLeft className="h-3.5 w-3.5" />
-              Back to articles
+              Back to essays
             </Link>
             <Link
               href="/roadmap"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--ink-blue)] link-quill"
             >
               See the roadmap
               <ArrowRight className="h-3.5 w-3.5" />

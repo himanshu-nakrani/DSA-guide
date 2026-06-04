@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
+import { InlineScript } from "@/components/layout/InlineScript";
 import { getSearchIndex } from "@/lib/searchIndex";
 
 const fraunces = localFont({
@@ -28,9 +29,24 @@ export const metadata: Metadata = {
   title: "DSA Guide — A structured curriculum on data structures and algorithms",
   description:
     "A modern, interactive curriculum of data structures and algorithms — drawn from CLRS, Sedgewick, Laaksonen, and cp-algorithms.",
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
 };
 
-const themeBootstrap = `(()=>{try{const k='dsa.theme';const s=localStorage.getItem(k);const m=window.matchMedia('(prefers-color-scheme: light)').matches;const t=s||(m?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+// Runs synchronously during HTML parsing — before first paint, before React.
+// Reads persisted UI state out of localStorage and stamps the result onto
+// <html> as data-* attributes so the CSS can drive layout (collapsed sidebar,
+// focus mode) and the colour theme without a flash of unstyled state.
+const themeBootstrap = `(()=>{try{
+  var d=document.documentElement;
+  var t=localStorage.getItem('dsa.theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  d.setAttribute('data-theme',t);
+  if(localStorage.getItem('dsa.sidebar.collapsed')==='1') d.setAttribute('data-sidebar-collapsed','');
+  if(localStorage.getItem('dsa.focus')==='1') d.setAttribute('data-focus-mode','');
+}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 
 export default async function RootLayout({
   children,
@@ -42,15 +58,15 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="dark"
+      data-theme="light"
       className={`${GeistSans.variable} ${GeistMono.variable} ${fraunces.variable} h-full`}
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+        <InlineScript html={themeBootstrap} />
       </head>
       <body className="min-h-full flex flex-col md:flex-row bg-background text-foreground antialiased">
-        <Sidebar />
+        <Sidebar searchIndex={searchIndex} />
         <main className="flex-1 min-w-0 md:overflow-y-auto">{children}</main>
         <CommandPalette index={searchIndex} />
       </body>
