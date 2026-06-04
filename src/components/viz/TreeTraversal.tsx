@@ -149,7 +149,7 @@ export function TreeTraversal({
               key={i}
               style={{
                 color: i <= step ? PALETTE.ink : PALETTE.muted,
-                background: i === step ? `oklch(0.65 0.10 60 / 0.25)` : "transparent",
+                background: i === step ? "var(--ink-blue-wash)" : "transparent",
                 padding: "0 4px",
               }}
             >

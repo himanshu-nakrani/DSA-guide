@@ -91,7 +91,7 @@ export function BFSHero() {
   useEffect(() => {
     if (paused) return;
     let raf = 0;
-    let start = performance.now();
+    const start = performance.now();
     const loop = (now: number) => {
       const elapsed = (now - start) % TOTAL_MS;
       setTick(elapsed);

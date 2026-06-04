@@ -58,6 +58,13 @@ export function Viz({ raw }: { raw: string }) {
   if (!Component) {
     return <VizError message={`Unknown viz type: ${parsed.type}`} detail={raw} />;
   }
+  // Callouts already render as semantic <aside>s; wrapping them in a <figure>
+  // would (a) break the `.essay > .annotation` selector that slots them into
+  // the desktop marginalia gutter and (b) add a second visual frame around
+  // what is already an editorial side-note.
+  if (parsed.type === "callout") {
+    return <Component {...(parsed.props ?? {})} />;
+  }
   return (
     <figure className="viz not-prose my-8">
       <Component {...(parsed.props ?? {})} />

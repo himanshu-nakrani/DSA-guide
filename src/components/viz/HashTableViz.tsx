@@ -78,7 +78,7 @@ export function HashTableViz({
                         style={{
                           borderColor: node.collided ? PALETTE.c4 : PALETTE.ink,
                           background: node.collided
-                            ? `oklch(0.45 0.16 25 / 0.08)`
+                            ? "var(--ink-red-wash)"
                             : PALETTE.paper,
                         }}
                         title={`hash("${node.key}") = ${node.hash} → home bucket ${node.home}${

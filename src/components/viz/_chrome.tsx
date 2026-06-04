@@ -3,8 +3,8 @@
 import * as React from "react";
 
 /**
- * Common chrome around a visualization: rounded card, soft shadow, caption,
- * optional controls slot.
+ * VizFrame — printed-figure chrome: paper-toned surface, ruled border, a
+ * "Figure" small-cap caption, optional controls slot in the running head.
  */
 export function VizFrame({
   caption,
@@ -18,9 +18,19 @@ export function VizFrame({
   height?: number | string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-      <div className="px-5 pt-4 pb-3 border-b border-border flex items-center justify-between gap-3">
-        <span className="font-mono text-[0.7rem] uppercase tracking-[0.04em] text-muted-foreground">
+    <div
+      className="border border-[color:var(--rule-strong)] overflow-hidden"
+      style={{
+        background: "var(--surface-1)",
+        borderRadius: "var(--radius-md)",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <div
+        className="px-4 py-2 border-b border-[color:var(--rule)] flex items-center justify-between gap-3"
+        style={{ background: "var(--surface-2)" }}
+      >
+        <span className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--pencil)]">
           {caption ?? "Figure"}
         </span>
         {controls ? <span className="flex items-center gap-2">{controls}</span> : null}
@@ -54,10 +64,10 @@ export function VizButton({
       title={title}
       onClick={onClick}
       disabled={disabled}
-      className={`font-mono text-[0.7rem] uppercase tracking-[0.04em] px-2.5 py-1 rounded-md border transition-colors ${
+      className={`font-mono text-[0.66rem] uppercase tracking-[0.1em] px-2 py-1 rounded-[2px] border transition-colors ${
         active
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-border bg-background hover:bg-accent hover:text-accent-foreground"
+          ? "border-[color:var(--ink-blue)] bg-[color:var(--ink-blue)] text-[color:var(--primary-foreground)]"
+          : "border-[color:var(--rule-strong)] bg-transparent text-[color:var(--ink)] hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)]"
       } disabled:opacity-30 disabled:cursor-not-allowed`}
     >
       {children}
@@ -77,17 +87,31 @@ export function useTicker(active: boolean, intervalMs: number, onTick: () => voi
   }, [active, intervalMs]);
 }
 
-/** Scholar Blue palette for SVG fills/strokes. */
+/**
+ * Manuscript ink palette. Every slot resolves through a CSS variable so the
+ * colours track light/dark. The slots are *semantic*, not just a rainbow:
+ *
+ *   c1  — primary ink (deep blue): "active / selected" cells, "visited" nodes,
+ *         the main highlight in a diagram.
+ *   c2  — softer blue: a secondary-but-still-on-theme accent.
+ *   c3  — ochre highlight: marks the *current* step in a sequence. Warm so it
+ *         reads like a pencil mark next to the blue, not a second alarm.
+ *   c4  — pitfall red: errors, collisions, the "danger" state.
+ *   c5  — pencil muted: dim / inert / "eliminated" state.
+ *
+ * If you're picking a colour and none of those semantics fit, you're
+ * inventing a fourth ink — push back on the diagram instead.
+ */
 export const PALETTE = {
-  ink: "var(--foreground)",
-  paper: "var(--background)",
-  muted: "var(--muted-foreground)",
-  border: "var(--border)",
-  primary: "var(--primary)",
-  destructive: "var(--destructive)",
-  c1: "#2563eb", // blue
-  c2: "#0f766e", // teal
-  c3: "#b7791f", // amber
-  c4: "#c2410c", // burnt orange
-  c5: "#64748b", // slate
+  ink: "var(--ink)",
+  paper: "var(--paper)",
+  muted: "var(--pencil)",
+  border: "var(--rule-strong)",
+  primary: "var(--ink-blue)",
+  destructive: "var(--ink-red)",
+  c1: "var(--ink-blue)",
+  c2: "var(--ink-blue-soft)",
+  c3: "var(--ink-ochre)",
+  c4: "var(--ink-red)",
+  c5: "var(--pencil)",
 };

@@ -122,9 +122,9 @@ export function Architecture({
             e === "primary"
               ? { fill: PALETTE.c1, stroke: PALETTE.ink, color: PALETTE.paper }
               : e === "warn"
-                ? { fill: `oklch(0.45 0.16 25 / 0.12)`, stroke: PALETTE.destructive, color: PALETTE.ink }
+                ? { fill: "var(--ink-red-wash)", stroke: PALETTE.destructive, color: PALETTE.ink }
                 : e === "muted"
-                  ? { fill: `oklch(0.21 0.018 60 / 0.04)`, stroke: PALETTE.border, color: PALETTE.muted }
+                  ? { fill: "color-mix(in srgb, var(--pencil) 8%, transparent)", stroke: PALETTE.border, color: PALETTE.muted }
                   : { fill: PALETTE.paper, stroke: PALETTE.ink, color: PALETTE.ink };
           return (
             <g key={b.id}>

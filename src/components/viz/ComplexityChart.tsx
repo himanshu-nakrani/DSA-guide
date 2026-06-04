@@ -24,7 +24,7 @@ const ALL_CURVES: Curve[] = [
   { key: "nlogn", label: "O(n log n)", fn: (n) => n * Math.log2(n), color: PALETTE.c5 },
   { key: "n2", label: "O(n²)", fn: (n) => n * n, color: PALETTE.c4 },
   { key: "n3", label: "O(n³)", fn: (n) => n * n * n, color: PALETTE.c4, dash: "5 3" },
-  { key: "2n", label: "O(2ⁿ)", fn: (n) => Math.pow(2, n), color: "oklch(0.30 0.18 25)", dash: "4 2" },
+  { key: "2n", label: "O(2ⁿ)", fn: (n) => Math.pow(2, n), color: "var(--ink-red)", dash: "4 2" },
 ];
 
 export function ComplexityChart({
