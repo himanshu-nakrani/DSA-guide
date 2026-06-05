@@ -1,12 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ViewTransition } from "react";
-import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
+import { ArticleLevel, ArticleStatus, Prisma } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
 import { ReadBadge } from "@/components/article/ReadBadge";
 import { ReadTally } from "@/components/article/ReadTally";
 
 export const revalidate = 3600;
+
+type TopicWithArticles = Prisma.TopicGetPayload<{
+  include: {
+    module: true;
+    articles: true;
+  };
+}>;
 
 const levelLabel: Record<ArticleLevel, string> = {
   FOUNDATION: "Foundation",
@@ -41,7 +48,6 @@ export default async function LearnPage() {
     );
   }
 
-  type TopicWithArticles = (typeof topics)[number];
   const modulesMap = new Map<
     string,
     {
@@ -123,11 +129,7 @@ function ModuleSection({
   moduleNumber: number;
   moduleName: string;
   description: string | null;
-  topics: Awaited<ReturnType<typeof prisma.topic.findMany>> extends infer T
-    ? T extends Array<infer U>
-      ? (U & { articles: Array<{ id: string; slug: string; title: string; summary: string; level: ArticleLevel; estimatedMins: number }> })[]
-      : never
-    : never;
+  topics: TopicWithArticles[];
   i: number;
 }) {
   return (
