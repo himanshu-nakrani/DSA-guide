@@ -16,6 +16,8 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const listId = "cmdk-listbox";
+  const optionId = (i: number) => `cmdk-opt-${i}`;
 
   const openPalette = () => {
     setQuery("");
@@ -154,12 +156,19 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
             className="flex-1 bg-transparent outline-none text-[0.95rem] placeholder:text-muted-foreground font-display"
             autoComplete="off"
             spellCheck={false}
+            role="combobox"
+            aria-expanded="true"
+            aria-controls={listId}
+            aria-autocomplete="list"
+            aria-activedescendant={results.length > 0 ? optionId(active) : undefined}
           />
           <Kbd>esc</Kbd>
         </div>
         <div
           ref={listRef}
+          id={listId}
           role="listbox"
+          aria-label="Search results"
           className="max-h-[55vh] overflow-y-auto py-1"
         >
           {results.length === 0 ? (
@@ -172,6 +181,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
                 key={`${item.kind}-${item.href}-${item.title}-${i}`}
                 item={item}
                 idx={i}
+                id={optionId(i)}
                 active={i === active}
                 onHover={() => setActive(i)}
                 onClick={() => go(item)}
@@ -205,12 +215,14 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
 function Row({
   item,
   idx,
+  id,
   active,
   onHover,
   onClick,
 }: {
   item: SearchItem;
   idx: number;
+  id: string;
   active: boolean;
   onHover: () => void;
   onClick: () => void;
@@ -223,6 +235,7 @@ function Row({
     <button
       type="button"
       role="option"
+      id={id}
       data-idx={idx}
       aria-selected={active}
       onMouseEnter={onHover}

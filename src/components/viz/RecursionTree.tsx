@@ -45,16 +45,15 @@ export function RecursionTree({
   // total ops
   const totalCalls = tree.nodes.length;
 
+  const figureLabel =
+    caption ??
+    `fib(${n}) call tree — ${memoized ? "memoized" : "naive"} (${totalCalls} call${
+      totalCalls === 1 ? "" : "s"
+    })`;
+
   return (
-    <VizFrame
-      caption={
-        caption ??
-        `fib(${n}) call tree — ${memoized ? "memoized" : "naive"} (${totalCalls} call${
-          totalCalls === 1 ? "" : "s"
-        })`
-      }
-    >
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+    <VizFrame caption={figureLabel}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={figureLabel}>
         {tree.edges.map((e, i) => {
           const a = tree.nodes[e[0]];
           const b = tree.nodes[e[1]];

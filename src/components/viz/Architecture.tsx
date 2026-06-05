@@ -53,7 +53,7 @@ export function Architecture({
 
   return (
     <VizFrame caption={caption}>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={caption}>
         <defs>
           <marker
             id="arch-arrow"

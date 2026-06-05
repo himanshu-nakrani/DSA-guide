@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { ArticleLink } from "@/components/article/ArticleLink";
 import { ProgressNode } from "@/components/roadmap/ProgressNode";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function RoadmapPage() {
   const track = await prisma.track.findUnique({

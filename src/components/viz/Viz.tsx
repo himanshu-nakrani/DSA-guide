@@ -1,47 +1,70 @@
 "use client";
 
 import * as React from "react";
-import { ComplexityChart } from "./ComplexityChart";
-import { ArrayMemory } from "./ArrayMemory";
-import { BinarySearchPlayer } from "./BinarySearchPlayer";
-import { LinearVsBinary } from "./LinearVsBinary";
-import { TwoPointers } from "./TwoPointers";
-import { SlidingWindow } from "./SlidingWindow";
-import { HashTableViz } from "./HashTableViz";
-import { LinkedList } from "./LinkedList";
-import { StackQueue } from "./StackQueue";
-import { TreeTraversal } from "./TreeTraversal";
-import { GraphTraversal } from "./GraphTraversal";
-import { DPGrid } from "./DPGrid";
-import { DijkstraViz } from "./DijkstraViz";
-import { RecursionTree } from "./RecursionTree";
-import { Architecture } from "./Architecture";
-import { GrowthTable } from "./GrowthTable";
 import { Callout } from "./Callout";
 
 /**
  * Viz: the single entry point used by the markdown renderer.
  * A fenced ```viz block in an article carries `{ "type": "...", "props": {...} }`.
  * We dispatch through this registry so authors don't import components.
+ *
+ * Each non-trivial viz is React.lazy'd so an article that uses only one viz
+ * type doesn't pay for the other eighteen in its JS bundle. Callout is
+ * imported eagerly because it's tiny and frequently used as a margin note.
  */
-const REGISTRY: Record<string, React.ComponentType<Record<string, unknown>>> = {
-  "complexity-chart": ComplexityChart as React.ComponentType<Record<string, unknown>>,
-  "growth-table": GrowthTable as React.ComponentType<Record<string, unknown>>,
-  "array-memory": ArrayMemory as React.ComponentType<Record<string, unknown>>,
-  "binary-search": BinarySearchPlayer as React.ComponentType<Record<string, unknown>>,
-  "linear-vs-binary": LinearVsBinary as React.ComponentType<Record<string, unknown>>,
-  "two-pointers": TwoPointers as React.ComponentType<Record<string, unknown>>,
-  "sliding-window": SlidingWindow as React.ComponentType<Record<string, unknown>>,
-  "hash-table": HashTableViz as React.ComponentType<Record<string, unknown>>,
-  "linked-list": LinkedList as React.ComponentType<Record<string, unknown>>,
-  "stack-queue": StackQueue as React.ComponentType<Record<string, unknown>>,
-  "tree-traversal": TreeTraversal as React.ComponentType<Record<string, unknown>>,
-  "graph-traversal": GraphTraversal as React.ComponentType<Record<string, unknown>>,
-  "dp-grid": DPGrid as React.ComponentType<Record<string, unknown>>,
-  "dijkstra": DijkstraViz as React.ComponentType<Record<string, unknown>>,
-  "recursion-tree": RecursionTree as React.ComponentType<Record<string, unknown>>,
-  "architecture": Architecture as React.ComponentType<Record<string, unknown>>,
-  "callout": Callout as React.ComponentType<Record<string, unknown>>,
+type LazyViz = React.LazyExoticComponent<
+  React.ComponentType<Record<string, unknown>>
+>;
+
+const REGISTRY: Record<string, LazyViz> = {
+  "complexity-chart": React.lazy(() =>
+    import("./ComplexityChart").then((m) => ({ default: m.ComplexityChart as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "growth-table": React.lazy(() =>
+    import("./GrowthTable").then((m) => ({ default: m.GrowthTable as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "array-memory": React.lazy(() =>
+    import("./ArrayMemory").then((m) => ({ default: m.ArrayMemory as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "binary-search": React.lazy(() =>
+    import("./BinarySearchPlayer").then((m) => ({ default: m.BinarySearchPlayer as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "linear-vs-binary": React.lazy(() =>
+    import("./LinearVsBinary").then((m) => ({ default: m.LinearVsBinary as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "two-pointers": React.lazy(() =>
+    import("./TwoPointers").then((m) => ({ default: m.TwoPointers as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "sliding-window": React.lazy(() =>
+    import("./SlidingWindow").then((m) => ({ default: m.SlidingWindow as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "hash-table": React.lazy(() =>
+    import("./HashTableViz").then((m) => ({ default: m.HashTableViz as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "linked-list": React.lazy(() =>
+    import("./LinkedList").then((m) => ({ default: m.LinkedList as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "stack-queue": React.lazy(() =>
+    import("./StackQueue").then((m) => ({ default: m.StackQueue as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "tree-traversal": React.lazy(() =>
+    import("./TreeTraversal").then((m) => ({ default: m.TreeTraversal as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "graph-traversal": React.lazy(() =>
+    import("./GraphTraversal").then((m) => ({ default: m.GraphTraversal as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "dp-grid": React.lazy(() =>
+    import("./DPGrid").then((m) => ({ default: m.DPGrid as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "dijkstra": React.lazy(() =>
+    import("./DijkstraViz").then((m) => ({ default: m.DijkstraViz as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "recursion-tree": React.lazy(() =>
+    import("./RecursionTree").then((m) => ({ default: m.RecursionTree as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "architecture": React.lazy(() =>
+    import("./Architecture").then((m) => ({ default: m.Architecture as React.ComponentType<Record<string, unknown>> })),
+  ),
 };
 
 export function Viz({ raw }: { raw: string }) {
@@ -54,21 +77,34 @@ export function Viz({ raw }: { raw: string }) {
   if (!parsed || !parsed.type) {
     return <VizError message="Viz block missing `type`" detail={raw} />;
   }
+  // Callouts already render as semantic <aside>s; wrapping them in a <figure>
+  // would (a) break the `.essay > .annotation` selector that slots them into
+  // the desktop marginalia gutter and (b) add a second visual frame around
+  // what is already an editorial side-note. Kept eagerly imported because
+  // it's small and shows up in nearly every article.
+  if (parsed.type === "callout") {
+    return <Callout {...(parsed.props ?? {})} />;
+  }
   const Component = REGISTRY[parsed.type];
   if (!Component) {
     return <VizError message={`Unknown viz type: ${parsed.type}`} detail={raw} />;
   }
-  // Callouts already render as semantic <aside>s; wrapping them in a <figure>
-  // would (a) break the `.essay > .annotation` selector that slots them into
-  // the desktop marginalia gutter and (b) add a second visual frame around
-  // what is already an editorial side-note.
-  if (parsed.type === "callout") {
-    return <Component {...(parsed.props ?? {})} />;
-  }
   return (
     <figure className="viz not-prose my-8">
-      <Component {...(parsed.props ?? {})} />
+      <React.Suspense fallback={<VizSkeleton />}>
+        <Component {...(parsed.props ?? {})} />
+      </React.Suspense>
     </figure>
+  );
+}
+
+function VizSkeleton() {
+  return (
+    <div
+      className="animate-pulse rounded-sm border border-[color:var(--rule)]"
+      style={{ background: "var(--surface-1)", minHeight: 220 }}
+      aria-label="Loading figure"
+    />
   );
 }
 

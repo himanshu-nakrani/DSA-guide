@@ -78,7 +78,7 @@ export function TreeTraversal({
       }
     >
       <div className="space-y-3">
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={caption}>
           {/* edges */}
           {positions.map((p, i) =>
             p.parent != null ? (

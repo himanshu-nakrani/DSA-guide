@@ -97,7 +97,7 @@ export function GraphTraversal({
       }
     >
       <div className="space-y-3">
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={caption}>
           {graph.edges.map(([a, b], i) => {
             const A = graph.nodes[a];
             const B = graph.nodes[b];

@@ -412,6 +412,12 @@ async function seedArticles() {
       throw new Error(`Article ${file} references unknown topicSlug "${data.topicSlug}"`);
     }
 
+    if (!hasAnyH2(content)) {
+      console.warn(
+        `  warn: ${file} has no ## headings — table of contents will be empty.`,
+      );
+    }
+
     await prisma.article.upsert({
       where: { slug: data.slug },
       update: {
@@ -441,6 +447,28 @@ async function seedArticles() {
     count++;
   }
   return count;
+}
+
+/**
+ * True if the markdown contains at least one `## ` heading outside of fenced
+ * code blocks. Mirrors `extractH2Toc` semantics. The trailing references h2
+ * doesn't count — it's stripped before the TOC renders.
+ */
+function hasAnyH2(md: string): boolean {
+  const lines = md.split("\n");
+  let inFence = false;
+  for (const line of lines) {
+    if (/^```/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+    const m = /^##\s+(.+?)\s*#*\s*$/.exec(line);
+    if (!m) continue;
+    if (m[1].trim().toLowerCase() === "references") continue;
+    return true;
+  }
+  return false;
 }
 
 async function main() {

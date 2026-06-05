@@ -1,12 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ViewTransition } from "react";
-import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
+import { ArticleLevel, ArticleStatus, Prisma } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
 import { ReadBadge } from "@/components/article/ReadBadge";
 import { ReadTally } from "@/components/article/ReadTally";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+type TopicWithArticles = Prisma.TopicGetPayload<{
+  include: {
+    module: true;
+    articles: true;
+  };
+}>;
 
 const levelLabel: Record<ArticleLevel, string> = {
   FOUNDATION: "Foundation",
@@ -41,12 +48,12 @@ export default async function LearnPage() {
     );
   }
 
-  type TopicWithArticles = (typeof topics)[number];
   const modulesMap = new Map<
     string,
     {
       order: number;
       id: string;
+      slug: string;
       name: string;
       description: string | null;
       topics: TopicWithArticles[];
@@ -59,6 +66,7 @@ export default async function LearnPage() {
       modulesMap.set(topic.module.id, {
         order: topic.module.order,
         id: topic.module.id,
+        slug: topic.module.slug,
         name: topic.module.name,
         description: topic.module.description,
         topics: [topic],
@@ -101,6 +109,7 @@ export default async function LearnPage() {
         {Array.from(modulesMap.values()).map((moduleData, idx) => (
           <ModuleSection
             key={moduleData.id}
+            moduleSlug={moduleData.slug}
             moduleNumber={moduleData.order}
             moduleName={moduleData.name}
             description={moduleData.description}
@@ -114,24 +123,22 @@ export default async function LearnPage() {
 }
 
 function ModuleSection({
+  moduleSlug,
   moduleNumber,
   moduleName,
   description,
   topics,
   i,
 }: {
+  moduleSlug: string;
   moduleNumber: number;
   moduleName: string;
   description: string | null;
-  topics: Awaited<ReturnType<typeof prisma.topic.findMany>> extends infer T
-    ? T extends Array<infer U>
-      ? (U & { articles: Array<{ id: string; slug: string; title: string; summary: string; level: ArticleLevel; estimatedMins: number }> })[]
-      : never
-    : never;
+  topics: TopicWithArticles[];
   i: number;
 }) {
   return (
-    <section style={{ ["--i" as string]: i }}>
+    <section id={`mod-${moduleSlug}`} className="scroll-mt-24" style={{ ["--i" as string]: i }}>
       <div className="flex items-baseline gap-4 mb-4">
         <span className="font-mono text-[0.85rem] text-[color:var(--ink-blue)] tabular-nums tracking-[0.08em]">
           {String(moduleNumber).padStart(2, "0")}

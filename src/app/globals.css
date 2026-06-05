@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "katex/dist/katex.min.css";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -65,7 +66,7 @@
   /* Ink — dark, slightly warm, never solid black. */
   --ink: #14212e;
   --ink-soft: #2a3744;
-  --pencil: #6b6457; /* muted, for marginalia & meta */
+  --pencil: #5e574a; /* muted, for marginalia & meta — 4.7:1 on paper, clears WCAG AA */
   --foreground: var(--ink);
 
   /* Blue manuscript ink — headings, links, annotation marks, diagrams. */
@@ -1179,4 +1180,26 @@ html[data-focus-mode] .reader-article {
     scroll-behavior: auto !important;
   }
   .bloom > * { opacity: 1; transform: none; }
+}
+
+/* Printed-index TOC row: title, then a dotted leader stretching to the
+   page count. The leader is a flex spacer with a repeating radial-gradient
+   "dot" pattern so it always lines up with the baseline regardless of
+   font size, and truncates cleanly on narrow viewports. */
+.toc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  overflow: hidden;
+}
+.toc-leader {
+  flex: 1;
+  height: 1px;
+  align-self: end;
+  margin-bottom: 0.45em;
+  background-image: radial-gradient(circle, var(--rule-strong) 0.5px, transparent 1px);
+  background-size: 6px 2px;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  opacity: 0.7;
 }

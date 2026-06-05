@@ -50,11 +50,16 @@ export function ComplexityChart({
   const minLog = 0;
   const maxLog = Math.log10(Math.max(...ALL_CURVES.filter((c) => active.has(c.key)).map((c) => c.fn(maxN))) || 1);
 
-  const xOfN = (n: number) => PAD.l + ((n - 1) / (maxN - 1)) * plotW;
+  // Round to 2 decimal places so the SVG `points` string is bit-identical
+  // between the SSR pass (Node's libm) and the client (V8). Math.log2/log10
+  // are not required to be cross-runtime stable, and the divergence shows up
+  // as a hydration mismatch on log-scale curves like O(n log n) and O(2ⁿ).
+  const q = (n: number) => Math.round(n * 100) / 100;
+  const xOfN = (n: number) => q(PAD.l + ((n - 1) / (maxN - 1)) * plotW);
   const yOfOps = (ops: number) => {
     const v = Math.max(1, ops);
     const t = (Math.log10(v) - minLog) / (maxLog - minLog || 1);
-    return PAD.t + (1 - t) * plotH;
+    return q(PAD.t + (1 - t) * plotH);
   };
 
   const xTicks = [1, Math.floor(maxN / 4), Math.floor(maxN / 2), Math.floor((3 * maxN) / 4), maxN];

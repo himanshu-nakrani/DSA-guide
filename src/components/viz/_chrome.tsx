@@ -80,11 +80,29 @@ export function useTicker(active: boolean, intervalMs: number, onTick: () => voi
   React.useEffect(() => {
     cbRef.current = onTick;
   }, [onTick]);
+  const reducedMotion = usePrefersReducedMotion();
   React.useEffect(() => {
-    if (!active) return;
+    if (!active || reducedMotion) return;
     const id = window.setInterval(() => cbRef.current(), intervalMs);
     return () => window.clearInterval(id);
-  }, [active, intervalMs]);
+  }, [active, intervalMs, reducedMotion]);
+}
+
+/**
+ * usePrefersReducedMotion — true when the user has the OS-level reduced-motion
+ * preference set. Returns false on the server and on the very first client
+ * paint so SSR markup matches; flips to the real value after mount.
+ */
+export function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return reduced;
 }
 
 /**

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePrefersReducedMotion } from "@/components/viz/_chrome";
 
 type Node = { id: number; x: number; y: number };
 type Edge = [number, number];
@@ -81,6 +82,7 @@ const TOTAL_MS = FRAMES[FRAMES.length - 1].finishedAt + 1800;
 export function BFSHero() {
   const [tick, setTick] = useState(0);
   const [paused, setPaused] = useState(false);
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     const onVis = () => setPaused(document.hidden);
@@ -89,7 +91,7 @@ export function BFSHero() {
   }, []);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || reducedMotion) return;
     let raf = 0;
     const start = performance.now();
     const loop = (now: number) => {
@@ -99,15 +101,16 @@ export function BFSHero() {
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [paused]);
+  }, [paused, reducedMotion]);
 
   const frame = useMemo(() => {
+    if (reducedMotion) return FRAMES[FRAMES.length - 1];
     let f = FRAMES[0];
     for (const candidate of FRAMES) {
       if (candidate.finishedAt <= tick) f = candidate;
     }
     return f;
-  }, [tick]);
+  }, [tick, reducedMotion]);
 
   return (
     <div className="relative w-full aspect-[4/3] max-w-md select-none">
@@ -195,8 +198,12 @@ export function BFSHero() {
                   strokeWidth="1.2"
                   opacity="0.55"
                 >
-                  <animate attributeName="r" from="8" to="18" dur="1.2s" repeatCount="indefinite" />
-                  <animate attributeName="opacity" from="0.55" to="0" dur="1.2s" repeatCount="indefinite" />
+                  {!reducedMotion && (
+                    <>
+                      <animate attributeName="r" from="8" to="18" dur="1.2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" from="0.55" to="0" dur="1.2s" repeatCount="indefinite" />
+                    </>
+                  )}
                 </circle>
               )}
             </g>

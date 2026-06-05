@@ -16,7 +16,15 @@ import { ViewTransition } from "react";
 import type { ArticlePreviewMap } from "@/components/article/ArticleBody";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const articles = await prisma.article.findMany({
+    where: { status: ArticleStatus.PUBLISHED },
+    select: { slug: true },
+  });
+  return articles.map((a) => ({ slug: a.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -29,9 +37,24 @@ export async function generateMetadata({
     select: { title: true, summary: true },
   });
   if (!article) return { title: "DSA Guide" };
+  const canonical = `/learn/${slug}`;
   return {
     title: `${article.title} — DSA Guide`,
     description: article.summary,
+    alternates: { canonical },
+    openGraph: {
+      title: article.title,
+      description: article.summary,
+      url: canonical,
+      type: "article",
+      images: [{ url: `${canonical}/opengraph-image` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.summary,
+      images: [`${canonical}/opengraph-image`],
+    },
   };
 }
 

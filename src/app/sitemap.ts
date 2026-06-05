@@ -4,7 +4,7 @@ import { ArticleStatus } from "@/generated/prisma";
 
 const SITE = process.env.SITE_URL?.replace(/\/$/, "") || "https://dsa.guide";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await prisma.article.findMany({

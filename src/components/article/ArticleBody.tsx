@@ -1,10 +1,11 @@
+"use client";
+
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
-import "katex/dist/katex.min.css";
 import { Viz } from "@/components/viz/Viz";
 import { CopyButton } from "./CopyButton";
 import { ArticleLink, type ArticleLinkPreview } from "./ArticleLink";
@@ -40,20 +41,21 @@ export function ArticleBody({
       ]}
       components={{
         a({ href, children, ...rest }) {
-          if (previews && typeof href === "string") {
-            const m = /^\/learn\/([^#?\/]+)/.exec(href);
+          const safeHref = sanitizeHref(href);
+          if (previews && typeof safeHref === "string") {
+            const m = /^\/learn\/([^#?\/]+)/.exec(safeHref);
             const slug = m?.[1];
             const preview = slug ? previews[slug] : undefined;
             if (preview) {
               return (
-                <ArticleLink href={href} preview={preview}>
+                <ArticleLink href={safeHref} preview={preview}>
                   {children}
                 </ArticleLink>
               );
             }
           }
           return (
-            <a href={href} {...rest}>
+            <a href={safeHref} {...rest}>
               {children}
             </a>
           );
@@ -201,6 +203,24 @@ function extractText(node: React.ReactNode): string {
     return extractText(node.props.children);
   }
   return "";
+}
+
+/**
+ * Strip dangerous URL schemes from a link href. Allows relative paths, hashes,
+ * mailto, and standard http(s); blocks javascript:, data:, vbscript:, file:.
+ * Belt-and-braces — react-markdown already escapes raw HTML, but markdown
+ * link syntax goes straight to <a href=...> so the scheme still needs checking.
+ */
+function sanitizeHref(href: unknown): string | undefined {
+  if (typeof href !== "string") return undefined;
+  const trimmed = href.trim();
+  if (!trimmed) return undefined;
+  if (/^(?:[a-z][a-z0-9+.-]*):/i.test(trimmed)) {
+    const scheme = trimmed.slice(0, trimmed.indexOf(":")).toLowerCase();
+    const allowed = new Set(["http", "https", "mailto", "tel"]);
+    if (!allowed.has(scheme)) return undefined;
+  }
+  return trimmed;
 }
 
 function slugify(s: string): string {

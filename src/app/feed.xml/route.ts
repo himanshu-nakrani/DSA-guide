@@ -3,7 +3,7 @@ import { ArticleStatus } from "@/generated/prisma";
 
 const SITE = process.env.SITE_URL?.replace(/\/$/, "") || "https://dsa.guide";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 /**
  * RSS 2.0 feed for new articles. Standard reader compatibility (Feedly,
@@ -18,7 +18,6 @@ export async function GET() {
       title: true,
       summary: true,
       updatedAt: true,
-      createdAt: true,
       topic: { select: { name: true, module: { select: { name: true } } } },
     },
     orderBy: { updatedAt: "desc" },
@@ -35,7 +34,7 @@ export async function GET() {
         `    <title>${esc(a.title)}</title>`,
         `    <link>${esc(link)}</link>`,
         `    <guid isPermaLink="true">${esc(link)}</guid>`,
-        `    <pubDate>${a.createdAt.toUTCString()}</pubDate>`,
+        `    <pubDate>${a.updatedAt.toUTCString()}</pubDate>`,
         `    <category>${esc(a.topic.module.name)}</category>`,
         `    <description>${esc(a.summary)}</description>`,
         "  </item>",

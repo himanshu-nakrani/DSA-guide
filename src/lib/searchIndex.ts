@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { ArticleStatus } from "@/generated/prisma";
 
@@ -26,7 +27,7 @@ export type SearchItem =
       moduleName: string;
     };
 
-export async function getSearchIndex(): Promise<SearchItem[]> {
+export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
   const modules = await prisma.module.findMany({
     orderBy: { order: "asc" },
     include: {
@@ -80,4 +81,4 @@ export async function getSearchIndex(): Promise<SearchItem[]> {
     }
   }
   return items;
-}
+});
