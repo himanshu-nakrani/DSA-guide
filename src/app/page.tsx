@@ -13,7 +13,8 @@ export default async function HomePage() {
       topics: {
         where: { articles: { some: { status: ArticleStatus.PUBLISHED } } },
         orderBy: { order: "asc" },
-        include: {
+        select: {
+          name: true,
           articles: {
             where: { status: ArticleStatus.PUBLISHED },
             orderBy: [{ level: "asc" }, { order: "asc" }],
@@ -99,22 +100,30 @@ export default async function HomePage() {
         <ol className="border-t border-[color:var(--rule-strong)]">
           {modules.map((m, i) => {
             const count = m.topics.reduce((t, topic) => t + topic.articles.length, 0);
+            const topicLine = m.topics.map((t) => t.name).join(" · ");
             return (
               <li key={m.id} style={{ ["--i" as string]: i + 1 }}>
                 <Link
                   href={`/learn#mod-${m.slug}`}
-                  className="group grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-4 py-4 border-b border-[color:var(--rule)] transition-colors hover:bg-[color:var(--ink-blue-wash)]"
+                  className="group grid grid-cols-[2.25rem_1fr_auto] items-baseline gap-4 px-1 py-3 border-b border-[color:var(--rule)] transition-colors hover:bg-[color:var(--ink-blue-wash)]"
                 >
-                  <span className="font-mono text-[0.78rem] tabular-nums text-[color:var(--pencil)] group-hover:text-[color:var(--ink-blue)] transition-colors">
+                  <span className="font-mono text-[0.76rem] tabular-nums text-[color:var(--pencil)] group-hover:text-[color:var(--ink-blue)] transition-colors">
                     {String(m.order).padStart(2, "0")}
                   </span>
-                  <span className="toc-row min-w-0">
-                    <span className="font-display text-[1.05rem] text-[color:var(--ink)] group-hover:text-[color:var(--ink-blue)] transition-colors">
-                      {m.name}
+                  <span className="min-w-0">
+                    <span className="toc-row">
+                      <span className="font-display text-[1.02rem] text-[color:var(--ink)] group-hover:text-[color:var(--ink-blue)] transition-colors">
+                        {m.name}
+                      </span>
+                      <span aria-hidden className="toc-leader" />
                     </span>
-                    <span aria-hidden className="toc-leader" />
+                    {topicLine && (
+                      <span className="block mt-0.5 text-[0.74rem] font-pencil text-[color:var(--pencil)] truncate">
+                        {topicLine}
+                      </span>
+                    )}
                   </span>
-                  <span className="font-mono text-[0.74rem] tabular-nums text-[color:var(--pencil)] whitespace-nowrap">
+                  <span className="font-mono text-[0.72rem] tabular-nums text-[color:var(--pencil)] whitespace-nowrap self-start mt-1">
                     {count} {count === 1 ? "essay" : "essays"}
                   </span>
                 </Link>
