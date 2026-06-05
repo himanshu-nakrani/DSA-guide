@@ -1181,3 +1181,25 @@ html[data-focus-mode] .reader-article {
   }
   .bloom > * { opacity: 1; transform: none; }
 }
+
+/* Printed-index TOC row: title, then a dotted leader stretching to the
+   page count. The leader is a flex spacer with a repeating radial-gradient
+   "dot" pattern so it always lines up with the baseline regardless of
+   font size, and truncates cleanly on narrow viewports. */
+.toc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  overflow: hidden;
+}
+.toc-leader {
+  flex: 1;
+  height: 1px;
+  align-self: end;
+  margin-bottom: 0.45em;
+  background-image: radial-gradient(circle, var(--rule-strong) 0.5px, transparent 1px);
+  background-size: 6px 2px;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  opacity: 0.7;
+}

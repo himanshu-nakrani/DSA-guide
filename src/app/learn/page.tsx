@@ -53,6 +53,7 @@ export default async function LearnPage() {
     {
       order: number;
       id: string;
+      slug: string;
       name: string;
       description: string | null;
       topics: TopicWithArticles[];
@@ -65,6 +66,7 @@ export default async function LearnPage() {
       modulesMap.set(topic.module.id, {
         order: topic.module.order,
         id: topic.module.id,
+        slug: topic.module.slug,
         name: topic.module.name,
         description: topic.module.description,
         topics: [topic],
@@ -107,6 +109,7 @@ export default async function LearnPage() {
         {Array.from(modulesMap.values()).map((moduleData, idx) => (
           <ModuleSection
             key={moduleData.id}
+            moduleSlug={moduleData.slug}
             moduleNumber={moduleData.order}
             moduleName={moduleData.name}
             description={moduleData.description}
@@ -120,12 +123,14 @@ export default async function LearnPage() {
 }
 
 function ModuleSection({
+  moduleSlug,
   moduleNumber,
   moduleName,
   description,
   topics,
   i,
 }: {
+  moduleSlug: string;
   moduleNumber: number;
   moduleName: string;
   description: string | null;
@@ -133,7 +138,7 @@ function ModuleSection({
   i: number;
 }) {
   return (
-    <section style={{ ["--i" as string]: i }}>
+    <section id={`mod-${moduleSlug}`} className="scroll-mt-24" style={{ ["--i" as string]: i }}>
       <div className="flex items-baseline gap-4 mb-4">
         <span className="font-mono text-[0.85rem] text-[color:var(--ink-blue)] tabular-nums tracking-[0.08em]">
           {String(moduleNumber).padStart(2, "0")}
