@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { ReadBadge } from "@/components/article/ReadBadge";
 import { ReadTally } from "@/components/article/ReadTally";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const levelLabel: Record<ArticleLevel, string> = {
   FOUNDATION: "Foundation",

@@ -4,7 +4,7 @@ import { ArticleStatus } from "@/generated/prisma";
 import { ArrowRight, BookOpen, Map, Code2 } from "lucide-react";
 import { BFSHero } from "@/components/hero/BFSHero";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function HomePage() {
   const [articleCount, moduleCount, problemCount] = await Promise.all([

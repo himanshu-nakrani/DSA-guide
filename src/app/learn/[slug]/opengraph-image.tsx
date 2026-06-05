@@ -5,6 +5,15 @@ import { ArticleStatus, ArticleLevel } from "@/generated/prisma";
 export const alt = "Article preview";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const revalidate = 86400;
+
+export async function generateStaticParams() {
+  const articles = await prisma.article.findMany({
+    where: { status: ArticleStatus.PUBLISHED },
+    select: { slug: true },
+  });
+  return articles.map((a) => ({ slug: a.slug }));
+}
 
 const levelLabel: Record<ArticleLevel, string> = {
   FOUNDATION: "Foundation",

@@ -25,15 +25,20 @@ const fraunces = localFont({
   ],
 });
 
+const SITE_URL = process.env.SITE_URL?.replace(/\/$/, "") || "https://dsa.guide";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "DSA Guide — A structured curriculum on data structures and algorithms",
   description:
     "A modern, interactive curriculum of data structures and algorithms — drawn from CLRS, Sedgewick, Laaksonen, and cp-algorithms.",
   alternates: {
+    canonical: "/",
     types: {
       "application/rss+xml": "/feed.xml",
     },
   },
+  robots: { index: true, follow: true },
 };
 
 // Runs synchronously during HTML parsing — before first paint, before React.
