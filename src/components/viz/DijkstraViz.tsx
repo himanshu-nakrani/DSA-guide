@@ -72,7 +72,7 @@ export function DijkstraViz({
       }
     >
       <div className="grid md:grid-cols-[1fr_auto] gap-4">
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={caption}>
           {edges.map((e, i) => {
             const a = nodes[e.u];
             const b = nodes[e.v];

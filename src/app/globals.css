@@ -66,7 +66,7 @@
   /* Ink — dark, slightly warm, never solid black. */
   --ink: #14212e;
   --ink-soft: #2a3744;
-  --pencil: #6b6457; /* muted, for marginalia & meta */
+  --pencil: #5e574a; /* muted, for marginalia & meta — 4.7:1 on paper, clears WCAG AA */
   --foreground: var(--ink);
 
   /* Blue manuscript ink — headings, links, annotation marks, diagrams. */

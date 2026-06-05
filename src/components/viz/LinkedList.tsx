@@ -27,7 +27,7 @@ export function LinkedList({
 
   return (
     <VizFrame caption={caption}>
-      <svg viewBox={`0 0 ${totalW} ${H}`} className="w-full h-auto">
+      <svg viewBox={`0 0 ${totalW} ${H}`} className="w-full h-auto" role="img" aria-label={caption}>
         {/* HEAD label */}
         <text
           x={20}

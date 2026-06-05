@@ -159,7 +159,7 @@ export function LinearVsBinary({
         </div>
       </div>
 
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={caption}>
         {/* linear lane */}
         <text
           x={PAD.l}

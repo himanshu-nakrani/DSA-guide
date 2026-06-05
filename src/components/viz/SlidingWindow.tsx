@@ -116,7 +116,7 @@ export function SlidingWindow({
           <Stat label="sum" value={`${f.sum}`} />
         </div>
 
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={caption}>
           <line x1={PAD.l} x2={W - PAD.r} y1={H - PAD.b} y2={H - PAD.b} stroke={PALETTE.border} />
           {frames.map((fr, i) => {
             const x = PAD.l + (i / Math.max(1, frames.length - 1)) * plotW;
