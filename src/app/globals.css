@@ -7,40 +7,40 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --font-sans: var(--font), sans-serif;
+  --font-mono: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-serif: var(--title-font), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --color-sidebar-ring: var(--sidebar-active);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-accent-foreground: var(--sidebar-active);
+  --color-sidebar-accent: var(--sidebar-active-bg);
+  --color-sidebar-primary-foreground: var(--bg);
+  --color-sidebar-primary: var(--sidebar-active);
+  --color-sidebar-foreground: var(--sidebar-fg);
+  --color-sidebar: var(--sidebar-bg);
+  --color-chart-5: var(--pencil);
+  --color-chart-4: var(--ink-red);
+  --color-chart-3: var(--code-string);
+  --color-chart-2: var(--ink-blue-soft);
+  --color-chart-1: var(--links);
+  --color-ring: var(--links);
+  --color-input: var(--border);
   --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
+  --color-destructive: var(--ink-red);
+  --color-accent-foreground: var(--links);
+  --color-accent: var(--code-bg);
+  --color-muted-foreground: var(--pencil);
+  --color-muted: var(--border-light);
+  --color-secondary-foreground: var(--fg);
+  --color-secondary: var(--border-light);
+  --color-primary-foreground: var(--bg);
+  --color-primary: var(--links);
+  --color-popover-foreground: var(--fg);
+  --color-popover: var(--pre-bg);
+  --color-card-foreground: var(--fg);
+  --color-card: var(--pre-bg);
   --radius-sm: 0.125rem;
   --radius-md: 0.1875rem;
   --radius-lg: 0.25rem;
@@ -49,176 +49,209 @@
 }
 
 /* =========================================================================
-   Annotated Manuscript — paper + ink editorial system.
-   Light is the canonical reading experience; dark is "night manuscript".
-   Tokens are deliberately quiet — borders are hairlines, surfaces nearly flat.
+   Zed Docs Design System — cool blue accent on warm cream paper.
    ========================================================================= */
 
 :root,
 [data-theme="light"] {
-  /* Paper surfaces — warm off-white, never pure white. */
-  --paper: #f7f3ea;
-  --paper-edge: #ede7d6;
-  --background: #f7f3ea;
-  --surface-1: #fbf8ef;
-  --surface-2: #f1ecdd;
+  --color-scheme: light;
+  --font: "iA Writer Quattro S", sans-serif;
+  --title-font: "IBM Plex Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono-font: "Lilex", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --code-font-size: 0.875em;
 
-  /* Ink — dark, slightly warm, never solid black. */
-  --ink: #14212e;
-  --ink-soft: #2a3744;
-  --pencil: #5e574a; /* muted, for marginalia & meta — 4.7:1 on paper, clears WCAG AA */
-  --foreground: var(--ink);
+  --sidebar-width: 280px;
+  --content-max-width: 690px;
+  --page-padding: 15px;
+  --menu-bar-height: 64px;
+  --noise-opacity: 0.024;
 
-  /* Blue manuscript ink — headings, links, annotation marks, diagrams. */
-  --ink-blue: #1f3d7a;
-  --ink-blue-soft: #4a6aa8;
-  --ink-blue-wash: rgba(31, 61, 122, 0.07);
+  --bg: hsl(50, 25%, 96%);
+  --fg: hsl(220, 13%, 34%);
+  --title-color: hsl(220, 92%, 42%);
+  --links: hsl(220, 92%, 42%);
+  --link-line-decoration: hsla(220, 93%, 42%, 0.2);
+  --link-line-decoration-hover: hsla(220, 93%, 42%, 0.5);
+  --full-contrast: #000;
 
-  /* Pitfall ink — restrained red. */
-  --ink-red: #a8331c;
-  --ink-red-wash: rgba(168, 51, 28, 0.07);
+  --border: hsl(220, 13%, 80%);
+  --border-light: hsl(220, 13%, 90%);
+  --border-hover: hsl(220, 13%, 70%);
+  --divider: hsla(220, 50%, 45%, 0.1);
 
-  /* Highlighter ochre — used in diagrams to mark "this step" without
-     introducing a third major ink. Warm enough to feel like a yellow
-     pencil mark, dark enough that paper-coloured text on top is legible
-     (paper #fbf8ef on ochre #8a5a18 ≈ 5.5:1 contrast). */
-  --ink-ochre: #8a5a18;
-  --ink-ochre-wash: rgba(138, 90, 24, 0.16);
+  --sidebar-bg: hsl(50, 25%, 94%);
+  --sidebar-fg: hsl(0, 0%, 0%);
+  --sidebar-active: hsl(220, 93%, 42%);
+  --sidebar-active-bg: hsla(220, 93%, 42%, 0.1);
 
-  --card: #fbf8ef;
-  --card-foreground: var(--ink);
-  --popover: #fbf8ef;
-  --popover-foreground: var(--ink);
-  --primary: var(--ink-blue);
-  --primary-foreground: #fbf8ef;
-  --secondary: #efe9d8;
-  --secondary-foreground: var(--ink);
-  --muted: #efe9d8;
+  --inline-code-color: #301900;
+  --code-text: hsl(220, 13%, 10%);
+  --code-bg: hsla(220, 93%, 42%, 0.1);
+  --pre-bg: #fff;
+  --pre-border: hsla(220, 93%, 42%, 0.3);
+  --pre-shadow: hsla(220, 93%, 42%, 0.07);
+  --keybinding-bg: hsl(0, 0%, 94%);
+
+  --quote-bg: hsl(197, 37%, 96%);
+  --quote-border: hsl(197, 37%, 84%);
+  --warning-bg: hsla(42, 100%, 60%, 0.1);
+  --warning-border: hsl(25, 100%, 85%);
+  --warning-icon: hsl(42, 100%, 30%);
+
+  --table-header-bg: hsla(220, 50%, 90%, 0.4);
+  --table-border-color: hsla(220, 93%, 42%, 0.15);
+  --table-alternate-bg: hsla(220, 10%, 90%, 0.4);
+
+  /* ── Compat aliases for existing component code ── */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --paper: var(--bg);
+  --paper-edge: hsl(50, 20%, 90%);
+  --surface-1: hsl(50, 25%, 98%);
+  --surface-2: var(--sidebar-bg);
+  --ink: var(--full-contrast);
+  --ink-soft: hsl(220, 13%, 28%);
+  --pencil: hsl(220, 10%, 45%);
+  --ink-blue: var(--title-color);
+  --ink-blue-soft: hsla(220, 92%, 42%, 0.55);
+  --ink-blue-wash: hsla(220, 93%, 42%, 0.08);
+  --ink-red: #b53020;
+  --ink-red-wash: hsla(6, 70%, 42%, 0.07);
+  --ink-ochre: hsl(42, 85%, 28%);
+  --ink-ochre-wash: hsla(42, 100%, 60%, 0.15);
+  --rule: var(--border);
+  --rule-strong: var(--border-hover);
+  --card: var(--pre-bg);
+  --card-foreground: var(--fg);
+  --primary: var(--links);
+  --primary-foreground: var(--bg);
+  --secondary: var(--border-light);
+  --secondary-foreground: var(--fg);
+  --muted: var(--border-light);
   --muted-foreground: var(--pencil);
-  --accent: #ece6d2;
-  --accent-foreground: var(--ink-blue);
+  --accent: var(--code-bg);
+  --accent-foreground: var(--links);
   --destructive: var(--ink-red);
-
-  /* Ruled-border hairlines. */
-  --rule: rgba(20, 33, 46, 0.14);
-  --rule-strong: rgba(20, 33, 46, 0.28);
-  --border: var(--rule);
-  --border-strong: var(--rule-strong);
-  --input: var(--rule);
-  --ring: var(--ink-blue);
-
-  --chart-1: var(--ink-blue);
-  --chart-2: #4a6aa8;
-  --chart-3: #6b8e23; /* faded leaf green for diagrams */
-  --chart-4: #a8331c;
+  --ring: var(--links);
+  --input: var(--border);
+  --popover: var(--pre-bg);
+  --popover-foreground: var(--fg);
+  --sidebar: var(--sidebar-bg);
+  --sidebar-foreground: var(--sidebar-fg);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--sidebar-active);
+  --chart-1: var(--links);
+  --chart-2: var(--ink-blue-soft);
+  --chart-3: var(--code-string);
+  --chart-4: var(--ink-red);
   --chart-5: var(--pencil);
-
-  /* Code "typed on paper" — pale paper, dark ink. The base `code-fg` is a
-     deep brown-ink so the *unhighlighted* code reads as warm graphite; the
-     accent tokens (keyword/string) lean into the manuscript palette so
-     they stand out against that base. */
-  --code-bg: #f3ecd9;
-  --code-fg: #2d2519;
-  --code-border: rgba(20, 33, 46, 0.20);
-  --code-keyword: #1f3d7a;
-  --code-string: #6b8e23;
-  --code-comment: #8a8170;
+  --code-fg: var(--code-text);
+  --code-keyword: var(--title-color);
+  --code-string: #5d7a30;
+  --code-comment: hsl(220, 10%, 55%);
+  --code-border: var(--pre-border);
 
   --radius: 0.25rem;
-  --sidebar: #f1ecdd;
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--ink-blue);
-  --sidebar-primary-foreground: #fbf8ef;
-  --sidebar-accent: #ece6d2;
-  --sidebar-accent-foreground: var(--ink-blue);
-  --sidebar-border: var(--rule);
-  --sidebar-ring: var(--ink-blue);
-
   --shadow-card:
-    0 1px 0 0 rgba(20, 33, 46, 0.04),
-    0 1px 0 0 rgba(20, 33, 46, 0.03);
+    0 1px 0 0 rgba(0, 0, 0, 0.04),
+    0 1px 2px 0 rgba(0, 0, 0, 0.03);
   --shadow-pop:
-    0 1px 0 0 rgba(20, 33, 46, 0.06),
-    0 14px 28px -16px rgba(20, 33, 46, 0.18);
+    0 1px 0 0 rgba(0, 0, 0, 0.05),
+    0 14px 28px -16px rgba(0, 0, 0, 0.15);
   --gradient-surface: none;
-
-  /* Paper grain — a single very-high-frequency fractal-noise tile, tinted
-     dark ink at low alpha. baseFrequency is high so the noise is sub-pixel
-     "tooth" rather than visible clumps; the tile is big enough (640px) that
-     its repeat isn't perceptible. A single warm wash bleeds in from the
-     top-left so the sheet isn't a single flat color. No discrete-alpha
-     flecks: those read as boxes when tiled, which is the opposite of paper. */
-  --paper-fiber: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='640'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.12  0 0 0 0 0.16  0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23f)'/></svg>");
-  --paper-warmth:
-    radial-gradient(120% 90% at 18% 0%, rgba(176, 132, 60, 0.05) 0%, transparent 60%);
 }
 
+.dark,
 [data-theme="dark"] {
-  /* Night manuscript — deep ink-blue paper, parchment text. */
-  --paper: #0e141d;
-  --paper-edge: #131a25;
-  --background: #0e141d;
-  --surface-1: #131b26;
-  --surface-2: #18212e;
+  --color-scheme: dark;
+  --noise-opacity: 0.012;
 
-  --ink: #ece2c8; /* warm parchment */
-  --ink-soft: #c9c0a8;
-  --pencil: #8b8470;
-  --foreground: var(--ink);
+  --bg: hsl(220, 13%, 7.5%);
+  --fg: hsl(220, 14%, 70%);
+  --title-color: hsl(220, 92%, 80%);
+  --links: hsl(220, 93%, 75%);
+  --link-line-decoration: hsla(220, 92%, 80%, 0.4);
+  --link-line-decoration-hover: hsla(220, 92%, 80%, 0.8);
+  --full-contrast: #fff;
 
-  --ink-blue: #8ab0ff; /* night-readable blue */
-  --ink-blue-soft: #6b8fd6;
-  --ink-blue-wash: rgba(138, 176, 255, 0.10);
+  --border: hsl(220, 13%, 20%);
+  --border-light: hsl(220, 13%, 15%);
+  --border-hover: hsl(220, 13%, 40%);
+  --divider: hsl(220, 13%, 12%);
 
-  --ink-red: #e58b76;
-  --ink-red-wash: rgba(229, 139, 118, 0.10);
+  --sidebar-bg: hsl(220, 13%, 6.5%);
+  --sidebar-fg: hsl(220, 14%, 71%);
+  --sidebar-active: hsl(220, 92%, 75%);
+  --sidebar-active-bg: hsla(220, 93%, 42%, 0.25);
 
-  --ink-ochre: #e2b659;
-  --ink-ochre-wash: rgba(226, 182, 89, 0.18);
+  --inline-code-color: hsl(40, 100%, 80%);
+  --code-text: hsl(220, 13%, 95%);
+  --code-bg: hsla(220, 93%, 50%, 0.2);
+  --pre-bg: hsl(220, 13%, 5%);
+  --pre-border: hsla(220, 93%, 70%, 0.3);
+  --pre-shadow: hsla(220, 93%, 70%, 0.1);
+  --keybinding-bg: hsl(220, 20%, 10%);
 
-  --card: #131b26;
-  --card-foreground: var(--ink);
-  --popover: #18212e;
-  --popover-foreground: var(--ink);
-  --primary: var(--ink-blue);
-  --primary-foreground: #0e141d;
-  --secondary: #18212e;
-  --secondary-foreground: var(--ink);
-  --muted: #18212e;
+  --quote-bg: hsla(220, 13%, 25%, 0.4);
+  --quote-border: hsla(220, 13%, 32%, 0.5);
+  --warning-bg: hsla(42, 100%, 50%, 0.1);
+  --warning-border: hsla(42, 100%, 60%, 0.25);
+  --warning-icon: hsl(42, 100%, 55%);
+
+  --table-header-bg: hsla(220, 13%, 25%, 0.5);
+  --table-border-color: hsla(220, 13%, 30%, 0.5);
+  --table-alternate-bg: hsla(220, 13%, 20%, 0.4);
+
+  /* ── Compat aliases for existing component code ── */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --paper: var(--bg);
+  --paper-edge: hsl(220, 13%, 11%);
+  --surface-1: hsl(220, 13%, 10%);
+  --surface-2: var(--sidebar-bg);
+  --ink: var(--full-contrast);
+  --ink-soft: hsl(220, 14%, 62%);
+  --pencil: hsl(220, 10%, 48%);
+  --ink-blue: var(--title-color);
+  --ink-blue-soft: hsla(220, 92%, 80%, 0.55);
+  --ink-blue-wash: hsla(220, 93%, 42%, 0.12);
+  --ink-red: hsl(10, 65%, 55%);
+  --ink-red-wash: hsla(10, 65%, 55%, 0.1);
+  --ink-ochre: hsl(42, 85%, 55%);
+  --ink-ochre-wash: hsla(42, 100%, 60%, 0.15);
+  --rule: var(--border);
+  --rule-strong: var(--border-hover);
+  --card: var(--pre-bg);
+  --card-foreground: var(--fg);
+  --primary: var(--links);
+  --primary-foreground: var(--bg);
+  --secondary: var(--border-light);
+  --secondary-foreground: var(--fg);
+  --muted: var(--border-light);
   --muted-foreground: var(--pencil);
-  --accent: #1c2738;
-  --accent-foreground: var(--ink-blue);
+  --accent: var(--code-bg);
+  --accent-foreground: var(--links);
   --destructive: var(--ink-red);
-
-  --rule: rgba(236, 226, 200, 0.14);
-  --rule-strong: rgba(236, 226, 200, 0.28);
-  --border: var(--rule);
-  --border-strong: var(--rule-strong);
-  --input: var(--rule);
-  --ring: var(--ink-blue);
-
-  --chart-1: var(--ink-blue);
-  --chart-2: #6b8fd6;
-  --chart-3: #b6c98a;
-  --chart-4: #e58b76;
+  --ring: var(--links);
+  --input: var(--border);
+  --popover: var(--pre-bg);
+  --popover-foreground: var(--fg);
+  --sidebar: var(--sidebar-bg);
+  --sidebar-foreground: var(--sidebar-fg);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--sidebar-active);
+  --chart-1: var(--links);
+  --chart-2: var(--ink-blue-soft);
+  --chart-3: var(--code-string);
+  --chart-4: var(--ink-red);
   --chart-5: var(--pencil);
+  --code-fg: var(--code-text);
+  --code-keyword: var(--title-color);
+  --code-string: hsl(90, 35%, 55%);
+  --code-comment: hsl(220, 10%, 42%);
+  --code-border: var(--pre-border);
 
-  --code-bg: #0a1018;
-  --code-fg: var(--ink);
-  --code-border: rgba(236, 226, 200, 0.14);
-  --code-keyword: #8ab0ff;
-  --code-string: #b6c98a;
-  --code-comment: #7b7560;
-
-  --sidebar: #0b1119;
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--ink-blue);
-  --sidebar-primary-foreground: #0e141d;
-  --sidebar-accent: #1c2738;
-  --sidebar-accent-foreground: var(--ink-blue);
-  --sidebar-border: var(--rule);
-  --sidebar-ring: var(--ink-blue);
-
+  --radius: 0.25rem;
   --shadow-card:
     0 1px 0 0 rgba(255, 255, 255, 0.02) inset,
     0 1px 2px 0 rgba(0, 0, 0, 0.5);
@@ -226,15 +259,9 @@
     0 1px 0 0 rgba(255, 255, 255, 0.03) inset,
     0 18px 40px -16px rgba(0, 0, 0, 0.7);
   --gradient-surface: none;
-
-  /* Night manuscript — same high-frequency tooth, tinted parchment-cream so
-     the deep ink-blue lifts to feel like a page rather than a flat dark UI. */
-  --paper-fiber: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='640'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.92  0 0 0 0 0.88  0 0 0 0 0.78  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23f)'/></svg>");
-  --paper-warmth:
-    radial-gradient(120% 90% at 18% 0%, rgba(255, 220, 160, 0.03) 0%, transparent 60%);
 }
 
-/* Motion tokens — slower & gentler than a SaaS app. */
+/* ── Motion tokens ── */
 :root {
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -255,9 +282,10 @@ html[data-theme-transition] *::after {
   transition-delay: 0 !important;
 }
 
+/* ── Base layer ── */
 @layer base {
   html {
-    font-family: var(--font-sans);
+    font-family: var(--font), sans-serif;
     font-feature-settings: "cv11", "ss01", "cv09";
     color-scheme: light dark;
   }
@@ -267,54 +295,73 @@ html[data-theme-transition] *::after {
   body {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    color: var(--foreground);
-    /* Paper grain (top) over warmth cast (middle) over the flat paper colour
-       (bottom). The grain tile is 640px — large enough that the repeat isn't
-       perceptible — and high-frequency enough that it reads as tooth rather
-       than dots. Background-attachment is intentionally NOT fixed: scrolling
-       text past a stationary grain looks like a window over wallpaper; paper
-       moves with you. */
-    background-color: var(--paper);
-    background-image:
-      var(--paper-fiber),
-      var(--paper-warmth);
-    background-size: 640px 640px, 100% 100%;
-    background-repeat: repeat, no-repeat;
+    color: var(--fg);
+    background-color: var(--bg);
   }
+
+  /* Subtle film-grain noise overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: var(--noise-opacity);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='300' height='300' filter='url(%23n)' opacity='1'/></svg>");
+  }
+
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-serif);
+    font-family: var(--title-font), "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 500;
-    color: var(--ink);
+    color: var(--title-color);
     font-optical-sizing: auto;
   }
+
+  code, pre, kbd {
+    font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: var(--code-font-size);
+  }
+
+  a {
+    color: var(--links);
+    text-decoration: underline;
+    text-decoration-color: var(--link-line-decoration);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--dur-base) var(--ease-out);
+  }
+  a:hover {
+    text-decoration-color: var(--link-line-decoration-hover);
+  }
+
   ::selection {
-    background: var(--ink-blue-wash);
-    color: var(--ink);
+    background: var(--code-bg);
+    color: var(--fg);
   }
   :focus-visible {
-    outline: 1.5px solid var(--ink-blue);
+    outline: 1.5px solid var(--links);
     outline-offset: 2px;
     border-radius: 2px;
   }
 }
 
-.font-mono { font-family: var(--font-mono); }
+/* ── Font utility classes ── */
+.font-mono { font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 .font-display {
-  font-family: var(--font-serif);
+  font-family: var(--title-font), "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
   font-optical-sizing: auto;
   font-variation-settings: "SOFT" 30, "WONK" 0;
 }
 .font-pencil {
-  font-family: var(--font-serif);
+  font-family: var(--title-font), "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-style: italic;
   font-weight: 400;
   color: var(--pencil);
 }
 
-/* Eyebrow / small caps label — small-cap ruled label. */
 .eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.68rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -322,21 +369,20 @@ html[data-theme-transition] *::after {
   color: var(--pencil);
 }
 
-/* Blue-ink underlined link, used in body and references. */
 .link-quill {
-  color: var(--ink-blue);
+  color: var(--links);
   text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--ink-blue) 50%, transparent);
+  text-decoration-color: var(--link-line-decoration);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   transition: text-decoration-color var(--dur-base) var(--ease-out);
 }
 .link-quill:hover,
 .link-quill:focus-visible {
-  text-decoration-color: var(--ink-blue);
+  text-decoration-color: var(--link-line-decoration-hover);
 }
 
-/* Soft fade-in. */
+/* ── Animations ── */
 @keyframes fadeUp {
   0%   { opacity: 0; transform: translateY(4px); }
   100% { opacity: 1; transform: translateY(0); }
@@ -347,31 +393,27 @@ html[data-theme-transition] *::after {
   animation-delay: calc(var(--i, 0) * 55ms);
 }
 
-/* Paper panel — replaces the SaaS "card". Flat-ish, hairline-ruled, faint inner edge. */
+/* ── Surface panels ── */
 .surface-card {
   background: var(--surface-1);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
 }
 
-/* Manuscript "page" — used for the article body container. */
 .manuscript {
   position: relative;
   background-color: var(--surface-1);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background-image: var(--paper-fiber);
-  background-size: 320px 320px;
-  background-repeat: repeat;
 }
 
-/* Pill / tag for level + duration — small ruled tag, never filled. */
+/* ── Pills / tags ── */
 .pill {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  font-family: var(--font-mono);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.66rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -380,23 +422,64 @@ html[data-theme-transition] *::after {
   border-radius: 2px;
   background: transparent;
   color: var(--pencil);
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--border-hover);
 }
 .pill-primary {
-  color: var(--ink-blue);
-  border-color: color-mix(in srgb, var(--ink-blue) 45%, var(--rule));
+  color: var(--links);
+  border-color: color-mix(in srgb, var(--links) 45%, var(--border));
 }
 .pill-red {
   color: var(--ink-red);
-  border-color: color-mix(in srgb, var(--ink-red) 45%, var(--rule));
+  border-color: color-mix(in srgb, var(--ink-red) 45%, var(--border));
 }
 
-/* Article body — manuscript reading typography. */
+/* ── Buttons ── */
+.btn-ink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font), sans-serif;
+  font-weight: 500;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  padding: 0.6rem 1.15rem;
+  border-radius: var(--radius-sm);
+  background: var(--full-contrast);
+  color: var(--bg);
+  border: 1px solid var(--full-contrast);
+  box-shadow: inset 0 0 0 1px var(--bg), 0 0 0 1px var(--full-contrast);
+  transition: background-color var(--dur-base) var(--ease-out),
+              color var(--dur-base) var(--ease-out);
+}
+.btn-ink:hover {
+  background: var(--links);
+  border-color: var(--links);
+  box-shadow: inset 0 0 0 1px var(--bg), 0 0 0 1px var(--links);
+}
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font), sans-serif;
+  font-weight: 500;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  padding: 0.6rem 1.15rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border-hover);
+  transition: border-color var(--dur-base) var(--ease-out),
+              color var(--dur-base) var(--ease-out);
+}
+.btn-ghost:hover { border-color: var(--links); color: var(--links); }
+
+/* ── Essay / article body ── */
 .essay {
-  font-family: var(--font-serif);
+  font-family: var(--title-font), "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1.0625rem;
   line-height: 1.78;
-  color: var(--ink);
+  color: var(--fg);
   font-feature-settings: "kern", "liga", "onum";
 }
 .essay > p,
@@ -409,28 +492,28 @@ html[data-theme-transition] *::after {
 .essay > figure { margin: 1.75em 0; max-width: 100%; }
 
 .essay h2 {
-  font-family: var(--font-serif);
+  font-family: var(--title-font), "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
   font-size: 1.6rem;
   letter-spacing: -0.005em;
-  color: var(--ink-blue);
+  color: var(--title-color);
   margin-top: 2.2em;
   margin-bottom: 0.55em;
   padding-bottom: 0.35em;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--border);
   font-variation-settings: "SOFT" 50;
 }
 .essay h3 {
-  font-family: var(--font-serif);
+  font-family: var(--title-font), "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
   font-size: 1.22rem;
-  color: var(--ink);
+  color: var(--fg);
   margin-top: 1.6em;
   margin-bottom: 0.4em;
   font-variation-settings: "SOFT" 30;
 }
 .essay h4 {
-  font-family: var(--font-sans);
+  font-family: var(--font), sans-serif;
   font-weight: 600;
   font-size: 0.92rem;
   letter-spacing: 0.04em;
@@ -445,40 +528,40 @@ html[data-theme-transition] *::after {
 .essay ol { list-style: decimal; }
 .essay li { margin: 0.35em 0; padding-left: 0.2em; }
 .essay li::marker { color: var(--ink-blue-soft); }
-.essay strong { font-weight: 600; color: var(--ink); }
+.essay strong { font-weight: 600; color: var(--full-contrast); }
 .essay em { font-style: italic; }
 .essay a:not(.no-quill) {
-  color: var(--ink-blue);
+  color: var(--links);
   text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--ink-blue) 45%, transparent);
+  text-decoration-color: var(--link-line-decoration);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   font-weight: 500;
 }
 .essay a:not(.no-quill):hover {
-  text-decoration-color: var(--ink-blue);
+  text-decoration-color: var(--link-line-decoration-hover);
 }
 .essay code {
-  font-family: var(--font-mono);
-  font-size: 0.86em;
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--code-font-size);
   padding: 0.08em 0.36em;
   background: var(--code-bg);
   border-radius: 2px;
-  border: 1px solid var(--code-border);
-  color: var(--code-fg);
+  color: var(--inline-code-color);
+  border: none;
 }
 .essay pre {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--code-font-size);
   line-height: 1.7;
-  background: var(--code-bg);
-  color: var(--code-fg);
+  background: var(--pre-bg);
+  color: var(--code-text);
   padding: 1.05rem 1.2rem;
   border-radius: var(--radius-md);
   margin: 1.5em 0;
   overflow-x: auto;
-  border: 1px solid var(--code-border);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--code-fg) 4%, transparent);
+  border: 1px solid var(--pre-border);
+  box-shadow: 0 1px 0 var(--pre-shadow);
 }
 .essay pre code {
   background: transparent;
@@ -490,10 +573,10 @@ html[data-theme-transition] *::after {
 .essay blockquote {
   margin: 1.4em 0;
   padding: 0.6em 1.1em;
-  border-left: 2px solid var(--ink-blue);
+  border-left: 2px solid var(--links);
   background: var(--ink-blue-wash);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  color: var(--ink);
+  color: var(--fg);
   font-style: italic;
 }
 .essay blockquote > p { margin: 0.4em 0; }
@@ -502,10 +585,8 @@ html[data-theme-transition] *::after {
   border-collapse: collapse;
   margin: 1.4em 0;
   font-size: 0.93em;
-  font-family: var(--font-sans);
+  font-family: var(--font), sans-serif;
 }
-/* Tables get an overflow wrapper rendered by ArticleBody — keep its margins
-   matched with the rest of the body flow. */
 .essay .table-wrap {
   margin: 1.4em 0;
   overflow-x: auto;
@@ -516,24 +597,24 @@ html[data-theme-transition] *::after {
   margin: 0;
 }
 .essay table th {
-  font-family: var(--font-mono);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 500;
   text-align: left;
-  border-top: 1.5px solid var(--ink-soft);
-  border-bottom: 1px solid var(--rule-strong);
+  border-top: 1.5px solid var(--fg);
+  border-bottom: 1px solid var(--border-hover);
   padding: 0.55rem 0.8rem 0.55rem 0;
   color: var(--pencil);
 }
 .essay table td {
   padding: 0.6rem 0.8rem 0.6rem 0;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--border);
   vertical-align: top;
 }
 .essay table tr:last-child td {
-  border-bottom: 1.5px solid var(--ink-soft);
+  border-bottom: 1.5px solid var(--fg);
 }
 .essay hr {
   border: 0;
@@ -549,22 +630,11 @@ html[data-theme-transition] *::after {
   letter-spacing: 0.4em;
 }
 
-/* =========================================================================
-   Syntax highlighting — manuscript palette for highlight.js output.
-   Slots map to the same inks as the rest of the design system:
-     keyword / type    → ink-blue
-     string / regex    → ink-ochre (looks like a yellow highlighter)
-     number            → ink-blue-soft
-     comment / doc     → pencil italic
-     function name     → ink (slightly bolder)
-     error / deleted   → ink-red
-   Everything else inherits the code-fg colour so unrecognised tokens are
-   just typed ink on paper.
-   ========================================================================= */
+/* ── Syntax highlighting (hljs) ── */
 .essay pre code.hljs,
 .essay pre code[class*="language-"] {
   display: block;
-  color: var(--code-fg);
+  color: var(--code-text);
   background: transparent;
   padding: 0;
 }
@@ -599,7 +669,7 @@ html[data-theme-transition] *::after {
 .essay .hljs-title,
 .essay .hljs-title.function_,
 .essay .hljs-section {
-  color: var(--code-fg);
+  color: var(--code-text);
   font-weight: 600;
 }
 .essay .hljs-class .hljs-title,
@@ -610,7 +680,7 @@ html[data-theme-transition] *::after {
 .essay .hljs-params,
 .essay .hljs-attribute,
 .essay .hljs-property {
-  color: var(--code-fg);
+  color: var(--code-text);
 }
 .essay .hljs-deletion,
 .essay .hljs-formula,
@@ -620,17 +690,12 @@ html[data-theme-transition] *::after {
 .essay .hljs-emphasis { font-style: italic; }
 .essay .hljs-strong { font-weight: 600; }
 .essay .hljs-addition {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--ink-blue) 12%, transparent);
+  color: var(--fg);
+  background: color-mix(in srgb, var(--links) 12%, transparent);
 }
 
-/* =========================================================================
-   KaTeX math — make rehype-katex's output read as ink on paper, not the
-   default near-black with a slightly different font weight. KaTeX ships
-   its own font (KaTeX_Main etc.) which already feels like printed math;
-   we just tame colour and inline alignment.
-   ========================================================================= */
-.essay .katex { color: var(--ink); font-size: 1.04em; }
+/* ── KaTeX math ── */
+.essay .katex { color: var(--fg); font-size: 1.04em; }
 .essay .katex-display {
   margin: 1.1em 0;
   overflow-x: auto;
@@ -642,23 +707,16 @@ html[data-theme-transition] *::after {
   text-align: center;
 }
 .essay .katex .mathnormal,
-.essay .katex .mathit { color: var(--ink); }
+.essay .katex .mathit { color: var(--fg); }
 .essay .katex .mord,
 .essay .katex .mrel,
 .essay .katex .mbin,
 .essay .katex .mopen,
 .essay .katex .mclose,
 .essay .katex .mpunct { color: inherit; }
-/* Inline math inside paragraphs: nudge slightly so it doesn't disturb the
-   leading. */
 .essay p .katex { vertical-align: -0.05em; }
 
-/* =========================================================================
-   Footnotes — GFM emits `<sup><a>1</a></sup>` references in the body and a
-   `<section class="footnotes">` at the foot of the article with an ordered
-   list of notes. Render the in-body markers as small-cap blue ink and the
-   footer block as a ruled bibliography.
-   ========================================================================= */
+/* ── Footnotes ── */
 .essay sup {
   font-size: 0.7em;
   line-height: 1;
@@ -666,8 +724,8 @@ html[data-theme-transition] *::after {
 }
 .essay sup > a,
 .essay a[data-footnote-ref] {
-  color: var(--ink-blue);
-  font-family: var(--font-mono);
+  color: var(--links);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.95em;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -677,20 +735,19 @@ html[data-theme-transition] *::after {
 }
 .essay sup > a:hover,
 .essay a[data-footnote-ref]:hover {
-  border-bottom-color: var(--ink-blue);
+  border-bottom-color: var(--links);
 }
 .essay .footnotes {
   margin-top: 3em;
   padding-top: 1.5em;
-  border-top: 1px solid var(--rule-strong);
-  font-family: var(--font-sans);
+  border-top: 1px solid var(--border-hover);
+  font-family: var(--font), sans-serif;
   font-size: 0.85rem;
-  color: var(--ink-soft);
+  color: var(--fg);
   max-width: 68ch;
 }
 .essay .footnotes h2,
 .essay .footnotes .sr-only {
-  /* GFM emits an h2 "Footnotes" heading. Hide it and use a small label. */
   position: absolute;
   width: 1px;
   height: 1px;
@@ -704,7 +761,7 @@ html[data-theme-transition] *::after {
 .essay .footnotes::before {
   content: "Notes";
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.66rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -721,8 +778,8 @@ html[data-theme-transition] *::after {
   line-height: 1.55;
 }
 .essay .footnotes li::marker {
-  color: var(--ink-blue);
-  font-family: var(--font-mono);
+  color: var(--links);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.85em;
 }
 .essay .footnotes a[data-footnote-backref] {
@@ -732,9 +789,8 @@ html[data-theme-transition] *::after {
   font-size: 0.85em;
 }
 .essay .footnotes a[data-footnote-backref]:hover {
-  color: var(--ink-blue);
+  color: var(--links);
 }
-/* Visible jump target when navigating to a footnote. */
 .essay [id^="user-content-fn-"]:target,
 .essay [id^="fn-"]:target {
   background: var(--ink-blue-wash);
@@ -743,7 +799,7 @@ html[data-theme-transition] *::after {
   margin: -0.15em -0.3em;
 }
 
-/* Drop the dark essay treatments for the viz figure internals. */
+/* ── Viz figure internals ── */
 .essay > figure.viz pre {
   background: transparent;
   color: inherit;
@@ -754,36 +810,31 @@ html[data-theme-transition] *::after {
 }
 .essay > figure.viz button,
 .essay > figure.viz input {
-  font-family: var(--font-mono);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* =========================================================================
-   Annotations — margin notes & pitfalls.
-   On lg+ screens, .annotation slots align into a right-side margin gutter.
-   On smaller screens, they collapse inline.
-   ========================================================================= */
-
+/* ── Annotations ── */
 .annotation {
   position: relative;
   margin: 1.1em 0;
   padding: 0.6em 0.85em 0.6em 1em;
-  font-family: var(--font-sans);
+  font-family: var(--font), sans-serif;
   font-size: 0.84rem;
   line-height: 1.6;
-  color: var(--ink-soft);
+  color: var(--fg);
   background: var(--ink-blue-wash);
-  border-left: 1.5px solid var(--ink-blue);
+  border-left: 1.5px solid var(--links);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   max-width: 68ch;
 }
 .annotation .annotation-label {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 600;
-  color: var(--ink-blue);
+  color: var(--links);
   margin-bottom: 0.15em;
 }
 .annotation.tone-pitfall {
@@ -799,18 +850,15 @@ html[data-theme-transition] *::after {
 .annotation > p:first-of-type { margin-top: 0; }
 .annotation > p:last-of-type { margin-bottom: 0; }
 .annotation code {
-  font-size: 0.82em;
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--code-font-size);
   padding: 0.05em 0.3em;
   background: color-mix(in srgb, var(--code-bg) 60%, transparent);
-  border: 1px solid var(--code-border);
   border-radius: 2px;
+  color: var(--inline-code-color);
 }
 
-/* Desktop margin notes — at xl, the essay itself becomes a 2-column grid:
-   column 1 is the body, column 2 is a 13rem marginalia gutter. Each annotation
-   with tone-margin / tone-pitfall places itself in column 2 on its source-order
-   row, so notes sit beside the paragraph they belong to. Inline tones
-   (tone-note, tone-insight) stay in column 1. */
+/* Desktop margin notes */
 @media (min-width: 1280px) {
   .essay {
     display: grid;
@@ -818,12 +866,10 @@ html[data-theme-transition] *::after {
     column-gap: 2rem;
     align-items: start;
   }
-  /* All direct children default to the body column. */
   .essay > * {
     grid-column: 1;
     min-width: 0;
   }
-  /* Margin- and pitfall-tone annotations escape into the gutter. */
   .essay > .annotation.tone-margin,
   .essay > .annotation.tone-pitfall {
     grid-column: 2;
@@ -832,7 +878,7 @@ html[data-theme-transition] *::after {
     background: transparent;
     border-radius: 0;
     border-left-width: 1.5px;
-    font-family: var(--font-sans);
+    font-family: var(--font), sans-serif;
     font-size: 0.78rem;
     line-height: 1.55;
   }
@@ -842,7 +888,7 @@ html[data-theme-transition] *::after {
   }
   .essay > .annotation.tone-pitfall {
     border-left-color: var(--ink-red);
-    color: var(--ink-soft);
+    color: var(--fg);
   }
   .essay > .annotation.tone-margin .annotation-label,
   .essay > .annotation.tone-pitfall .annotation-label {
@@ -851,8 +897,6 @@ html[data-theme-transition] *::after {
   }
 }
 
-/* On focus-mode the TOC and the article grid's third column disappear and
-   the essay returns to a single-column flow; margin notes drop back inline. */
 html[data-focus-mode] .essay { display: block; }
 html[data-focus-mode] .essay > .annotation.tone-margin,
 html[data-focus-mode] .essay > .annotation.tone-pitfall {
@@ -860,7 +904,7 @@ html[data-focus-mode] .essay > .annotation.tone-pitfall {
   padding: 0.6em 0.85em 0.6em 1em;
   background: var(--ink-blue-wash);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-family: var(--font-sans);
+  font-family: var(--font), sans-serif;
   font-size: 0.84rem;
   line-height: 1.6;
 }
@@ -868,7 +912,7 @@ html[data-focus-mode] .essay > .annotation.tone-pitfall {
   background: var(--ink-red-wash);
 }
 
-/* Subtle scrollbars. */
+/* ── Scrollbars ── */
 @media (pointer: fine) {
   ::-webkit-scrollbar { width: 12px; height: 12px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -884,25 +928,12 @@ html[data-focus-mode] .essay > .annotation.tone-pitfall {
   }
 }
 
-/* =========================================================================
-   Sidebar collapse — driven by `html[data-sidebar-collapsed]`. The inline
-   bootstrap script sets this attribute before paint so a user who collapsed
-   the sidebar last time doesn't see it expand and then snap shut. React
-   state still tracks the value for interactive bits (icons, titles) but the
-   layout itself is pure CSS.
-   ========================================================================= */
-
+/* ── Sidebar collapse ── */
 @media (min-width: 768px) {
-  .dsa-sidebar { width: 16rem; } /* expanded default */
+  .dsa-sidebar { width: var(--sidebar-width); }
   html[data-sidebar-collapsed] .dsa-sidebar { width: 68px; }
-
-  /* In collapsed mode, hide everything that only makes sense expanded. */
   html[data-sidebar-collapsed] .dsa-collapse-hide { display: none !important; }
-
-  /* And in expanded mode, hide the standalone expand button. */
   html:not([data-sidebar-collapsed]) .dsa-expand-show { display: none !important; }
-
-  /* Center the icon row when collapsed. */
   html[data-sidebar-collapsed] .dsa-sidebar-brand { justify-content: center; width: 100%; }
   html[data-sidebar-collapsed] .dsa-sidebar-search { padding-left: 0.5rem; padding-right: 0.5rem; }
   html[data-sidebar-collapsed] .dsa-sidebar-search > button {
@@ -916,9 +947,7 @@ html[data-focus-mode] .essay > .annotation.tone-pitfall {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
-  /* Active-mark rule doesn't make sense when there's nothing to its right. */
   html[data-sidebar-collapsed] .dsa-active-mark { display: none; }
-
   html[data-sidebar-collapsed] .dsa-sidebar-foot {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -934,8 +963,8 @@ html[data-focus-mode] .essay > .annotation.tone-pitfall {
   }
 }
 
-/* Focus mode — hide sidebar/toc, dim chrome, narrow page. */
-html[data-focus-mode] aside[class*="bg-sidebar"] { display: none; }
+/* ── Focus mode ── */
+html[data-focus-mode] aside[data-sidebar] { display: none; }
 html[data-focus-mode] .reader-chrome { opacity: 0.35; }
 html[data-focus-mode] .reader-chrome:hover { opacity: 1; }
 html[data-focus-mode] .reader-toc { display: none; }
@@ -945,7 +974,7 @@ html[data-focus-mode] .reader-article {
   max-width: 48rem;
 }
 
-/* Copy button on code blocks — quiet ink chip. */
+/* ── Copy button on code blocks ── */
 .code-block { position: relative; }
 .code-block .copy-button {
   position: absolute;
@@ -954,15 +983,15 @@ html[data-focus-mode] .reader-article {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-family: var(--font-mono);
+  font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 0.22rem 0.45rem;
   border-radius: 2px;
   color: var(--pencil);
-  background: color-mix(in srgb, var(--paper) 80%, transparent);
-  border: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border: 1px solid var(--border);
   opacity: 0;
   transform: translateY(-1px);
   transition:
@@ -977,15 +1006,15 @@ html[data-focus-mode] .reader-article {
   transform: translateY(0);
 }
 .code-block .copy-button:hover {
-  color: var(--ink-blue);
-  border-color: color-mix(in srgb, var(--ink-blue) 40%, var(--rule));
+  color: var(--links);
+  border-color: color-mix(in srgb, var(--links) 40%, var(--border));
 }
 .code-block .copy-button[data-state="copied"] {
-  color: var(--ink-blue);
-  border-color: var(--ink-blue);
+  color: var(--links);
+  border-color: var(--links);
 }
 
-/* Article-link hover-card popover. */
+/* ── Preview card popover ── */
 .preview-card {
   position: fixed;
   z-index: 60;
@@ -1003,18 +1032,16 @@ html[data-focus-mode] .reader-article {
   transform: translateY(0);
 }
 
-/* Ruled section divider — used between modules and major site sections. */
+/* ── Rule section divider ── */
 .rule-section {
   height: 1px;
-  background: var(--rule-strong);
+  background: var(--border-hover);
   margin: 1.5rem 0;
 }
 .rule-section.with-ornament {
   position: relative;
   background: transparent;
   text-align: center;
-  /* Give the glyph room to sit on the baseline without colliding with
-     the lines above and below — this divider is meant to breathe. */
   margin: 2.25rem 0;
   height: auto;
   line-height: 1;
@@ -1024,99 +1051,79 @@ html[data-focus-mode] .reader-article {
   position: absolute;
   left: 0; right: 0; top: 50%;
   height: 1px;
-  background: var(--rule-strong);
+  background: var(--border-hover);
 }
 .rule-section.with-ornament::after {
   content: "❦";
   position: relative;
   display: inline-block;
-  background: var(--background);
-  color: var(--ink-blue);
+  background: var(--bg);
+  color: var(--links);
   padding: 0 1.1rem;
-  font-family: var(--font-serif);
+  font-family: var(--title-font), "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1.5rem;
   line-height: 1;
   letter-spacing: 0;
   transform: translateY(-1px);
 }
 
-/* Manuscript button — pressed-stamp feel. The primary is ink-dark with
-   paper-coloured text and a thin double border so it reads as a printed
-   stamp rather than a SaaS pill. */
-.btn-ink {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 0.92rem;
-  letter-spacing: 0.01em;
-  padding: 0.6rem 1.15rem;
-  border-radius: var(--radius-sm);
-  background: var(--ink);
-  color: var(--paper);
-  border: 1px solid var(--ink);
-  box-shadow: inset 0 0 0 1px var(--paper), 0 0 0 1px var(--ink);
-  transition: background-color var(--dur-base) var(--ease-out),
-              color var(--dur-base) var(--ease-out);
+/* ── TOC row with dotted leader ── */
+.toc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  overflow: hidden;
 }
-.btn-ink:hover {
-  background: var(--ink-blue);
-  border-color: var(--ink-blue);
-  box-shadow: inset 0 0 0 1px var(--paper), 0 0 0 1px var(--ink-blue);
+.toc-leader {
+  flex: 1;
+  height: 1px;
+  align-self: end;
+  margin-bottom: 0.45em;
+  background-image: radial-gradient(circle, var(--border-hover) 0.5px, transparent 1px);
+  background-size: 6px 2px;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  opacity: 0.7;
 }
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 0.92rem;
-  letter-spacing: 0.01em;
-  padding: 0.6rem 1.15rem;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--ink);
-  border: 1px solid var(--rule-strong);
-  transition: border-color var(--dur-base) var(--ease-out),
-              color var(--dur-base) var(--ease-out);
-}
-.btn-ghost:hover { border-color: var(--ink-blue); color: var(--ink-blue); }
 
-/* =========================================================================
-   Print — render an article as a clean manuscript page. Everything that
-   only makes sense as an interactive reading surface (sidebar, command
-   palette, copy buttons, progress bar, prev/next folios) gets hidden;
-   the essay reflows into a single column with black ink on white paper.
-   ========================================================================= */
+/* ── Print ── */
 @media print {
   :root, [data-theme="light"], [data-theme="dark"] {
-    --paper: #ffffff;
-    --surface-1: #ffffff;
-    --surface-2: #ffffff;
-    --ink: #000000;
-    --ink-soft: #1a1a1a;
-    --pencil: #555555;
+    --bg: #ffffff;
+    --fg: #000000;
+    --full-contrast: #000000;
+    --links: #1f3d7a;
+    --title-color: #1f3d7a;
     --ink-blue: #1f3d7a;
     --ink-blue-soft: #4a6aa8;
     --ink-blue-wash: rgba(31, 61, 122, 0.06);
     --ink-red: #8a2a18;
     --ink-red-wash: rgba(138, 42, 24, 0.05);
+    --pencil: #555555;
+    --border: rgba(0, 0, 0, 0.25);
+    --border-hover: rgba(0, 0, 0, 0.55);
+    --code-bg: #f2efe6;
+    --code-text: #000000;
+    --pre-bg: #ffffff;
+    --pre-border: rgba(0, 0, 0, 0.3);
+    --surface-1: #ffffff;
+    --surface-2: #ffffff;
+    --background: #ffffff;
+    --foreground: #000000;
+    --paper: #ffffff;
+    --ink: #000000;
+    --ink-soft: #1a1a1a;
     --rule: rgba(0, 0, 0, 0.25);
     --rule-strong: rgba(0, 0, 0, 0.55);
-    --border: var(--rule);
-    --code-bg: #f2efe6;
-    --code-fg: #000000;
-    --code-border: rgba(0, 0, 0, 0.3);
   }
   html, body {
     background: #ffffff !important;
     background-image: none !important;
     color: #000000 !important;
   }
+  body::before { display: none !important; }
   body { display: block !important; }
 
-  /* Drop interactive chrome. */
   aside[data-sidebar],
   [role="dialog"],
   .reader-chrome,
@@ -1133,8 +1140,6 @@ html[data-focus-mode] .reader-article {
     padding: 0 !important;
     margin: 0 !important;
   }
-
-  /* Collapse the manuscript grid back to single column for print. */
   .essay {
     display: block !important;
     font-size: 11pt;
@@ -1173,7 +1178,6 @@ html[data-focus-mode] .reader-article {
   .essay figure, .essay table, .essay blockquote {
     page-break-inside: avoid;
   }
-
   .annotation {
     background: transparent !important;
     border-left: 2px solid #000 !important;
@@ -1185,7 +1189,6 @@ html[data-focus-mode] .reader-article {
     border-left-color: var(--ink-red) !important;
   }
   .annotation.tone-pitfall .annotation-label { color: var(--ink-red) !important; }
-
   @page {
     margin: 0.85in 0.75in;
   }
@@ -1199,26 +1202,4 @@ html[data-focus-mode] .reader-article {
     scroll-behavior: auto !important;
   }
   .bloom > * { opacity: 1; transform: none; }
-}
-
-/* Printed-index TOC row: title, then a dotted leader stretching to the
-   page count. The leader is a flex spacer with a repeating radial-gradient
-   "dot" pattern so it always lines up with the baseline regardless of
-   font size, and truncates cleanly on narrow viewports. */
-.toc-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  overflow: hidden;
-}
-.toc-leader {
-  flex: 1;
-  height: 1px;
-  align-self: end;
-  margin-bottom: 0.45em;
-  background-image: radial-gradient(circle, var(--rule-strong) 0.5px, transparent 1px);
-  background-size: 6px 2px;
-  background-repeat: repeat-x;
-  background-position: left bottom;
-  opacity: 0.7;
 }

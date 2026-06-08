@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -8,21 +6,33 @@ import { CommandPalette } from "@/components/layout/CommandPalette";
 import { InlineScript } from "@/components/layout/InlineScript";
 import { getSearchIndex } from "@/lib/searchIndex";
 
-const fraunces = localFont({
-  variable: "--font-fraunces",
+const iaWriter = localFont({
+  variable: "--font",
   display: "swap",
   src: [
     {
-      path: "../../public/fonts/Fraunces-VF.ttf",
+      path: "../../public/fonts/iAWriterQuattroV.woff2",
       weight: "100 900",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Fraunces-Italic-VF.ttf",
+      path: "../../public/fonts/iAWriterQuattroV-Italic.woff2",
       weight: "100 900",
       style: "italic",
     },
   ],
+});
+
+const ibmPlex = localFont({
+  variable: "--title-font",
+  display: "swap",
+  src: [{ path: "../../public/fonts/IBMPlexSerif-Var.woff2", weight: "400 700" }],
+});
+
+const lilex = localFont({
+  variable: "--mono-font",
+  display: "swap",
+  src: [{ path: "../../public/fonts/Lilex-Regular.woff2", weight: "400" }],
 });
 
 const SITE_URL = process.env.SITE_URL?.replace(/\/$/, "") || "https://dsa.guide";
@@ -64,7 +74,7 @@ export default async function RootLayout({
     <html
       lang="en"
       data-theme="light"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${fraunces.variable} h-full`}
+      className={`${iaWriter.variable} ${ibmPlex.variable} ${lilex.variable} h-full`}
       suppressHydrationWarning
     >
       <head>
