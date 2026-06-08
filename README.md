@@ -107,10 +107,67 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
+Contributions are welcome — whether that's fixing a typo, improving an article, adding a new problem, or building a full feature.
 
-1. Fork the project.
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+### Getting started
+
+1. **Fork** the repository and clone your fork locally.
+2. **Check existing issues** before opening a new one — your problem or idea may already be tracked.
+3. **Open an issue first** for any non-trivial change so we can discuss the approach before you invest time coding it.
+
+### Submitting a pull request
+
+1. Create a focused branch from `main`:
+   ```bash
+   git checkout -b fix/typo-in-arrays-article
+   # or
+   git checkout -b feat/add-sliding-window-problems
+   ```
+2. Keep commits small and descriptive — one logical change per commit.
+3. Follow the existing code style (ESLint is enforced on CI — run `npm run lint` locally before pushing).
+4. Open a PR against `main` with a short summary of *what* and *why*.
+5. A maintainer will review and give feedback within a few days.
+
+### What to contribute
+
+- **Content**: New articles, problem descriptions, or corrections in `prisma/content/articles/`.
+- **Features**: Enhancements to the roadmap, progress tracking, or the reading interface.
+- **Bugs**: Anything broken — file an issue with steps to reproduce, or open a PR with a fix.
+- **Accessibility & performance**: Always welcome.
+
+### Commit style
+
+Use conventional commits where possible:
+
+```
+feat: add heap topic articles
+fix: correct time complexity in binary search article
+docs: update README with OSS guidelines
+style: fix lint warnings in roadmap component
+```
+
+---
+
+## 🌐 Community & OSS
+
+DSA Guide is fully open source under the **MIT License** — use it, fork it, build on it.
+
+### Reporting issues
+
+- Search [open issues](https://github.com/himanshu-nakrani/DSA-guide/issues) first.
+- Include your OS, Node.js version, and steps to reproduce when filing a bug.
+- For security vulnerabilities, please **do not** open a public issue — email the maintainer directly.
+
+### Code of conduct
+
+This project follows a simple rule: be kind and constructive. Disrespectful or hostile behaviour will not be tolerated.
+
+### Roadmap
+
+See [`DSA_PLATFORM_PRODUCT_SPEC.md`](./DSA_PLATFORM_PRODUCT_SPEC.md) for the product vision and upcoming milestones. If you want to pick up a planned feature, comment on the relevant issue and it will be assigned to you.
+
+---
+
+## 📄 License
+
+Distributed under the [MIT License](./LICENSE).
