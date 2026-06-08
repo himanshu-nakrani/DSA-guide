@@ -324,14 +324,10 @@ html[data-theme-transition] *::after {
 
   a {
     color: var(--links);
-    text-decoration: underline;
-    text-decoration-color: var(--link-line-decoration);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-    transition: text-decoration-color var(--dur-base) var(--ease-out);
+    text-decoration: none;
   }
   a:hover {
-    text-decoration-color: var(--link-line-decoration-hover);
+    color: var(--links);
   }
 
   ::selection {
@@ -371,15 +367,11 @@ html[data-theme-transition] *::after {
 
 .link-quill {
   color: var(--links);
-  text-decoration: underline;
-  text-decoration-color: var(--link-line-decoration);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  transition: text-decoration-color var(--dur-base) var(--ease-out);
+  text-decoration: none;
 }
 .link-quill:hover,
 .link-quill:focus-visible {
-  text-decoration-color: var(--link-line-decoration-hover);
+  color: var(--links);
 }
 
 /* ── Animations ── */
@@ -532,14 +524,11 @@ html[data-theme-transition] *::after {
 .essay em { font-style: italic; }
 .essay a:not(.no-quill) {
   color: var(--links);
-  text-decoration: underline;
-  text-decoration-color: var(--link-line-decoration);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-decoration: none;
   font-weight: 500;
 }
 .essay a:not(.no-quill):hover {
-  text-decoration-color: var(--link-line-decoration-hover);
+  color: var(--links);
 }
 .essay code {
   font-family: var(--mono-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -1202,4 +1191,6 @@ html[data-focus-mode] .reader-article {
     scroll-behavior: auto !important;
   }
   .bloom > * { opacity: 1; transform: none; }
+}
+ne; }
 }
