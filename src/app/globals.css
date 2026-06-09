@@ -1041,11 +1041,15 @@ html[data-focus-mode] .reader-article {
   left: 0; right: 0; top: 50%;
   height: 1px;
   background: var(--border-hover);
+  transform: translateY(-50%);
 }
 .rule-section.with-ornament::after {
   content: "❦";
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.5rem;
   background: var(--bg);
   color: var(--links);
   padding: 0 1.1rem;
@@ -1053,7 +1057,6 @@ html[data-focus-mode] .reader-article {
   font-size: 1.5rem;
   line-height: 1;
   letter-spacing: 0;
-  transform: translateY(-1px);
 }
 
 /* ── TOC row with dotted leader ── */

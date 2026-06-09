@@ -87,13 +87,13 @@ export default async function LearnPage() {
           className="font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
           style={{ ["--i" as string]: 1 }}
         >
-          Table of Essays
+          Table of Articles
         </h1>
         <p
           className="text-[1.05rem] mt-3 max-w-2xl text-[color:var(--ink-soft)]"
           style={{ ["--i" as string]: 2 }}
         >
-          {totalArticles} essays across {modulesMap.size} modules — from
+          {totalArticles} articles across {modulesMap.size} modules — from
           asymptotic notation through shortest paths and dynamic programming.
         </p>
         <div

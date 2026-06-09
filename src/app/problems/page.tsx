@@ -28,7 +28,7 @@ export default function ProblemsPage() {
           >
             An interactive workspace for applying the theory — code editor,
             judge, hints, and editorial — is in development. Until it ships,
-            every essay in the library ends with a curated practice set.
+            every article in the library ends with a curated practice set.
           </p>
 
           <div
@@ -37,7 +37,7 @@ export default function ProblemsPage() {
           >
             <Link href="/learn" className="btn-ink">
               <ArrowLeft className="h-3.5 w-3.5" />
-              Back to essays
+              Back to articles
             </Link>
             <Link
               href="/roadmap"

@@ -152,7 +152,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
               setActive(0);
             }}
             onKeyDown={onInputKey}
-            placeholder="Search essays, topics, modules…"
+            placeholder="Search articles, topics, modules…"
             className="flex-1 bg-transparent outline-none text-[0.95rem] placeholder:text-muted-foreground font-display"
             autoComplete="off"
             spellCheck={false}
