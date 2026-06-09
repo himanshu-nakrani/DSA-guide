@@ -25,7 +25,7 @@ export default async function HomePage() {
     },
   });
 
-  const essayCount = modules.reduce(
+  const articleCount = modules.reduce(
     (n, m) => n + m.topics.reduce((t, topic) => t + topic.articles.length, 0),
     0,
   );
@@ -51,34 +51,17 @@ export default async function HomePage() {
         </h1>
 
         <div
-          className="mt-4 font-display text-[clamp(1.4rem,3vw,2rem)] italic text-[color:var(--ink-blue)]"
-          style={{
-            ["--i" as string]: 2,
-            fontVariationSettings: '"SOFT" 50, "WONK" 1',
-          }}
-        >
-          — annotated —
-        </div>
-
-        <div
           className="mt-10 max-w-md mx-auto rule-section with-ornament"
-          style={{ ["--i" as string]: 3 }}
+          style={{ ["--i" as string]: 2 }}
         />
 
-        <p
-          className="mt-9 text-[0.78rem] font-mono uppercase tracking-[0.18em] text-[color:var(--pencil)]"
-          style={{ ["--i" as string]: 4 }}
-        >
-          Drawn from CLRS · Sedgewick &amp; Wayne · Laaksonen
-        </p>
-
         <div
-          className="mt-12 flex flex-wrap items-center justify-center gap-3"
-          style={{ ["--i" as string]: 5 }}
+          className="mt-10 flex flex-wrap items-center justify-center gap-3"
+          style={{ ["--i" as string]: 3 }}
         >
           {firstSlug && (
             <Link href={`/learn/${firstSlug}`} className="btn-ink">
-              Open to the first essay
+              Open to the first article
               <ArrowRight className="h-4 w-4" />
             </Link>
           )}
@@ -93,7 +76,7 @@ export default async function HomePage() {
         <div className="text-center mb-10" style={{ ["--i" as string]: 0 }}>
           <div className="eyebrow mb-3">Contents</div>
           <p className="text-[0.82rem] font-pencil text-[color:var(--pencil)]">
-            {numberWord(modules.length)} modules · {numberWord(essayCount)} essays
+            {numberWord(modules.length)} modules · {numberWord(articleCount)} articles
           </p>
         </div>
 
@@ -124,7 +107,7 @@ export default async function HomePage() {
                     )}
                   </span>
                   <span className="font-mono text-[0.72rem] tabular-nums text-[color:var(--pencil)] whitespace-nowrap self-start mt-1">
-                    {count} {count === 1 ? "essay" : "essays"}
+                    {count} {count === 1 ? "article" : "articles"}
                   </span>
                 </Link>
               </li>

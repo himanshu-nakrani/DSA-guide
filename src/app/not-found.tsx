@@ -37,7 +37,7 @@ export default function NotFound() {
             Back to the title page
           </Link>
           <Link href="/learn" className="btn-ghost">
-            Table of essays
+            Table of articles
           </Link>
         </div>
         <p

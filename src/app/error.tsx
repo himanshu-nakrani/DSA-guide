@@ -54,7 +54,7 @@ export default function GlobalError({
             Try again
           </button>
           <Link href="/learn" className="btn-ghost">
-            Table of essays
+            Table of articles
           </Link>
         </div>
       </div>
