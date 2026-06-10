@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
 import { ProgressStatus } from "@/generated/prisma";
 import { ArticleBody } from "@/components/article/ArticleBody";
 import { addProblemToListAction } from "@/app/lists/actions";
@@ -165,6 +165,17 @@ export default async function ProblemDetailPage({
         </div>
 
         <aside className="surface-card p-5 space-y-5">
+          {problem.externalUrl && (
+            <a
+              href={problem.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ink w-full justify-center"
+            >
+              Solve on LeetCode
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          )}
           <div className="space-y-2">
             <div className="text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Saved</div>
             <div className="flex items-center justify-between gap-3 rounded-md border border-[color:var(--rule)] px-3 py-2">

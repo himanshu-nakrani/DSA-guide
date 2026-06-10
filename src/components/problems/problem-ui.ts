@@ -14,7 +14,7 @@ export const difficultyClass: Record<Difficulty, string> = {
 
 export const progressLabel: Record<ProgressStatus, string> = {
   NEW: "New",
-  ATTEMPTED: "Attempted",
+  ATTEMPTED: "In progress",
   SOLVED: "Solved",
   NEEDS_REVISION: "Needs revision",
   MASTERED: "Mastered",

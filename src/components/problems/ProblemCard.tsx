@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { Difficulty, ProgressStatus } from "@/generated/prisma";
 import { BookmarkButton } from "@/components/problems/BookmarkButton";
+import { ProblemQuickStatusSelect } from "@/components/problems/ProblemQuickStatusSelect";
 import { difficultyClass, difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
 
 export function ProblemCard({
@@ -19,6 +20,7 @@ export function ProblemCard({
     title: string;
     difficulty: Difficulty;
     acceptanceRate: number;
+    externalUrl?: string | null;
     editorial: { id: string } | null;
     hints: { id: string }[];
   };
@@ -65,10 +67,24 @@ export function ProblemCard({
       </div>
 
       {!compact && (
-        <div className="mt-4 flex flex-wrap gap-3 text-[0.75rem] text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-[0.75rem] text-muted-foreground">
           <span>{Math.round(problem.acceptanceRate)}% acceptance</span>
-          <span>{problem.hints.length} hint{problem.hints.length === 1 ? "" : "s"}</span>
-          <span>{problem.editorial ? "Editorial included" : "Editorial coming soon"}</span>
+          {problem.externalUrl && (
+            <a
+              href={problem.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[color:var(--ink-blue)] hover:underline"
+            >
+              Solve on LeetCode
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+          <ProblemQuickStatusSelect
+            slug={problem.slug}
+            initialStatus={status ?? ProgressStatus.NEW}
+            signedIn={signedIn}
+          />
         </div>
       )}
     </div>

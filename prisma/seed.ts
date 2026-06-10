@@ -173,8 +173,33 @@ const MODULES: ModuleSpec[] = [
 
 const PROBLEM_TOPIC_BY_SLUG: Record<string, string> = {
   "two-sum": "arrays-and-strings",
+  "best-time-to-buy-and-sell-stock": "arrays-and-strings",
+  "maximum-subarray": "arrays-and-strings",
+  "move-zeroes": "arrays-and-strings",
+  "merge-sorted-array": "arrays-and-strings",
+  "contains-duplicate": "hashing",
+  "valid-anagram": "hashing",
+  "longest-substring-without-repeating-characters": "prefix-sums-and-sliding-window",
+  "maximum-average-subarray-i": "prefix-sums-and-sliding-window",
   "binary-search": "binary-search",
+  "search-insert-position": "binary-search",
+  "first-bad-version": "binary-search",
+  "reverse-linked-list": "linked-lists",
+  "merge-two-sorted-lists": "linked-lists",
   "valid-parentheses": "stacks-and-queues",
+  "min-stack": "stacks-and-queues",
+  "daily-temperatures": "stacks-and-queues",
+  "subsets": "recursion-and-backtracking",
+  "permutations": "recursion-and-backtracking",
+  "invert-binary-tree": "trees",
+  "maximum-depth-of-binary-tree": "trees",
+  "implement-trie-prefix-tree": "tries",
+  "number-of-islands": "graph-fundamentals",
+  "flood-fill": "graph-fundamentals",
+  "climbing-stairs": "dynamic-programming-i",
+  "house-robber": "dynamic-programming-i",
+  "coin-change": "dynamic-programming-i",
+  "maximum-subarray-greedy": "greedy",
 };
 
 async function seedTaxonomy() {
@@ -240,12 +265,66 @@ async function seedTaxonomy() {
   }
 }
 
+type SeedDifficulty = "EASY" | "MEDIUM" | "HARD";
+
+function leetCodeProblem({
+  slug,
+  title,
+  difficulty,
+  externalUrl,
+  statement,
+}: {
+  slug: string;
+  title: string;
+  difficulty: SeedDifficulty;
+  externalUrl: string;
+  statement: string;
+}) {
+  return {
+    slug,
+    title,
+    difficulty,
+    externalUrl,
+    statementMd: `${statement}\n\nOpen the linked LeetCode problem to solve and submit the full challenge.`,
+    examplesJson: [
+      {
+        input: "See LeetCode examples",
+        output: "See LeetCode expected output",
+      },
+    ],
+    starterCodeJson: {
+      PYTHON: "# Use the starter template on LeetCode for this problem.",
+      CPP: "// Use the starter template on LeetCode for this problem.",
+      JAVA: "// Use the starter template on LeetCode for this problem.",
+      JAVASCRIPT: "// Use the starter template on LeetCode for this problem.",
+    },
+    testCases: [
+      {
+        input: "External judge",
+        output: "Submit on LeetCode",
+        isHidden: false,
+        order: 1,
+      },
+    ],
+    hints: [
+      "Read the linked problem carefully and identify the core pattern before coding.",
+      "After solving externally, come back here and mark your status manually.",
+    ],
+    editorial: {
+      intuitionMd: "This item is currently tracked as external practice. Use the linked LeetCode statement, then record your progress in DSA Guide.",
+      optimizedMd: "Solve on LeetCode using the pattern from the associated module. DSA Guide stores your progress and saved-list state for revision.",
+      complexityMd: "See the LeetCode editorial or your own accepted solution analysis.",
+    },
+  };
+}
+
 async function seedProblems() {
   const problems = [
     {
       slug: "two-sum",
       title: "Two Sum",
       difficulty: "EASY" as const,
+      externalUrl: "https://leetcode.com/problems/two-sum/",
       statementMd:
         "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have **exactly one solution**, and you may not use the same element twice.",
       examplesJson: [
@@ -278,6 +357,7 @@ async function seedProblems() {
       slug: "binary-search",
       title: "Binary Search",
       difficulty: "EASY" as const,
+      externalUrl: "https://leetcode.com/problems/binary-search/",
       statementMd:
         "Given an array of integers `nums` which is sorted in ascending order, and an integer `target`, write a function to search `target` in `nums`. If `target` exists, then return its index. Otherwise, return `-1`.",
       examplesJson: [
@@ -307,6 +387,7 @@ async function seedProblems() {
       slug: "valid-parentheses",
       title: "Valid Parentheses",
       difficulty: "EASY" as const,
+      externalUrl: "https://leetcode.com/problems/valid-parentheses/",
       statementMd:
         "Given a string `s` containing just the characters `'('`, `')'`, `'{'`, `'}'`, `'['` and `']'`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.",
       examplesJson: [
@@ -336,6 +417,181 @@ async function seedProblems() {
         complexityMd: "Time: O(n), Space: O(n)",
       },
     },
+    leetCodeProblem({
+      slug: "best-time-to-buy-and-sell-stock",
+      title: "Best Time to Buy and Sell Stock",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+      statement: "Track the best single buy/sell transaction in one pass.",
+    }),
+    leetCodeProblem({
+      slug: "maximum-subarray",
+      title: "Maximum Subarray",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/maximum-subarray/",
+      statement: "Find the contiguous subarray with the largest sum.",
+    }),
+    leetCodeProblem({
+      slug: "move-zeroes",
+      title: "Move Zeroes",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/move-zeroes/",
+      statement: "Move all zeroes to the end while preserving non-zero order.",
+    }),
+    leetCodeProblem({
+      slug: "merge-sorted-array",
+      title: "Merge Sorted Array",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/merge-sorted-array/",
+      statement: "Merge two sorted arrays into the first array in nondecreasing order.",
+    }),
+    leetCodeProblem({
+      slug: "contains-duplicate",
+      title: "Contains Duplicate",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/contains-duplicate/",
+      statement: "Detect whether any value appears at least twice.",
+    }),
+    leetCodeProblem({
+      slug: "valid-anagram",
+      title: "Valid Anagram",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/valid-anagram/",
+      statement: "Decide whether two strings contain the same character counts.",
+    }),
+    leetCodeProblem({
+      slug: "longest-substring-without-repeating-characters",
+      title: "Longest Substring Without Repeating Characters",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+      statement: "Use a sliding window to find the longest substring with all unique characters.",
+    }),
+    leetCodeProblem({
+      slug: "maximum-average-subarray-i",
+      title: "Maximum Average Subarray I",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/maximum-average-subarray-i/",
+      statement: "Find the maximum average over every fixed-size window.",
+    }),
+    leetCodeProblem({
+      slug: "search-insert-position",
+      title: "Search Insert Position",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/search-insert-position/",
+      statement: "Return the target index or the position where it should be inserted.",
+    }),
+    leetCodeProblem({
+      slug: "first-bad-version",
+      title: "First Bad Version",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/first-bad-version/",
+      statement: "Binary search the first failing version in a monotonic sequence.",
+    }),
+    leetCodeProblem({
+      slug: "reverse-linked-list",
+      title: "Reverse Linked List",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/reverse-linked-list/",
+      statement: "Reverse a singly linked list by rewiring next pointers.",
+    }),
+    leetCodeProblem({
+      slug: "merge-two-sorted-lists",
+      title: "Merge Two Sorted Lists",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/merge-two-sorted-lists/",
+      statement: "Merge two sorted linked lists into one sorted list.",
+    }),
+    leetCodeProblem({
+      slug: "min-stack",
+      title: "Min Stack",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/min-stack/",
+      statement: "Design a stack that can return the current minimum in constant time.",
+    }),
+    leetCodeProblem({
+      slug: "daily-temperatures",
+      title: "Daily Temperatures",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/daily-temperatures/",
+      statement: "Use a monotonic stack to find how many days until a warmer temperature.",
+    }),
+    leetCodeProblem({
+      slug: "subsets",
+      title: "Subsets",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/subsets/",
+      statement: "Generate every subset of a distinct integer array.",
+    }),
+    leetCodeProblem({
+      slug: "permutations",
+      title: "Permutations",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/permutations/",
+      statement: "Generate every ordering of a distinct integer array.",
+    }),
+    leetCodeProblem({
+      slug: "invert-binary-tree",
+      title: "Invert Binary Tree",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/invert-binary-tree/",
+      statement: "Swap every node's left and right subtrees.",
+    }),
+    leetCodeProblem({
+      slug: "maximum-depth-of-binary-tree",
+      title: "Maximum Depth of Binary Tree",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
+      statement: "Compute the maximum root-to-leaf depth of a binary tree.",
+    }),
+    leetCodeProblem({
+      slug: "implement-trie-prefix-tree",
+      title: "Implement Trie",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/implement-trie-prefix-tree/",
+      statement: "Implement insert, exact search, and prefix search for a trie.",
+    }),
+    leetCodeProblem({
+      slug: "number-of-islands",
+      title: "Number of Islands",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/number-of-islands/",
+      statement: "Count connected components of land cells in a grid.",
+    }),
+    leetCodeProblem({
+      slug: "flood-fill",
+      title: "Flood Fill",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/flood-fill/",
+      statement: "Recolor a connected region in a grid.",
+    }),
+    leetCodeProblem({
+      slug: "climbing-stairs",
+      title: "Climbing Stairs",
+      difficulty: "EASY",
+      externalUrl: "https://leetcode.com/problems/climbing-stairs/",
+      statement: "Count ways to reach step n when you can climb one or two steps.",
+    }),
+    leetCodeProblem({
+      slug: "house-robber",
+      title: "House Robber",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/house-robber/",
+      statement: "Maximize non-adjacent house loot with a one-dimensional DP recurrence.",
+    }),
+    leetCodeProblem({
+      slug: "coin-change",
+      title: "Coin Change",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/coin-change/",
+      statement: "Find the minimum number of coins needed to make an amount.",
+    }),
+    leetCodeProblem({
+      slug: "maximum-subarray-greedy",
+      title: "Maximum Subarray (Greedy Review)",
+      difficulty: "MEDIUM",
+      externalUrl: "https://leetcode.com/problems/maximum-subarray/",
+      statement: "Revisit Kadane's algorithm as a local greedy choice.",
+    }),
   ];
 
   for (const p of problems) {
@@ -351,6 +607,7 @@ async function seedProblems() {
         statementMd: p.statementMd,
         examplesJson: p.examplesJson,
         starterCodeJson: p.starterCodeJson,
+        externalUrl: p.externalUrl ?? null,
         status: "PUBLISHED",
       },
       create: {
@@ -360,6 +617,7 @@ async function seedProblems() {
         statementMd: p.statementMd,
         examplesJson: p.examplesJson,
         starterCodeJson: p.starterCodeJson,
+        externalUrl: p.externalUrl ?? null,
         timeLimitMs: 1000,
         memoryLimitMb: 256,
       },
