@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArticleLevel, ArticleStatus } from "@/generated/prisma";
+import { ArticleLevel, ArticleStatus, ProgressStatus } from "@/generated/prisma";
 import { ArticleBody } from "@/components/article/ArticleBody";
 import { ArticleToc } from "@/components/article/ArticleToc";
 import { ReadingProgress } from "@/components/article/ReadingProgress";
@@ -12,6 +12,10 @@ import { ArticleLink } from "@/components/article/ArticleLink";
 import { ReadTracker } from "@/components/article/ReadTracker";
 import { extractH2Toc } from "@/lib/toc";
 import { getSearchIndex } from "@/lib/searchIndex";
+import { getCurrentUser } from "@/lib/auth";
+import { getUserReadArticleSlugs } from "@/lib/progress";
+import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
+import { ProblemCard } from "@/components/problems/ProblemCard";
 import { ViewTransition } from "react";
 import type { ArticlePreviewMap } from "@/components/article/ArticleBody";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -83,6 +87,7 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const user = await getCurrentUser();
 
   const article = await prisma.article.findFirst({
     where: { slug, status: ArticleStatus.PUBLISHED },
@@ -127,8 +132,39 @@ export default async function ArticlePage({
     };
   }
 
+  const readSlugs = user ? await getUserReadArticleSlugs(user.id) : [];
+  const relatedProblems = await prisma.problem.findMany({
+    where: {
+      status: "PUBLISHED",
+      topics: { some: { topicId: article.topicId } },
+    },
+    orderBy: [{ difficulty: "asc" }, { title: "asc" }],
+    take: 3,
+    include: {
+      topics: {
+        include: {
+          topic: {
+            include: { module: true },
+          },
+        },
+      },
+      hints: { select: { id: true } },
+      editorial: { select: { id: true } },
+    },
+  });
+  const problemProgress = user
+    ? await prisma.userProblemProgress.findMany({
+        where: { userId: user.id, problemId: { in: relatedProblems.map((problem) => problem.id) } },
+        select: { problemId: true, status: true },
+      })
+    : [];
+  const problemProgressMap = new Map<string, ProgressStatus>(
+    problemProgress.map((row) => [row.problemId, row.status]),
+  );
+
   return (
     <div className="min-h-screen">
+      {readSlugs.length > 0 && <ReadProgressSync slugs={readSlugs} />}
       <ReadTracker slug={article.slug} />
       <ReadingProgress targetSelector="#article-root" />
 
@@ -190,6 +226,33 @@ export default async function ArticlePage({
         >
           <div className="essay min-w-0">
             <ArticleBody markdown={bodyMd} previews={previews} />
+
+            {relatedProblems.length > 0 && (
+              <section className="mt-12 space-y-5">
+                <div className="rule-section with-ornament" aria-hidden />
+                <div>
+                  <div className="eyebrow mb-2">Practice set</div>
+                  <h2 className="font-display text-2xl font-medium text-[color:var(--ink)]">
+                    Apply this topic
+                  </h2>
+                  <p className="mt-2 text-[0.95rem] text-[color:var(--ink-soft)]">
+                    Try these problems while the pattern is still fresh.
+                  </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {relatedProblems.map((problem) => (
+                    <ProblemCard
+                      key={problem.id}
+                      problem={problem}
+                      moduleName={problem.topics[0]?.topic.module.name}
+                      topicName={problem.topics[0]?.topic.name}
+                      status={problemProgressMap.get(problem.id)}
+                      compact
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
 

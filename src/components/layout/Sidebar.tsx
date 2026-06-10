@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
-import { BookOpen, Map, Code2, Home, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
+import { BookOpen, Map, Code2, Home, LayoutDashboard, PanelLeftClose, PanelLeftOpen, Search, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import type { SearchItem } from "@/lib/searchIndex";
@@ -12,7 +12,9 @@ const navItems: { href: string; label: string; icon: LucideIcon; soon?: boolean 
   { href: "/", label: "Home", icon: Home },
   { href: "/learn", label: "Learn", icon: BookOpen },
   { href: "/roadmap", label: "Roadmap", icon: Map },
-  { href: "/problems", label: "Problems", icon: Code2, soon: true },
+  { href: "/problems", label: "Problems", icon: Code2 },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/auth", label: "Account", icon: User },
 ];
 
 const COLLAPSE_KEY = "dsa.sidebar.collapsed";

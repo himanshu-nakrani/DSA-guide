@@ -203,15 +203,20 @@ async function seedTaxonomy() {
     for (const topic of mod.topics) {
       await prisma.topic.upsert({
         where: { slug: topic.slug },
-        update: { name: topic.name, description: topic.description, order: topic.order, moduleId: module.id },
+        update: {
+          name: topic.name,
+          description: topic.description,
+          order: topic.order,
+          moduleId: dbModule.id,
+        },
         create: {
           slug: topic.slug,
           name: topic.name,
           description: topic.description,
           order: topic.order,
-        moduleId: dbModule.id,
-      },
-    });
+          moduleId: dbModule.id,
+        },
+      });
     }
   }
 
@@ -346,6 +351,7 @@ async function seedProblems() {
         statementMd: p.statementMd,
         examplesJson: p.examplesJson,
         starterCodeJson: p.starterCodeJson,
+        status: "PUBLISHED",
       },
       create: {
         slug: p.slug,
@@ -383,6 +389,10 @@ async function seedProblems() {
       create: { ...p.editorial, problemId: problem.id },
     });
   }
+
+  await prisma.problem.deleteMany({
+    where: { slug: { notIn: problems.map((problem) => problem.slug) } },
+  });
 }
 
 async function seedArticles() {

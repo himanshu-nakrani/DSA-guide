@@ -5,6 +5,9 @@ import { ArticleLevel, ArticleStatus, Prisma } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
 import { ReadBadge } from "@/components/article/ReadBadge";
 import { ReadTally } from "@/components/article/ReadTally";
+import { getCurrentUser } from "@/lib/auth";
+import { getUserReadArticleSlugs } from "@/lib/progress";
+import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
 
 export const revalidate = 3600;
 
@@ -28,6 +31,7 @@ const levelStyle: Record<ArticleLevel, string> = {
 };
 
 export default async function LearnPage() {
+  const user = await getCurrentUser();
   const topics = await prisma.topic.findMany({
     where: { articles: { some: { status: ArticleStatus.PUBLISHED } } },
     include: {
@@ -75,9 +79,11 @@ export default async function LearnPage() {
 
   const totalArticles = topics.reduce((s, t) => s + t.articles.length, 0);
   const allSlugs = topics.flatMap((t) => t.articles.map((a) => a.slug));
+  const readSlugs = user ? await getUserReadArticleSlugs(user.id) : [];
 
   return (
     <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
+      {readSlugs.length > 0 && <ReadProgressSync slugs={readSlugs} />}
       <header className="bloom mb-12">
         <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
           <span className="text-[color:var(--ink-blue)] mr-2">§</span>

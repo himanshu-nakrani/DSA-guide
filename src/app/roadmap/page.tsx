@@ -1,12 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { ArticleStatus } from "@/generated/prisma";
+import { ArticleStatus, ProgressStatus } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
 import { ArticleLink } from "@/components/article/ArticleLink";
 import { ProgressNode } from "@/components/roadmap/ProgressNode";
+import { getCurrentUser } from "@/lib/auth";
+import { getUserReadArticleSlugs } from "@/lib/progress";
+import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
+import { ProblemCard } from "@/components/problems/ProblemCard";
 
 export const revalidate = 3600;
 
 export default async function RoadmapPage() {
+  const user = await getCurrentUser();
   const track = await prisma.track.findUnique({
     where: { slug: "a2z-dsa-roadmap" },
     include: {
@@ -36,8 +41,26 @@ export default async function RoadmapPage() {
     );
   }
 
+  const readSlugs = user ? await getUserReadArticleSlugs(user.id) : [];
+  const problemIds = track.modules.flatMap((module) =>
+    module.topics.flatMap((topic) => topic.problems.map((entry) => entry.problemId)),
+  );
+  const problemProgressRows = user
+    ? await prisma.userProblemProgress.findMany({
+        where: {
+          userId: user.id,
+          problemId: { in: problemIds },
+        },
+        select: { problemId: true, status: true },
+      })
+    : [];
+  const problemProgressMap = new Map<string, ProgressStatus>(
+    problemProgressRows.map((row) => [row.problemId, row.status]),
+  );
+
   return (
     <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
+      {readSlugs.length > 0 && <ReadProgressSync slugs={readSlugs} />}
       <header className="bloom mb-12">
         <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
           <span className="text-[color:var(--ink-blue)] mr-2">§</span>
@@ -127,6 +150,38 @@ export default async function RoadmapPage() {
                         Start: {firstArticle.title}
                         <ArrowRight className="h-3.5 w-3.5" />
                       </ArticleLink>
+                    </div>
+                  )}
+
+                  {module.topics.some((topic) => topic.problems.length > 0) && (
+                    <div className="mt-5 space-y-3">
+                      <div className="text-[0.7rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                        Practice in this module
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {module.topics
+                          .flatMap((topic) =>
+                            topic.problems.map((entry) => ({
+                              topic,
+                              problem: entry.problem,
+                            })),
+                          )
+                          .slice(0, 2)
+                          .map(({ topic, problem }) => (
+                            <ProblemCard
+                              key={problem.id}
+                              problem={{
+                                ...problem,
+                                hints: [],
+                                editorial: null,
+                              }}
+                              moduleName={module.name}
+                              topicName={topic.name}
+                              status={problemProgressMap.get(problem.id)}
+                              compact
+                            />
+                          ))}
+                      </div>
                     </div>
                   )}
                 </div>
