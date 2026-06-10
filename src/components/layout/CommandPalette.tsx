@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, BookOpen, Layers, Map } from "lucide-react";
+import { Search, BookOpen, Layers, Map, Code2 } from "lucide-react";
 import type { SearchItem } from "@/lib/searchIndex";
 
 /**
@@ -66,7 +66,9 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
           " " +
           ("moduleName" in item ? item.moduleName : "") +
           " " +
-          ("topicName" in item ? item.topicName : "")
+          ("topicName" in item ? item.topicName : "") +
+          " " +
+          ("difficulty" in item ? item.difficulty : "")
         ).toLowerCase();
         let score = 0;
         for (const t of tokens) {
@@ -227,9 +229,22 @@ function Row({
   onHover: () => void;
   onClick: () => void;
 }) {
-  const Icon = item.kind === "article" ? BookOpen : item.kind === "module" ? Map : Layers;
+  const Icon =
+    item.kind === "article"
+      ? BookOpen
+      : item.kind === "module"
+        ? Map
+        : item.kind === "problem"
+          ? Code2
+          : Layers;
   const kindLabel =
-    item.kind === "article" ? "Article" : item.kind === "module" ? "Module" : "Topic";
+    item.kind === "article"
+      ? "Article"
+      : item.kind === "module"
+        ? "Module"
+        : item.kind === "problem"
+          ? "Problem"
+          : "Topic";
 
   return (
     <button
@@ -274,6 +289,11 @@ function Row({
           {item.kind === "article" && (
             <>
               {item.moduleName} · {item.topicName} · {item.mins}m
+            </>
+          )}
+          {item.kind === "problem" && (
+            <>
+              {item.moduleName} · {item.topicName} · {item.difficulty.toLowerCase()}
             </>
           )}
           {item.kind === "topic" && <>{item.moduleName}</>}

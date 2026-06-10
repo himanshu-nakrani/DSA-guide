@@ -10,6 +10,14 @@ const STORAGE_KEY = "dsa.read";
  */
 export function ReadTracker({ slug }: { slug: string }) {
   useEffect(() => {
+    void fetch("/api/progress/article", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ slug }),
+    }).catch(() => {
+      // anonymous readers / offline: local progress still works
+    });
+
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const set = new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);

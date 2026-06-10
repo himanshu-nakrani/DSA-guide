@@ -173,8 +173,33 @@ const MODULES: ModuleSpec[] = [
 
 const PROBLEM_TOPIC_BY_SLUG: Record<string, string> = {
   "two-sum": "arrays-and-strings",
+  "best-time-to-buy-and-sell-stock": "arrays-and-strings",
+  "maximum-subarray": "arrays-and-strings",
+  "move-zeroes": "arrays-and-strings",
+  "merge-sorted-array": "arrays-and-strings",
+  "contains-duplicate": "hashing",
+  "valid-anagram": "hashing",
+  "longest-substring-without-repeating-characters": "prefix-sums-and-sliding-window",
+  "maximum-average-subarray-i": "prefix-sums-and-sliding-window",
   "binary-search": "binary-search",
+  "search-insert-position": "binary-search",
+  "first-bad-version": "binary-search",
+  "reverse-linked-list": "linked-lists",
+  "merge-two-sorted-lists": "linked-lists",
   "valid-parentheses": "stacks-and-queues",
+  "min-stack": "stacks-and-queues",
+  "daily-temperatures": "stacks-and-queues",
+  "subsets": "recursion-and-backtracking",
+  "permutations": "recursion-and-backtracking",
+  "invert-binary-tree": "trees",
+  "maximum-depth-of-binary-tree": "trees",
+  "implement-trie-prefix-tree": "tries",
+  "number-of-islands": "graph-fundamentals",
+  "flood-fill": "graph-fundamentals",
+  "climbing-stairs": "dynamic-programming-i",
+  "house-robber": "dynamic-programming-i",
+  "coin-change": "dynamic-programming-i",
+  "maximum-subarray-greedy": "greedy",
 };
 
 async function seedTaxonomy() {
@@ -203,15 +228,20 @@ async function seedTaxonomy() {
     for (const topic of mod.topics) {
       await prisma.topic.upsert({
         where: { slug: topic.slug },
-        update: { name: topic.name, description: topic.description, order: topic.order, moduleId: module.id },
+        update: {
+          name: topic.name,
+          description: topic.description,
+          order: topic.order,
+          moduleId: dbModule.id,
+        },
         create: {
           slug: topic.slug,
           name: topic.name,
           description: topic.description,
           order: topic.order,
-        moduleId: dbModule.id,
-      },
-    });
+          moduleId: dbModule.id,
+        },
+      });
     }
   }
 
@@ -233,6 +263,56 @@ async function seedTaxonomy() {
   if (orphanedModules.length > 0) {
     await prisma.module.deleteMany({ where: { id: { in: orphanedModules.map((m) => m.id) } } });
   }
+}
+
+type SeedDifficulty = "EASY" | "MEDIUM" | "HARD";
+
+function leetCodeProblem({
+  slug,
+  title,
+  difficulty,
+  statement,
+}: {
+  slug: string;
+  title: string;
+  difficulty: SeedDifficulty;
+  statement: string;
+}) {
+  return {
+    slug,
+    title,
+    difficulty,
+    statementMd: `${statement}\n\nOpen the linked LeetCode problem to solve and submit the full challenge.`,
+    examplesJson: [
+      {
+        input: "See LeetCode examples",
+        output: "See LeetCode expected output",
+      },
+    ],
+    starterCodeJson: {
+      PYTHON: "# Use the starter template on LeetCode for this problem.",
+      CPP: "// Use the starter template on LeetCode for this problem.",
+      JAVA: "// Use the starter template on LeetCode for this problem.",
+      JAVASCRIPT: "// Use the starter template on LeetCode for this problem.",
+    },
+    testCases: [
+      {
+        input: "External judge",
+        output: "Submit on LeetCode",
+        isHidden: false,
+        order: 1,
+      },
+    ],
+    hints: [
+      "Read the linked problem carefully and identify the core pattern before coding.",
+      "After solving externally, come back here and mark your status manually.",
+    ],
+    editorial: {
+      intuitionMd: "This item is currently tracked as external practice. Use the linked LeetCode statement, then record your progress in DSA Guide.",
+      optimizedMd: "Solve on LeetCode using the pattern from the associated module. DSA Guide stores your progress and saved-list state for revision.",
+      complexityMd: "See the LeetCode editorial or your own accepted solution analysis.",
+    },
+  };
 }
 
 async function seedProblems() {
@@ -331,6 +411,156 @@ async function seedProblems() {
         complexityMd: "Time: O(n), Space: O(n)",
       },
     },
+    leetCodeProblem({
+      slug: "best-time-to-buy-and-sell-stock",
+      title: "Best Time to Buy and Sell Stock",
+      difficulty: "EASY",
+      statement: "Track the best single buy/sell transaction in one pass.",
+    }),
+    leetCodeProblem({
+      slug: "maximum-subarray",
+      title: "Maximum Subarray",
+      difficulty: "MEDIUM",
+      statement: "Find the contiguous subarray with the largest sum.",
+    }),
+    leetCodeProblem({
+      slug: "move-zeroes",
+      title: "Move Zeroes",
+      difficulty: "EASY",
+      statement: "Move all zeroes to the end while preserving non-zero order.",
+    }),
+    leetCodeProblem({
+      slug: "merge-sorted-array",
+      title: "Merge Sorted Array",
+      difficulty: "EASY",
+      statement: "Merge two sorted arrays into the first array in nondecreasing order.",
+    }),
+    leetCodeProblem({
+      slug: "contains-duplicate",
+      title: "Contains Duplicate",
+      difficulty: "EASY",
+      statement: "Detect whether any value appears at least twice.",
+    }),
+    leetCodeProblem({
+      slug: "valid-anagram",
+      title: "Valid Anagram",
+      difficulty: "EASY",
+      statement: "Decide whether two strings contain the same character counts.",
+    }),
+    leetCodeProblem({
+      slug: "longest-substring-without-repeating-characters",
+      title: "Longest Substring Without Repeating Characters",
+      difficulty: "MEDIUM",
+      statement: "Use a sliding window to find the longest substring with all unique characters.",
+    }),
+    leetCodeProblem({
+      slug: "maximum-average-subarray-i",
+      title: "Maximum Average Subarray I",
+      difficulty: "EASY",
+      statement: "Find the maximum average over every fixed-size window.",
+    }),
+    leetCodeProblem({
+      slug: "search-insert-position",
+      title: "Search Insert Position",
+      difficulty: "EASY",
+      statement: "Return the target index or the position where it should be inserted.",
+    }),
+    leetCodeProblem({
+      slug: "first-bad-version",
+      title: "First Bad Version",
+      difficulty: "EASY",
+      statement: "Binary search the first failing version in a monotonic sequence.",
+    }),
+    leetCodeProblem({
+      slug: "reverse-linked-list",
+      title: "Reverse Linked List",
+      difficulty: "EASY",
+      statement: "Reverse a singly linked list by rewiring next pointers.",
+    }),
+    leetCodeProblem({
+      slug: "merge-two-sorted-lists",
+      title: "Merge Two Sorted Lists",
+      difficulty: "EASY",
+      statement: "Merge two sorted linked lists into one sorted list.",
+    }),
+    leetCodeProblem({
+      slug: "min-stack",
+      title: "Min Stack",
+      difficulty: "MEDIUM",
+      statement: "Design a stack that can return the current minimum in constant time.",
+    }),
+    leetCodeProblem({
+      slug: "daily-temperatures",
+      title: "Daily Temperatures",
+      difficulty: "MEDIUM",
+      statement: "Use a monotonic stack to find how many days until a warmer temperature.",
+    }),
+    leetCodeProblem({
+      slug: "subsets",
+      title: "Subsets",
+      difficulty: "MEDIUM",
+      statement: "Generate every subset of a distinct integer array.",
+    }),
+    leetCodeProblem({
+      slug: "permutations",
+      title: "Permutations",
+      difficulty: "MEDIUM",
+      statement: "Generate every ordering of a distinct integer array.",
+    }),
+    leetCodeProblem({
+      slug: "invert-binary-tree",
+      title: "Invert Binary Tree",
+      difficulty: "EASY",
+      statement: "Swap every node's left and right subtrees.",
+    }),
+    leetCodeProblem({
+      slug: "maximum-depth-of-binary-tree",
+      title: "Maximum Depth of Binary Tree",
+      difficulty: "EASY",
+      statement: "Compute the maximum root-to-leaf depth of a binary tree.",
+    }),
+    leetCodeProblem({
+      slug: "implement-trie-prefix-tree",
+      title: "Implement Trie",
+      difficulty: "MEDIUM",
+      statement: "Implement insert, exact search, and prefix search for a trie.",
+    }),
+    leetCodeProblem({
+      slug: "number-of-islands",
+      title: "Number of Islands",
+      difficulty: "MEDIUM",
+      statement: "Count connected components of land cells in a grid.",
+    }),
+    leetCodeProblem({
+      slug: "flood-fill",
+      title: "Flood Fill",
+      difficulty: "EASY",
+      statement: "Recolor a connected region in a grid.",
+    }),
+    leetCodeProblem({
+      slug: "climbing-stairs",
+      title: "Climbing Stairs",
+      difficulty: "EASY",
+      statement: "Count ways to reach step n when you can climb one or two steps.",
+    }),
+    leetCodeProblem({
+      slug: "house-robber",
+      title: "House Robber",
+      difficulty: "MEDIUM",
+      statement: "Maximize non-adjacent house loot with a one-dimensional DP recurrence.",
+    }),
+    leetCodeProblem({
+      slug: "coin-change",
+      title: "Coin Change",
+      difficulty: "MEDIUM",
+      statement: "Find the minimum number of coins needed to make an amount.",
+    }),
+    leetCodeProblem({
+      slug: "maximum-subarray-greedy",
+      title: "Maximum Subarray (Greedy Review)",
+      difficulty: "MEDIUM",
+      statement: "Revisit Kadane's algorithm as a local greedy choice.",
+    }),
   ];
 
   for (const p of problems) {
@@ -346,6 +576,7 @@ async function seedProblems() {
         statementMd: p.statementMd,
         examplesJson: p.examplesJson,
         starterCodeJson: p.starterCodeJson,
+        status: "PUBLISHED",
       },
       create: {
         slug: p.slug,
@@ -383,6 +614,10 @@ async function seedProblems() {
       create: { ...p.editorial, problemId: problem.id },
     });
   }
+
+  await prisma.problem.deleteMany({
+    where: { slug: { notIn: problems.map((problem) => problem.slug) } },
+  });
 }
 
 async function seedArticles() {

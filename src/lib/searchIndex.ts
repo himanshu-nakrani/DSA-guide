@@ -25,6 +25,14 @@ export type SearchItem =
       title: string;
       href: string;
       moduleName: string;
+    }
+  | {
+      kind: "problem";
+      title: string;
+      href: string;
+      difficulty: "EASY" | "MEDIUM" | "HARD";
+      topicName: string;
+      moduleName: string;
     };
 
 export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
@@ -43,6 +51,18 @@ export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
               summary: true,
               level: true,
               estimatedMins: true,
+            },
+          },
+          problems: {
+            where: { problem: { status: "PUBLISHED" } },
+            select: {
+              problem: {
+                select: {
+                  slug: true,
+                  title: true,
+                  difficulty: true,
+                },
+              },
             },
           },
         },
@@ -66,6 +86,18 @@ export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
         href: "/learn",
         moduleName: m.name,
       });
+      for (const { problem } of [...t.problems].sort((a, b) =>
+        a.problem.title.localeCompare(b.problem.title),
+      )) {
+        items.push({
+          kind: "problem",
+          title: problem.title,
+          href: `/problems/${problem.slug}`,
+          difficulty: problem.difficulty,
+          moduleName: m.name,
+          topicName: t.name,
+        });
+      }
       for (const a of t.articles) {
         items.push({
           kind: "article",
