@@ -5,6 +5,7 @@ import { ProgressStatus } from "@/generated/prisma";
 import { ArticleBody } from "@/components/article/ArticleBody";
 import { addProblemToListAction } from "@/app/lists/actions";
 import { BOOKMARK_LIST_NAME, getBookmarkProblemIds } from "@/lib/lists";
+import { getProblemExternalUrl } from "@/lib/problem-links";
 import { BookmarkButton } from "@/components/problems/BookmarkButton";
 import { ProblemCard } from "@/components/problems/ProblemCard";
 import { ProblemStatusControl } from "@/components/problems/ProblemStatusControl";
@@ -128,6 +129,7 @@ export default async function ProblemDetailPage({
   const examples = Array.isArray(problem.examplesJson) ? (problem.examplesJson as Array<{ input: string; output: string; explanation?: string }>) : [];
   const starterCode = problem.starterCodeJson as Record<string, string>;
   const firstTopic = problem.topics[0]?.topic;
+  const externalUrl = getProblemExternalUrl(problem.slug);
 
   return (
     <div className="max-w-6xl mx-auto px-6 md:px-12 py-12 space-y-12">
@@ -165,9 +167,9 @@ export default async function ProblemDetailPage({
         </div>
 
         <aside className="surface-card p-5 space-y-5">
-          {problem.externalUrl && (
+          {externalUrl && (
             <a
-              href={problem.externalUrl}
+              href={externalUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-ink w-full justify-center"

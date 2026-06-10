@@ -4,6 +4,7 @@ import { Difficulty, ProgressStatus } from "@/generated/prisma";
 import { BookmarkButton } from "@/components/problems/BookmarkButton";
 import { ProblemQuickStatusSelect } from "@/components/problems/ProblemQuickStatusSelect";
 import { difficultyClass, difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
+import { getProblemExternalUrl } from "@/lib/problem-links";
 
 export function ProblemCard({
   problem,
@@ -20,7 +21,6 @@ export function ProblemCard({
     title: string;
     difficulty: Difficulty;
     acceptanceRate: number;
-    externalUrl?: string | null;
     editorial: { id: string } | null;
     hints: { id: string }[];
   };
@@ -32,6 +32,8 @@ export function ProblemCard({
   signedIn?: boolean;
   returnTo?: string;
 }) {
+  const externalUrl = getProblemExternalUrl(problem.slug);
+
   return (
     <div
       className="group surface-card p-5 transition-colors hover:border-[color:var(--ink-blue)]"
@@ -69,9 +71,9 @@ export function ProblemCard({
       {!compact && (
         <div className="mt-4 flex flex-wrap items-center gap-3 text-[0.75rem] text-muted-foreground">
           <span>{Math.round(problem.acceptanceRate)}% acceptance</span>
-          {problem.externalUrl && (
+          {externalUrl && (
             <a
-              href={problem.externalUrl}
+              href={externalUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-[color:var(--ink-blue)] hover:underline"

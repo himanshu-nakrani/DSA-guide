@@ -87,7 +87,6 @@ model Problem {
   examplesJson         Json
   starterCodeJson      Json
   referenceSolutionsJson Json?
-  externalUrl          String?
   timeLimitMs          Int                @default(1000)
   memoryLimitMb        Int                @default(256)
   acceptanceRate       Float              @default(0.0)
