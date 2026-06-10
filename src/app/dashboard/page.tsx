@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, Code2, Flame, Target } from "lucide-react";
 import { ProgressStatus } from "@/generated/prisma";
 import { ProblemCard } from "@/components/problems/ProblemCard";
 import { getCurrentUser } from "@/lib/auth";
+import { getBookmarkProblemIds } from "@/lib/lists";
 import { getUserReadArticleSlugs } from "@/lib/progress";
 import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
 import { progressLabel } from "@/components/problems/problem-ui";
@@ -49,7 +50,7 @@ export default async function DashboardPage() {
     );
   }
 
-  const [modules, readSlugs, problemProgress, recentReads, allArticleProgress, allProblemProgress] = await Promise.all([
+  const [modules, readSlugs, bookmarkIds, problemProgress, recentReads, allArticleProgress, allProblemProgress] = await Promise.all([
     prisma.module.findMany({
       where: { topics: { some: { articles: { some: { status: "PUBLISHED" } } } } },
       orderBy: { order: "asc" },
@@ -67,6 +68,7 @@ export default async function DashboardPage() {
       },
     }),
     getUserReadArticleSlugs(user.id),
+    getBookmarkProblemIds(user.id),
     prisma.userProblemProgress.findMany({
       where: { userId: user.id },
       orderBy: [{ updatedAt: "desc" }],
@@ -236,6 +238,10 @@ export default async function DashboardPage() {
             Open problem library
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
+          <Link href="/lists" className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--ink-blue)] link-quill">
+            Open saved lists
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </section>
 
@@ -334,6 +340,9 @@ export default async function DashboardPage() {
                   moduleName={primaryTopic?.module.name}
                   topicName={primaryTopic?.name}
                   status={entry.status}
+                  bookmarked={bookmarkIds.has(entry.problem.id)}
+                  signedIn
+                  returnTo="/dashboard"
                 />
               );
             })}

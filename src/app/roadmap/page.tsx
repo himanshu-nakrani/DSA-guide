@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { ArticleLink } from "@/components/article/ArticleLink";
 import { ProgressNode } from "@/components/roadmap/ProgressNode";
 import { getCurrentUser } from "@/lib/auth";
+import { getBookmarkProblemIds } from "@/lib/lists";
 import { getUserReadArticleSlugs } from "@/lib/progress";
 import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
 import { ProblemCard } from "@/components/problems/ProblemCard";
@@ -57,6 +58,7 @@ export default async function RoadmapPage() {
   const problemProgressMap = new Map<string, ProgressStatus>(
     problemProgressRows.map((row) => [row.problemId, row.status]),
   );
+  const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
 
   return (
     <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
@@ -178,6 +180,9 @@ export default async function RoadmapPage() {
                               moduleName={module.name}
                               topicName={topic.name}
                               status={problemProgressMap.get(problem.id)}
+                              bookmarked={bookmarkIds.has(problem.id)}
+                              signedIn={Boolean(user)}
+                              returnTo="/roadmap"
                               compact
                             />
                           ))}

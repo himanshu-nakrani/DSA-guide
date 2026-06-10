@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ProgressStatus } from "@/generated/prisma";
 import { ArticleBody } from "@/components/article/ArticleBody";
+import { addProblemToListAction } from "@/app/lists/actions";
+import { BOOKMARK_LIST_NAME, getBookmarkProblemIds } from "@/lib/lists";
+import { BookmarkButton } from "@/components/problems/BookmarkButton";
 import { ProblemCard } from "@/components/problems/ProblemCard";
 import { ProblemStatusControl } from "@/components/problems/ProblemStatusControl";
 import { difficultyClass, difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
@@ -90,6 +93,19 @@ export default async function ProblemDetailPage({
       )?.status ?? ProgressStatus.NEW
     : ProgressStatus.NEW;
 
+  let bookmarkIds = new Set<string>();
+  let customLists: Array<{ id: string; name: string }> = [];
+  if (user) {
+    [bookmarkIds, customLists] = await Promise.all([
+      getBookmarkProblemIds(user.id),
+      prisma.customList.findMany({
+        where: { userId: user.id, name: { not: BOOKMARK_LIST_NAME } },
+        orderBy: { updatedAt: "desc" },
+        select: { id: true, name: true },
+      }),
+    ]);
+  }
+
   const relatedProblems = await prisma.problem.findMany({
     where: {
       status: "PUBLISHED",
@@ -149,7 +165,48 @@ export default async function ProblemDetailPage({
         </div>
 
         <aside className="surface-card p-5 space-y-5">
+          <div className="space-y-2">
+            <div className="text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Saved</div>
+            <div className="flex items-center justify-between gap-3 rounded-md border border-[color:var(--rule)] px-3 py-2">
+              <span className="text-sm">{bookmarkIds.has(problem.id) ? "Bookmarked" : "Bookmark this problem"}</span>
+              <BookmarkButton
+                problemSlug={problem.slug}
+                saved={bookmarkIds.has(problem.id)}
+                signedIn={Boolean(user)}
+                returnTo={`/problems/${problem.slug}`}
+              />
+            </div>
+          </div>
+
           <ProblemStatusControl slug={problem.slug} initialStatus={currentStatus} signedIn={Boolean(user)} />
+          {user && customLists.length > 0 && (
+            <form action={addProblemToListAction} className="space-y-2">
+              <input type="hidden" name="problemSlug" value={problem.slug} />
+              <input type="hidden" name="returnTo" value={`/problems/${problem.slug}`} />
+              <label className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                Save to list
+              </label>
+              <div className="flex gap-2">
+                <select
+                  name="listId"
+                  className="min-w-0 flex-1 rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
+                >
+                  {customLists.map((list) => (
+                    <option key={list.id} value={list.id}>{list.name}</option>
+                  ))}
+                </select>
+                <button type="submit" className="btn-ink">
+                  Save
+                </button>
+              </div>
+            </form>
+          )}
+          {user && customLists.length === 0 && (
+            <Link href="/lists" className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--ink-blue)] link-quill">
+              Create a custom list
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          )}
           <div className="space-y-2">
             <div className="text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Primary article track</div>
             <div className="space-y-2">
@@ -314,6 +371,9 @@ export default async function ProblemDetailPage({
                     problem={relatedProblem}
                     moduleName={relatedProblem.topics[0]?.topic.module.name}
                     topicName={relatedProblem.topics[0]?.topic.name}
+                    bookmarked={bookmarkIds.has(relatedProblem.id)}
+                    signedIn={Boolean(user)}
+                    returnTo={`/problems/${problem.slug}`}
                     compact
                   />
                 ))}

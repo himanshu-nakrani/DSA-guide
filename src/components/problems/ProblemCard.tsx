@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Difficulty, ProgressStatus } from "@/generated/prisma";
+import { BookmarkButton } from "@/components/problems/BookmarkButton";
 import { difficultyClass, difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
 
 export function ProblemCard({
@@ -9,6 +10,9 @@ export function ProblemCard({
   moduleName,
   status,
   compact = false,
+  bookmarked = false,
+  signedIn = false,
+  returnTo = "/problems",
 }: {
   problem: {
     slug: string;
@@ -22,18 +26,23 @@ export function ProblemCard({
   moduleName?: string;
   status?: ProgressStatus | null;
   compact?: boolean;
+  bookmarked?: boolean;
+  signedIn?: boolean;
+  returnTo?: string;
 }) {
   return (
-    <Link
-      href={`/problems/${problem.slug}`}
+    <div
       className="group surface-card p-5 transition-colors hover:border-[color:var(--ink-blue)]"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-[1.05rem] font-medium text-[color:var(--ink)] group-hover:text-[color:var(--ink-blue)] transition-colors">
-              {problem.title}
-            </h3>
+            <Link href={`/problems/${problem.slug}`} className="inline-flex items-center gap-1.5">
+              <h3 className="font-display text-[1.05rem] font-medium text-[color:var(--ink)] hover:text-[color:var(--ink-blue)] transition-colors">
+                {problem.title}
+              </h3>
+              <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:text-[color:var(--ink-blue)] group-hover:translate-x-0.5" />
+            </Link>
             <span className={difficultyClass[problem.difficulty]}>{difficultyLabel[problem.difficulty]}</span>
             {status && (
               <span className="pill border-[color:var(--rule)] text-muted-foreground">
@@ -47,7 +56,12 @@ export function ProblemCard({
             </p>
           )}
         </div>
-        <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-[color:var(--ink-blue)] group-hover:translate-x-0.5 transition-all" />
+        <BookmarkButton
+          problemSlug={problem.slug}
+          saved={bookmarked}
+          signedIn={signedIn}
+          returnTo={returnTo}
+        />
       </div>
 
       {!compact && (
@@ -57,6 +71,6 @@ export function ProblemCard({
           <span>{problem.editorial ? "Editorial included" : "Editorial coming soon"}</span>
         </div>
       )}
-    </Link>
+    </div>
   );
 }

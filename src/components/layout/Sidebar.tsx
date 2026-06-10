@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
-import { BookOpen, Map, Code2, Home, LayoutDashboard, PanelLeftClose, PanelLeftOpen, Search, User } from "lucide-react";
+import { Bookmark, BookOpen, Map, Code2, Home, LayoutDashboard, PanelLeftClose, PanelLeftOpen, Search, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import type { SearchItem } from "@/lib/searchIndex";
@@ -13,6 +13,7 @@ const navItems: { href: string; label: string; icon: LucideIcon; soon?: boolean 
   { href: "/learn", label: "Learn", icon: BookOpen },
   { href: "/roadmap", label: "Roadmap", icon: Map },
   { href: "/problems", label: "Problems", icon: Code2 },
+  { href: "/lists", label: "Lists", icon: Bookmark },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/auth", label: "Account", icon: User },
 ];

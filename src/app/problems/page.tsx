@@ -4,6 +4,7 @@ import { Difficulty, ProgressStatus, type Prisma } from "@/generated/prisma";
 import { ProblemCard } from "@/components/problems/ProblemCard";
 import { difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
 import { getCurrentUser } from "@/lib/auth";
+import { getBookmarkProblemIds } from "@/lib/lists";
 import { prisma } from "@/lib/prisma";
 
 const statusOptions = [
@@ -147,6 +148,14 @@ export default async function ProblemsPage({
   const progressMap = new Map<string, ProgressStatus>(
     progressRows.map((row) => [row.problemId, row.status]),
   );
+  const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
+  const currentParams = new URLSearchParams();
+  if (query) currentParams.set("q", query);
+  if (difficulty) currentParams.set("difficulty", difficulty);
+  if (topicSlug) currentParams.set("topic", topicSlug);
+  if (user && status) currentParams.set("status", status);
+  if (sort !== "difficulty") currentParams.set("sort", sort);
+  const returnTo = currentParams.size > 0 ? `/problems?${currentParams.toString()}` : "/problems";
 
   const withEditorialCount = problems.filter((p) => p.editorial).length;
   const activeFilters = [difficulty, topicSlug, user && status ? status : undefined, query || undefined, sort !== "difficulty" ? sort : undefined].filter(Boolean).length;
@@ -310,6 +319,9 @@ export default async function ProblemsPage({
                   moduleName={primaryTopic?.module.name}
                   topicName={primaryTopic?.name}
                   status={progressMap.get(problem.id)}
+                  bookmarked={bookmarkIds.has(problem.id)}
+                  signedIn={Boolean(user)}
+                  returnTo={returnTo}
                 />
               );
             })}

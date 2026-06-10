@@ -13,6 +13,7 @@ import { ReadTracker } from "@/components/article/ReadTracker";
 import { extractH2Toc } from "@/lib/toc";
 import { getSearchIndex } from "@/lib/searchIndex";
 import { getCurrentUser } from "@/lib/auth";
+import { getBookmarkProblemIds } from "@/lib/lists";
 import { getUserReadArticleSlugs } from "@/lib/progress";
 import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
 import { ProblemCard } from "@/components/problems/ProblemCard";
@@ -161,6 +162,7 @@ export default async function ArticlePage({
   const problemProgressMap = new Map<string, ProgressStatus>(
     problemProgress.map((row) => [row.problemId, row.status]),
   );
+  const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
 
   return (
     <div className="min-h-screen">
@@ -247,6 +249,9 @@ export default async function ArticlePage({
                       moduleName={problem.topics[0]?.topic.module.name}
                       topicName={problem.topics[0]?.topic.name}
                       status={problemProgressMap.get(problem.id)}
+                      bookmarked={bookmarkIds.has(problem.id)}
+                      signedIn={Boolean(user)}
+                      returnTo={`/learn/${article.slug}`}
                       compact
                     />
                   ))}
