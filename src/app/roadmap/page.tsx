@@ -8,6 +8,7 @@ import { getBookmarkProblemIds } from "@/lib/lists";
 import { getUserReadArticleSlugs } from "@/lib/progress";
 import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
 import { ProblemCard } from "@/components/problems/ProblemCard";
+import { pickNextProblem, summarizeProblemProgress } from "@/lib/problem-progress";
 
 export const revalidate = 3600;
 
@@ -59,6 +60,7 @@ export default async function RoadmapPage() {
     problemProgressRows.map((row) => [row.problemId, row.status]),
   );
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
+  const readSlugSet = new Set(readSlugs);
 
   return (
     <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
@@ -97,6 +99,15 @@ export default async function RoadmapPage() {
           const moduleSlugs = module.topics.flatMap((t) =>
             t.articles.map((a) => a.slug),
           );
+          const readArticleCount = moduleSlugs.filter((slug) => readSlugSet.has(slug)).length;
+          const moduleProblems = module.topics.flatMap((topic) =>
+            topic.problems.map((entry) => entry.problem),
+          );
+          const moduleProblemSummary = summarizeProblemProgress(
+            moduleProblems.map((problem) => problem.id),
+            problemProgressMap,
+          );
+          const nextProblem = pickNextProblem(moduleProblems, problemProgressMap);
           const firstArticle =
             module.topics.flatMap((t) => t.articles)[0] ?? null;
           const isLast = i === track.modules.length - 1;
@@ -136,6 +147,21 @@ export default async function RoadmapPage() {
                     </p>
                   )}
 
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <ProgressMeter
+                      label="Reading"
+                      current={readArticleCount}
+                      total={articleCount}
+                      detail={`${readArticleCount}/${articleCount} articles read`}
+                    />
+                    <ProgressMeter
+                      label="Practice"
+                      current={moduleProblemSummary.solved}
+                      total={moduleProblemSummary.total}
+                      detail={`${moduleProblemSummary.solved}/${moduleProblemSummary.total} problems solved`}
+                    />
+                  </div>
+
                   {firstArticle && (
                     <div className="mt-3">
                       <ArticleLink
@@ -155,38 +181,89 @@ export default async function RoadmapPage() {
                     </div>
                   )}
 
-                  {module.topics.some((topic) => topic.problems.length > 0) && (
+                  {module.topics.length > 0 && (
                     <div className="mt-5 space-y-3">
                       <div className="text-[0.7rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-                        Practice in this module
+                        Topic progress
                       </div>
                       <div className="grid gap-3 md:grid-cols-2">
-                        {module.topics
-                          .flatMap((topic) =>
-                            topic.problems.map((entry) => ({
-                              topic,
-                              problem: entry.problem,
-                            })),
-                          )
-                          .slice(0, 2)
-                          .map(({ topic, problem }) => (
-                            <ProblemCard
-                              key={problem.id}
-                              problem={{
-                                ...problem,
-                                hints: [],
-                                editorial: null,
-                              }}
-                              moduleName={module.name}
-                              topicName={topic.name}
-                              status={problemProgressMap.get(problem.id)}
-                              bookmarked={bookmarkIds.has(problem.id)}
-                              signedIn={Boolean(user)}
-                              returnTo="/roadmap"
-                              compact
-                            />
-                          ))}
+                        {module.topics.map((topic) => {
+                          const topicSlugs = topic.articles.map((article) => article.slug);
+                          const topicProblemIds = topic.problems.map((entry) => entry.problemId);
+                          const topicProblemSummary = summarizeProblemProgress(
+                            topicProblemIds,
+                            problemProgressMap,
+                          );
+                          const topicReadCount = topicSlugs.filter((articleSlug) =>
+                            readSlugSet.has(articleSlug),
+                          ).length;
+                          const topicPercent =
+                            topic.articles.length + topicProblemSummary.total === 0
+                              ? 0
+                              : Math.round(
+                                  ((topicReadCount + topicProblemSummary.solved) /
+                                    (topic.articles.length + topicProblemSummary.total)) *
+                                    100,
+                                );
+
+                          return (
+                            <div
+                              key={topic.id}
+                              className="rounded-xl border border-[color:var(--rule)] bg-background/40 px-4 py-3"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <div className="font-medium text-sm text-[color:var(--ink)]">
+                                    {topic.name}
+                                  </div>
+                                  <div className="mt-1 text-[0.68rem] font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                                    {topicReadCount}/{topic.articles.length} read · {topicProblemSummary.solved}/{topicProblemSummary.total} solved
+                                  </div>
+                                </div>
+                                <span className="text-xs font-mono tabular-nums text-muted-foreground">
+                                  {topicPercent}%
+                                </span>
+                              </div>
+                              <div className="mt-3 h-1.5 rounded-full bg-[color:var(--rule)]/60 overflow-hidden">
+                                <div
+                                  className="h-full bg-[color:var(--ink-blue)] transition-[width]"
+                                  style={{ width: `${topicPercent}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
+                    </div>
+                  )}
+
+                  {nextProblem && (
+                    <div className="mt-5 space-y-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="text-[0.7rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                          Recommended next problem
+                        </div>
+                        <span className="text-[0.68rem] font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                          {moduleProblemSummary.started}/{moduleProblemSummary.total} started
+                        </span>
+                      </div>
+                      <ProblemCard
+                        problem={{
+                          ...nextProblem,
+                          hints: [],
+                          editorial: null,
+                        }}
+                        moduleName={module.name}
+                        topicName={
+                          module.topics.find((topic) =>
+                            topic.problems.some((entry) => entry.problemId === nextProblem.id),
+                          )?.name
+                        }
+                        status={problemProgressMap.get(nextProblem.id)}
+                        bookmarked={bookmarkIds.has(nextProblem.id)}
+                        signedIn={Boolean(user)}
+                        returnTo="/roadmap"
+                      />
                     </div>
                   )}
                 </div>
@@ -195,6 +272,42 @@ export default async function RoadmapPage() {
           );
         })}
       </ol>
+    </div>
+  );
+}
+
+function ProgressMeter({
+  label,
+  current,
+  total,
+  detail,
+}: {
+  label: string;
+  current: number;
+  total: number;
+  detail: string;
+}) {
+  const percent = total === 0 ? 0 : Math.round((current / total) * 100);
+
+  return (
+    <div className="rounded-xl border border-[color:var(--rule)] bg-background/40 px-4 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-[0.68rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            {label}
+          </div>
+          <div className="mt-1 text-sm text-[color:var(--ink-soft)]">{detail}</div>
+        </div>
+        <span className="font-mono text-sm tabular-nums text-[color:var(--ink)]">
+          {percent}%
+        </span>
+      </div>
+      <div className="mt-3 h-1.5 rounded-full bg-[color:var(--rule)]/60 overflow-hidden">
+        <div
+          className="h-full bg-[color:var(--ink-blue)] transition-[width]"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
     </div>
   );
 }

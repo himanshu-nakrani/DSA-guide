@@ -17,6 +17,7 @@ import { getBookmarkProblemIds } from "@/lib/lists";
 import { getUserReadArticleSlugs } from "@/lib/progress";
 import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
 import { ProblemCard } from "@/components/problems/ProblemCard";
+import { pickNextProblem, summarizeProblemProgress } from "@/lib/problem-progress";
 import { ViewTransition } from "react";
 import type { ArticlePreviewMap } from "@/components/article/ArticleBody";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -163,6 +164,14 @@ export default async function ArticlePage({
     problemProgress.map((row) => [row.problemId, row.status]),
   );
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
+  const practiceSummary = summarizeProblemProgress(
+    relatedProblems.map((problem) => problem.id),
+    problemProgressMap,
+  );
+  const recommendedProblem = pickNextProblem(relatedProblems, problemProgressMap);
+  const remainingProblems = recommendedProblem
+    ? relatedProblems.filter((problem) => problem.id !== recommendedProblem.id)
+    : relatedProblems;
 
   return (
     <div className="min-h-screen">
@@ -232,30 +241,71 @@ export default async function ArticlePage({
             {relatedProblems.length > 0 && (
               <section className="mt-12 space-y-5">
                 <div className="rule-section with-ornament" aria-hidden />
-                <div>
-                  <div className="eyebrow mb-2">Practice set</div>
-                  <h2 className="font-display text-2xl font-medium text-[color:var(--ink)]">
-                    Apply this topic
-                  </h2>
-                  <p className="mt-2 text-[0.95rem] text-[color:var(--ink-soft)]">
-                    Try these problems while the pattern is still fresh.
-                  </p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <div className="eyebrow mb-2">Practice set</div>
+                    <h2 className="font-display text-2xl font-medium text-[color:var(--ink)]">
+                      Apply this topic
+                    </h2>
+                    <p className="mt-2 text-[0.95rem] text-[color:var(--ink-soft)]">
+                      Try these problems while the pattern is still fresh.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-[color:var(--rule)] bg-background/40 px-4 py-3 min-w-44">
+                    <div className="text-[0.68rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                      Topic practice
+                    </div>
+                    <div className="mt-1 font-mono text-sm tabular-nums text-[color:var(--ink)]">
+                      {practiceSummary.solved}/{practiceSummary.total} solved · {practiceSummary.percent}%
+                    </div>
+                    <div className="mt-3 h-1.5 rounded-full bg-[color:var(--rule)]/60 overflow-hidden">
+                      <div
+                        className="h-full bg-[color:var(--ink-blue)] transition-[width]"
+                        style={{ width: `${practiceSummary.percent}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {relatedProblems.map((problem) => (
+
+                {recommendedProblem && (
+                  <div className="space-y-3">
+                    <div className="text-[0.7rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                      Recommended next
+                    </div>
                     <ProblemCard
-                      key={problem.id}
-                      problem={problem}
-                      moduleName={problem.topics[0]?.topic.module.name}
-                      topicName={problem.topics[0]?.topic.name}
-                      status={problemProgressMap.get(problem.id)}
-                      bookmarked={bookmarkIds.has(problem.id)}
+                      problem={recommendedProblem}
+                      moduleName={recommendedProblem.topics[0]?.topic.module.name}
+                      topicName={recommendedProblem.topics[0]?.topic.name}
+                      status={problemProgressMap.get(recommendedProblem.id)}
+                      bookmarked={bookmarkIds.has(recommendedProblem.id)}
                       signedIn={Boolean(user)}
                       returnTo={`/learn/${article.slug}`}
-                      compact
                     />
-                  ))}
-                </div>
+                  </div>
+                )}
+
+                {remainingProblems.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="text-[0.7rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                      More practice
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {remainingProblems.map((problem) => (
+                        <ProblemCard
+                          key={problem.id}
+                          problem={problem}
+                          moduleName={problem.topics[0]?.topic.module.name}
+                          topicName={problem.topics[0]?.topic.name}
+                          status={problemProgressMap.get(problem.id)}
+                          bookmarked={bookmarkIds.has(problem.id)}
+                          signedIn={Boolean(user)}
+                          returnTo={`/learn/${article.slug}`}
+                          compact
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </section>
             )}
           </div>
