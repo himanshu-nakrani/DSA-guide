@@ -58,7 +58,12 @@ function parseSessionValue(raw: string | undefined) {
   if (!raw) return null;
   const [payload, signature] = raw.split(".");
   if (!payload || !signature) return null;
-  if (sign(payload) !== signature) return null;
+  const expectedSignature = sign(payload);
+  const expectedBuffer = Buffer.from(expectedSignature);
+  const providedBuffer = Buffer.from(signature);
+  if (expectedBuffer.length !== providedBuffer.length || !timingSafeEqual(expectedBuffer, providedBuffer)) {
+    return null;
+  }
 
   try {
     const parsed = JSON.parse(fromBase64url(payload)) as {
