@@ -125,7 +125,12 @@ export default async function ProblemsPage({
       ...(progressFilter ?? {}),
     },
     orderBy: buildOrderBy(sort),
-    include: {
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      difficulty: true,
+      acceptanceRate: true,
       topics: {
         include: {
           topic: {
