@@ -9,7 +9,10 @@ const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 const PASSWORD_KEYLEN = 64;
 
 function getAuthSecret() {
-  return process.env.AUTH_SECRET || "dev-insecure-auth-secret-change-me";
+  if (!process.env.AUTH_SECRET) {
+    throw new Error("AUTH_SECRET environment variable is not set. Please set it to a secure random string.");
+  }
+  return process.env.AUTH_SECRET;
 }
 
 function base64url(input: string | Buffer) {
