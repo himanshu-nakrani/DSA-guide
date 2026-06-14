@@ -74,7 +74,13 @@ export default async function DashboardPage() {
       orderBy: [{ updatedAt: "desc" }],
       include: {
         problem: {
-          include: {
+          // ⚡ Bolt: Use `select` instead of `include` to avoid fetching large text fields (like `statementMd`, `examplesJson`)
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            difficulty: true,
+            acceptanceRate: true,
             topics: {
               include: {
                 topic: {
