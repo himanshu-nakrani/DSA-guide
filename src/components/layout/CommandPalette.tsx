@@ -201,7 +201,12 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
           ) : (
             results.map((item, i) => (
               <Row
-                key={`${item.kind}-${item.href}-${item.title}-${i}`}
+                // Use href (a stable identity) as the React key so reorders
+                // and re-filters don't remount rows. The trailing index
+                // disambiguates a hypothetical duplicate href, which the
+                // search index can produce for problem slugs that collide
+                // with article slugs.
+                key={`${item.kind}:${item.href}:${i}`}
                 item={item}
                 idx={i}
                 id={optionId(i)}

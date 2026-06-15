@@ -1,45 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useScrollFraction } from "@/hooks/useScrollFraction";
 
 /**
- * Thin reading-progress bar pinned to the top of the viewport. Computes
- * fraction read against the bounding box of the targeted element.
+ * Thin reading-progress bar pinned to the top of the viewport. Uses the
+ * shared `useScrollFraction` hook so the bar and the running time chip
+ * (`ReadingChip`) don't each attach their own scroll listener.
  */
 export function ReadingProgress({ targetSelector }: { targetSelector: string }) {
-  const [pct, setPct] = useState(0);
-
-  useEffect(() => {
-    const el = document.querySelector<HTMLElement>(targetSelector);
-    if (!el) return;
-
-    let raf = 0;
-    const update = () => {
-      const rect = el.getBoundingClientRect();
-      const viewport = window.innerHeight;
-      const total = rect.height - viewport;
-      if (total <= 0) {
-        setPct(rect.top <= 0 ? 1 : 0);
-        return;
-      }
-      const scrolled = Math.min(Math.max(-rect.top, 0), total);
-      setPct(scrolled / total);
-    };
-
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [targetSelector]);
+  const fraction = useScrollFraction(targetSelector);
 
   return (
     <div
@@ -50,7 +19,7 @@ export function ReadingProgress({ targetSelector }: { targetSelector: string }) 
         className="h-full will-change-[transform] origin-left"
         style={{
           background: "var(--ink-blue)",
-          transform: `scaleX(${pct})`,
+          transform: `scaleX(${fraction})`,
           transition: "transform 80ms linear",
         }}
       />
