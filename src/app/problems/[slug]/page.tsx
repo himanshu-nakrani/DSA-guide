@@ -119,7 +119,13 @@ export default async function ProblemDetailPage({
     },
     orderBy: [{ difficulty: "asc" }, { title: "asc" }],
     take: 3,
-    include: {
+    // ⚡ Bolt: Use `select` instead of `include` to avoid fetching large text fields (like `statementMd`, `examplesJson`)
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      difficulty: true,
+      acceptanceRate: true,
       topics: { include: { topic: { include: { module: true } } } },
       hints: { select: { id: true } },
       editorial: { select: { id: true } },

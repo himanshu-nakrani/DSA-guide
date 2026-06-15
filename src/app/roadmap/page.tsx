@@ -26,8 +26,30 @@ export default async function RoadmapPage() {
               articles: {
                 where: { status: ArticleStatus.PUBLISHED },
                 orderBy: [{ level: "asc" }, { order: "asc" }],
+                // ⚡ Bolt: Use `select` instead of fetching all fields to avoid pulling large `contentMd` text
+                select: {
+                  slug: true,
+                  title: true,
+                  summary: true,
+                  level: true,
+                  estimatedMins: true,
+                },
               },
-              problems: { include: { problem: true } },
+              problems: {
+                // ⚡ Bolt: Use `select` instead of `include` to avoid fetching large text fields (like `statementMd`, `examplesJson`)
+                select: {
+                  problemId: true,
+                  problem: {
+                    select: {
+                      id: true,
+                      slug: true,
+                      title: true,
+                      difficulty: true,
+                      acceptanceRate: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },

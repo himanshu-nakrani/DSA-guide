@@ -8,8 +8,10 @@ import { prisma } from "@/lib/prisma";
 
 // `redirect()` throws a special Next.js error that aborts rendering; any code
 // after it (including `revalidatePath`) is unreachable. We revalidate first
-// and let `redirect` close out the function via throw.
-function finishAuthRedirect(destination: string) {
+// and let `redirect` close out the function via throw. The `never` return
+// type tells TypeScript that callers don't need an explicit `return` after
+// this (the function never falls through).
+function finishAuthRedirect(destination: string): never {
   revalidatePath("/", "layout");
   redirect(destination);
 }

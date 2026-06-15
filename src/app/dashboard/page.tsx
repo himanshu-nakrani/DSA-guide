@@ -62,8 +62,6 @@ type DashboardProblem = {
     title: string;
     difficulty: "EASY" | "MEDIUM" | "HARD";
     acceptanceRate: number;
-    isPremium: boolean;
-    status: string;
     hints: { id: string }[];
     editorial: { id: string } | null;
     topics: { topic: { name: string; module: { name: string } } }[];
@@ -129,14 +127,15 @@ export default async function DashboardPage() {
         updatedAt: true,
         status: true,
         problem: {
+          // ⚡ Bolt + audit I-1: Use `select` instead of `include` to avoid
+          // fetching large text fields (like `statementMd`, `examplesJson`).
+          // We only need the first topic for the breadcrumb, hence `take: 1`.
           select: {
             id: true,
             slug: true,
             title: true,
             difficulty: true,
             acceptanceRate: true,
-            isPremium: true,
-            status: true,
             hints: { select: { id: true } },
             editorial: { select: { id: true } },
             topics: {
