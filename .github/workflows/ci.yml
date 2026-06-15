@@ -63,7 +63,9 @@ jobs:
       - name: Apply Prisma schema to the test database
         # `db push` is the right tool for ephemeral CI databases — it
         # applies the current schema without writing a migration file.
-        run: npx prisma db push --skip-generate
+        # Prisma 7 removed the `--skip-generate` flag; we already ran
+        # `prisma generate` in the previous step, so no skip is needed.
+        run: npx prisma db push
 
       - name: Lint
         run: npm run lint
