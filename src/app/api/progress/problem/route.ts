@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ProgressStatus } from "@/generated/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
@@ -19,6 +20,19 @@ export async function POST(request: Request) {
   }
   if (!Object.values(ProgressStatus).includes(body.status)) {
     return NextResponse.json({ error: "Invalid status." }, { status: 400 });
+  }
+
+  const rateLimit = await checkRateLimit("progress", {
+    get: (key: string) => (key === "slug" ? body.slug : null),
+  } as unknown as FormData);
+  if (rateLimit.limited) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
   }
 
   const problem = await prisma.problem.findUnique({

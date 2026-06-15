@@ -202,6 +202,27 @@ const PROBLEM_TOPIC_BY_SLUG: Record<string, string> = {
   "maximum-subarray-greedy": "greedy",
 };
 
+/**
+ * Whether the seed is allowed to run destructive cleanup (orphan deletes).
+ *
+ * Re-running `npm run db:seed` is meant to be idempotent: existing rows are
+ * upserted, nothing else is touched. The previous version of this file
+ * also ran `deleteMany` on any problem/topic/module that wasn't in the
+ * current seed set, which silently dropped every user-owned row that
+ * referenced it via the FK cascade (UserProblemProgress, Submission,
+ * CustomListItem, UserArticleProgress). That was the B-5 bug from the
+ * audit — re-seeding during a sprint quietly erased real progress.
+ *
+ * Now those cleanups are gated on `RESET_PROGRESS`. Pass it on the CLI:
+ *
+ *   npm run db:seed -- --reset
+ *   RESET_PROGRESS=1 npm run db:seed
+ *
+ * Without it, the seed prints a warning if it finds orphans and leaves
+ * them in place.
+ */
+const RESET_PROGRESS = process.argv.includes("--reset") || process.env.RESET_PROGRESS === "1";
+
 async function seedTaxonomy() {
   const track = await prisma.track.upsert({
     where: { slug: TRACK.slug },
@@ -245,15 +266,24 @@ async function seedTaxonomy() {
     }
   }
 
-  // Remove any stale topics or modules from previous seed runs.
-  // Cascades will drop the legacy ProblemTopic / Article rows for those topics,
-  // but we re-seed problems and articles below, so this is safe.
+  // Orphan cleanup is opt-in: see RESET_PROGRESS above. Cascades will
+  // drop the legacy ProblemTopic / Article rows for removed topics, and
+  // drop the UserProblemProgress / Submission / CustomListItem rows that
+  // reference any problem whose module/topic gets removed.
   const orphanedTopics = await prisma.topic.findMany({
     where: { slug: { notIn: topicSlugs } },
     select: { id: true, slug: true },
   });
   if (orphanedTopics.length > 0) {
-    await prisma.topic.deleteMany({ where: { id: { in: orphanedTopics.map((t) => t.id) } } });
+    if (RESET_PROGRESS) {
+      await prisma.topic.deleteMany({ where: { id: { in: orphanedTopics.map((t) => t.id) } } });
+    } else {
+      console.warn(
+        `[seed] ${orphanedTopics.length} stale topic(s) detected (${orphanedTopics
+          .map((t) => t.slug)
+          .join(", ")}). Re-run with --reset to drop them.`,
+      );
+    }
   }
 
   const orphanedModules = await prisma.module.findMany({
@@ -261,7 +291,15 @@ async function seedTaxonomy() {
     select: { id: true, slug: true },
   });
   if (orphanedModules.length > 0) {
-    await prisma.module.deleteMany({ where: { id: { in: orphanedModules.map((m) => m.id) } } });
+    if (RESET_PROGRESS) {
+      await prisma.module.deleteMany({ where: { id: { in: orphanedModules.map((m) => m.id) } } });
+    } else {
+      console.warn(
+        `[seed] ${orphanedModules.length} stale module(s) detected (${orphanedModules
+          .map((m) => m.slug)
+          .join(", ")}). Re-run with --reset to drop them.`,
+      );
+    }
   }
 }
 
@@ -615,9 +653,25 @@ async function seedProblems() {
     });
   }
 
-  await prisma.problem.deleteMany({
-    where: { slug: { notIn: problems.map((problem) => problem.slug) } },
+  // Orphan problem cleanup. The cascade here deletes every
+  // UserProblemProgress / Submission / CustomListItem tied to the dropped
+  // problem, so this is gated on RESET_PROGRESS (see top of file).
+  const keptSlugs = problems.map((problem) => problem.slug);
+  const orphanedProblems = await prisma.problem.findMany({
+    where: { slug: { notIn: keptSlugs } },
+    select: { slug: true },
   });
+  if (orphanedProblems.length > 0) {
+    if (RESET_PROGRESS) {
+      await prisma.problem.deleteMany({ where: { slug: { notIn: keptSlugs } } });
+    } else {
+      console.warn(
+        `[seed] ${orphanedProblems.length} stale problem(s) detected (${orphanedProblems
+          .map((p) => p.slug)
+          .join(", ")}). Re-run with --reset to drop them.`,
+      );
+    }
+  }
 }
 
 async function seedArticles() {

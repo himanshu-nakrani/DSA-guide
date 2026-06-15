@@ -1,14 +1,80 @@
 import type { ComponentType } from "react";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Code2, Flame, Target } from "lucide-react";
+import { unstable_cache } from "next/cache";
 import { ProgressStatus } from "@/generated/prisma";
 import { ProblemCard } from "@/components/problems/ProblemCard";
 import { getCurrentUser } from "@/lib/auth";
 import { getBookmarkProblemIds } from "@/lib/lists";
-import { getUserReadArticleSlugs } from "@/lib/progress";
 import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
 import { progressLabel } from "@/components/problems/problem-ui";
 import { prisma } from "@/lib/prisma";
+
+// The dashboard is largely a read-only summary that does not need to be
+// fully dynamic on every request. Tag-based revalidation is intentionally
+// not used here (writes from the user flow are infrequent) — a 60s TTL
+// keeps the page snappy and bounded, while still picking up progress
+// changes within a minute.
+export const revalidate = 60;
+
+/**
+ * Cached module/topic/article index.
+ *
+ * This is the same shape that `getSearchIndex` already produces, but scoped
+ * to the lightweight summary fields the dashboard actually consumes. It is
+ * `unstable_cache`d so multiple signed-in users hitting the page in the
+ * 60s revalidation window share the same DB round-trip.
+ */
+const getModuleIndex = unstable_cache(
+  async () => {
+    return prisma.module.findMany({
+      where: { topics: { some: { articles: { some: { status: "PUBLISHED" } } } } },
+      orderBy: { order: "asc" },
+      select: {
+        id: true,
+        name: true,
+        topics: {
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            name: true,
+            articles: {
+              where: { status: "PUBLISHED" },
+              orderBy: [{ level: "asc" }, { order: "asc" }],
+              select: { id: true, slug: true, title: true },
+            },
+          },
+        },
+      },
+    });
+  },
+  ["dashboard:module-index"],
+  { revalidate: 60, tags: ["module-index"] },
+);
+
+type DashboardProblem = {
+  id: string;
+  updatedAt: Date;
+  status: ProgressStatus;
+  problem: {
+    id: string;
+    slug: string;
+    title: string;
+    difficulty: "EASY" | "MEDIUM" | "HARD";
+    acceptanceRate: number;
+    isPremium: boolean;
+    status: string;
+    hints: { id: string }[];
+    editorial: { id: string } | null;
+    topics: { topic: { name: string; module: { name: string } } }[];
+  };
+};
+
+type DashboardArticle = {
+  id: string;
+  readAt: Date;
+  article: { id: string; slug: string; title: string; topic: { name: string; module: { name: string } } };
+};
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -50,78 +116,76 @@ export default async function DashboardPage() {
     );
   }
 
-  const [modules, readSlugs, bookmarkIds, problemProgress, recentReads, allArticleProgress, allProblemProgress] = await Promise.all([
-    prisma.module.findMany({
-      where: { topics: { some: { articles: { some: { status: "PUBLISHED" } } } } },
-      orderBy: { order: "asc" },
-      include: {
-        topics: {
-          orderBy: { order: "asc" },
-          include: {
-            articles: {
-              where: { status: "PUBLISHED" },
-              orderBy: [{ level: "asc" }, { order: "asc" }],
-              select: { slug: true, title: true },
-            },
-          },
-        },
-      },
-    }),
-    getUserReadArticleSlugs(user.id),
+  // Four queries instead of the previous eight. The cached `getModuleIndex`
+  // is shared across users; the remaining three are scoped to this user.
+  const [modules, bookmarkIds, userProblemProgress, articleProgress] = await Promise.all([
+    getModuleIndex(),
     getBookmarkProblemIds(user.id),
     prisma.userProblemProgress.findMany({
       where: { userId: user.id },
       orderBy: [{ updatedAt: "desc" }],
-      include: {
+      select: {
+        id: true,
+        updatedAt: true,
+        status: true,
         problem: {
-          include: {
-            topics: {
-              include: {
-                topic: {
-                  include: { module: true },
-                },
-              },
-            },
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            difficulty: true,
+            acceptanceRate: true,
+            isPremium: true,
+            status: true,
             hints: { select: { id: true } },
             editorial: { select: { id: true } },
-          },
-        },
-      },
-      take: 8,
-    }),
-    prisma.userArticleProgress.findMany({
-      where: { userId: user.id },
-      orderBy: { readAt: "desc" },
-      include: {
-        article: {
-          include: {
-            topic: {
-              include: { module: true },
+            topics: {
+              select: { topic: { select: { name: true, module: { select: { name: true } } } } },
+              take: 1,
             },
           },
         },
       },
-      take: 6,
     }),
     prisma.userArticleProgress.findMany({
       where: { userId: user.id },
-      select: { readAt: true },
       orderBy: { readAt: "desc" },
-    }),
-    prisma.userProblemProgress.findMany({
-      where: { userId: user.id },
-      select: { updatedAt: true, status: true },
-      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        readAt: true,
+        article: {
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            topic: { select: { name: true, module: { select: { name: true } } } },
+          },
+        },
+      },
     }),
   ]);
+
+  // The original code ran two extra `findMany`s just to pull `readAt` /
+  // `updatedAt` again for the activity chart. With the consolidated fetch
+  // above we already have those columns locally, so we derive everything
+  // from these two arrays.
+  const recentProblems: DashboardProblem[] = userProblemProgress;
+  const allProblems = userProblemProgress;
+  const recentReads: DashboardArticle[] = articleProgress.slice(0, 6);
+  const allArticles = articleProgress;
+  const readSlugs = Array.from(new Set(articleProgress.map((entry) => entry.article.slug)));
 
   const totalArticles = modules.reduce(
     (sum, module) => sum + module.topics.reduce((inner, topic) => inner + topic.articles.length, 0),
     0,
   );
   const articlePct = totalArticles === 0 ? 0 : Math.round((readSlugs.length / totalArticles) * 100);
-  const solvedCount = allProblemProgress.filter((entry) => entry.status === ProgressStatus.SOLVED || entry.status === ProgressStatus.MASTERED).length;
-  const attemptedCount = allProblemProgress.filter((entry) => entry.status === ProgressStatus.ATTEMPTED || entry.status === ProgressStatus.NEEDS_REVISION).length;
+  const solvedCount = allProblems.filter(
+    (entry) => entry.status === ProgressStatus.SOLVED || entry.status === ProgressStatus.MASTERED,
+  ).length;
+  const attemptedCount = allProblems.filter(
+    (entry) => entry.status === ProgressStatus.ATTEMPTED || entry.status === ProgressStatus.NEEDS_REVISION,
+  ).length;
 
   const nextModule = modules.find((module) => {
     const moduleSlugs = module.topics.flatMap((topic) => topic.articles.map((article) => article.slug));
@@ -135,12 +199,12 @@ export default async function DashboardPage() {
     ProgressStatus.MASTERED,
   ].map((status) => ({
     status,
-    items: allProblemProgress.filter((entry) => entry.status === status),
+    items: allProblems.filter((entry) => entry.status === status),
   }));
 
   const activityDays = buildActivityDays([
-    ...allArticleProgress.map((entry) => entry.readAt),
-    ...allProblemProgress.map((entry) => entry.updatedAt),
+    ...allArticles.map((entry) => entry.readAt),
+    ...allProblems.map((entry) => entry.updatedAt),
   ]);
   const currentStreak = computeCurrentStreak(activityDays.map((day) => day.dateKey));
   const bestDayCount = Math.max(1, ...activityDays.map((day) => day.count));
@@ -327,11 +391,11 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {problemProgress.length === 0 ? (
+        {recentProblems.length === 0 ? (
           <div className="surface-card p-8 text-muted-foreground">No synced problem progress yet. Mark a problem as attempted or solved to populate this section.</div>
         ) : (
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {problemProgress.map((entry) => {
+            {recentProblems.slice(0, 8).map((entry) => {
               const primaryTopic = entry.problem.topics[0]?.topic;
               return (
                 <ProblemCard
