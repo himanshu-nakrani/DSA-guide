@@ -43,6 +43,12 @@ jobs:
       # database is fine — schema is applied via `prisma db push`.
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/dsa_guide_test
       AUTH_SECRET: ci-only-secret-do-not-use-in-prod
+      # I-6: getSiteUrl() throws in production if SITE_URL is unset; the
+      # build step runs in production mode, so we have to set this for
+      # layout.tsx's `metadataBase` to resolve at build time. The CI
+      # value is a placeholder; real deployments must inject the real
+      # canonical origin via their secret store.
+      SITE_URL: https://dsa.guide
       NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
