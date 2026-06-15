@@ -1,8 +1,11 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { promisify } from "node:util";
 import { prisma } from "@/lib/prisma";
+
+const scryptAsync = promisify(scrypt);
 
 const SESSION_COOKIE = "dsa_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
@@ -29,16 +32,29 @@ function fromBase64url(input: string) {
   return Buffer.from(normalized + pad, "base64").toString("utf8");
 }
 
-export function hashPassword(password: string) {
+/**
+ * Async password hashing via scrypt.
+ *
+ * The previous implementation used `scryptSync`, which blocks the Node event
+ * loop for tens of milliseconds per call (scrypt is intentionally slow to
+ * resist brute-force). That stalls every other in-flight request on the
+ * server, which on a single-process dev / edge runtime is the entire app.
+ * `util.promisify(scrypt)` yields the loop while scrypt runs.
+ *
+ * `hashPassword` is now an async function. Callers (register / verify) must
+ * `await` it. Stored format is unchanged (`salt:hash` in hex) so existing
+ * `passwordHash` values continue to verify.
+ */
+export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, PASSWORD_KEYLEN).toString("hex");
-  return `${salt}:${hash}`;
+  const derived = (await scryptAsync(password, salt, PASSWORD_KEYLEN)) as Buffer;
+  return `${salt}:${derived.toString("hex")}`;
 }
 
-export function verifyPassword(password: string, storedHash: string) {
+export async function verifyPassword(password: string, storedHash: string) {
   const [salt, hash] = storedHash.split(":");
   if (!salt || !hash) return false;
-  const derived = scryptSync(password, salt, PASSWORD_KEYLEN);
+  const derived = (await scryptAsync(password, salt, PASSWORD_KEYLEN)) as Buffer;
   const stored = Buffer.from(hash, "hex");
   if (stored.length !== derived.length) return false;
   return timingSafeEqual(stored, derived);
@@ -48,13 +64,24 @@ function sign(payload: string) {
   return createHmac("sha256", getAuthSecret()).update(payload).digest("base64url");
 }
 
+type SessionPayload = {
+  userId: string;
+  iat: number; // issued-at, seconds since epoch
+  exp: number; // expires-at, seconds since epoch
+};
+
 function createSessionValue(userId: string) {
-  const exp = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
-  const payload = base64url(JSON.stringify({ userId, exp }));
-  return `${payload}.${sign(payload)}`;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const payload: SessionPayload = {
+    userId,
+    iat: nowSec,
+    exp: nowSec + SESSION_TTL_SECONDS,
+  };
+  const encoded = base64url(JSON.stringify(payload));
+  return `${encoded}.${sign(encoded)}`;
 }
 
-function parseSessionValue(raw: string | undefined) {
+function parseSessionValue(raw: string | undefined): SessionPayload | null {
   if (!raw) return null;
   const [payload, signature] = raw.split(".");
   if (!payload || !signature) return null;
@@ -66,13 +93,11 @@ function parseSessionValue(raw: string | undefined) {
   }
 
   try {
-    const parsed = JSON.parse(fromBase64url(payload)) as {
-      userId?: string;
-      exp?: number;
-    };
-    if (!parsed.userId || !parsed.exp) return null;
-    if (parsed.exp < Math.floor(Date.now() / 1000)) return null;
-    return parsed;
+    const parsed = JSON.parse(fromBase64url(payload)) as Partial<SessionPayload>;
+    if (!parsed.userId || typeof parsed.iat !== "number" || typeof parsed.exp !== "number") return null;
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (parsed.exp < nowSec) return null;
+    return { userId: parsed.userId, iat: parsed.iat, exp: parsed.exp };
   } catch {
     return null;
   }
@@ -99,10 +124,25 @@ export async function getCurrentUser() {
   const parsed = parseSessionValue(jar.get(SESSION_COOKIE)?.value);
   if (!parsed) return null;
 
+  // `select` only the columns we need to keep this hot path cheap. We also
+  // pull `passwordChangedAt` so we can invalidate tokens issued before the
+  // most recent password change (see B-3 in the audit).
   const user = await prisma.user.findUnique({
     where: { id: parsed.userId },
-    select: { id: true, email: true, name: true, createdAt: true },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      createdAt: true,
+      passwordChangedAt: true,
+    },
   });
+  if (!user) return null;
+
+  if (user.passwordChangedAt) {
+    const changedAtSec = Math.floor(user.passwordChangedAt.getTime() / 1000);
+    if (parsed.iat < changedAtSec) return null;
+  }
 
   return user;
 }

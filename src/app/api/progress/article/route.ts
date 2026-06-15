@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
@@ -11,6 +12,19 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { slug?: string } | null;
   if (!body?.slug) {
     return NextResponse.json({ error: "Missing article slug." }, { status: 400 });
+  }
+
+  const rateLimit = await checkRateLimit("progress", {
+    get: (key: string) => (key === "slug" ? body.slug : null),
+  } as unknown as FormData);
+  if (rateLimit.limited) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
   }
 
   const article = await prisma.article.findUnique({

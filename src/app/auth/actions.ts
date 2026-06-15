@@ -2,8 +2,19 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { clearSession, hashPassword, setSession, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+// `redirect()` throws a special Next.js error that aborts rendering; any code
+// after it (including `revalidatePath`) is unreachable. We revalidate first
+// and let `redirect` close out the function via throw. The `never` return
+// type tells TypeScript that callers don't need an explicit `return` after
+// this (the function never falls through).
+function finishAuthRedirect(destination: string): never {
+  revalidatePath("/", "layout");
+  redirect(destination);
+}
 
 export type AuthFormState = {
   error?: string;
@@ -18,6 +29,9 @@ export async function registerAction(
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  const rateLimit = await checkRateLimit("register", formData);
+  if (rateLimit.limited) return rateLimitedResponse(rateLimit);
+
   const name = getString(formData, "name");
   const email = getString(formData, "email").toLowerCase();
   const password = getString(formData, "password");
@@ -34,26 +48,30 @@ export async function registerAction(
     return { error: "An account with that email already exists." };
   }
 
+  const passwordHash = await hashPassword(password);
   const user = await prisma.user.create({
     data: {
       email,
       name: name || null,
-      passwordHash: hashPassword(password),
+      passwordHash,
+      // Stamp the password-change moment so any future session token
+      // whose iat predates this is rejected.
+      passwordChangedAt: new Date(),
       profile: { create: {} },
     },
   });
 
   await setSession(user.id);
-  revalidatePath("/learn");
-  revalidatePath("/roadmap");
-  revalidatePath("/problems");
-  redirect("/learn");
+  finishAuthRedirect("/learn");
 }
 
 export async function loginAction(
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  const rateLimit = await checkRateLimit("login", formData);
+  if (rateLimit.limited) return rateLimitedResponse(rateLimit);
+
   const email = getString(formData, "email").toLowerCase();
   const password = getString(formData, "password");
 
@@ -67,16 +85,10 @@ export async function loginAction(
   }
 
   await setSession(user.id);
-  revalidatePath("/learn");
-  revalidatePath("/roadmap");
-  revalidatePath("/problems");
-  redirect("/learn");
+  finishAuthRedirect("/learn");
 }
 
 export async function logoutAction() {
   await clearSession();
-  revalidatePath("/learn");
-  revalidatePath("/roadmap");
-  revalidatePath("/problems");
-  redirect("/");
+  finishAuthRedirect("/");
 }

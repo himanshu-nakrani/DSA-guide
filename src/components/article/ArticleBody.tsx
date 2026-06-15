@@ -9,6 +9,7 @@ import rehypeHighlight from "rehype-highlight";
 import { Viz } from "@/components/viz/Viz";
 import { CopyButton } from "./CopyButton";
 import { ArticleLink, type ArticleLinkPreview } from "./ArticleLink";
+import { slugify } from "@/lib/toc";
 
 export type ArticlePreviewMap = Record<string, ArticleLinkPreview>;
 
@@ -221,11 +222,4 @@ function sanitizeHref(href: unknown): string | undefined {
     if (!allowed.has(scheme)) return undefined;
   }
   return trimmed;
-}
-
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 }

@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-flight runs for the same ref so a force-push doesn't queue
+# a redundant build on top of an older one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Use the same Node version that the project's engines field / local
+  # dev expects. Bump these in lockstep with .nvmrc / engines.
+  NODE_VERSION: "20"
+
+jobs:
+  build:
+    name: Lint, type-check, test, and build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dsa_guide_test
+        ports:
+          - 5432:5432
+        # Give Postgres a beat to be ready before the app's prisma step runs.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # CI-specific secrets. The job does not run `db:seed` so an empty
+      # database is fine — schema is applied via `prisma db push`.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/dsa_guide_test
+      AUTH_SECRET: ci-only-secret-do-not-use-in-prod
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply Prisma schema to the test database
+        # `db push` is the right tool for ephemeral CI databases — it
+        # applies the current schema without writing a migration file.
+        # Prisma 7 removed the `--skip-generate` flag; we already ran
+        # `prisma generate` in the previous step, so no skip is needed.
+        run: npx prisma db push
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Test
+        run: npm test -- --run --coverage
+
+      - name: Build
+        run: npm run build

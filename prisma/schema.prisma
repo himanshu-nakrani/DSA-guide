@@ -12,18 +12,22 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  passwordHash  String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String?
+  passwordHash     String?
+  // Bumped on every password change so any session whose `iat` predates
+  // this timestamp is invalidated. Used by src/lib/auth.ts to reject
+  // tokens issued before a password rotation.
+  passwordChangedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  profile       Profile?
-  articleProgress UserArticleProgress[]
-  submissions   Submission[]
-  progress      UserProblemProgress[]
-  customLists   CustomList[]
+  profile          Profile?
+  articleProgress  UserArticleProgress[]
+  submissions      Submission[]
+  progress         UserProblemProgress[]
+  customLists      CustomList[]
 }
 
 model Profile {
@@ -199,6 +203,12 @@ model CustomList {
   updatedAt   DateTime @updatedAt
 
   items       CustomListItem[]
+
+  // (userId, name) is the natural identity for a user's list. The compound
+  // unique key lets `upsert` in src/lib/lists.ts close the
+  // check-then-create race that previously produced duplicate Bookmarks
+  // lists under concurrent toggles.
+  @@unique([userId, name])
 }
 
 model CustomListItem {
