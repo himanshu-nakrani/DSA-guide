@@ -14,7 +14,16 @@ export const revalidate = 3600;
 type TopicWithArticles = Prisma.TopicGetPayload<{
   include: {
     module: true;
-    articles: true;
+    articles: {
+      select: {
+        id: true;
+        slug: true;
+        title: true;
+        summary: true;
+        level: true;
+        estimatedMins: true;
+      };
+    };
   };
 }>;
 
@@ -39,6 +48,15 @@ export default async function LearnPage() {
       articles: {
         where: { status: ArticleStatus.PUBLISHED },
         orderBy: [{ level: "asc" }, { order: "asc" }],
+        // ⚡ Bolt: Use `select` instead of `include` to avoid fetching large text fields (like `contentMd`)
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          summary: true,
+          level: true,
+          estimatedMins: true,
+        },
       },
     },
     orderBy: [{ module: { order: "asc" } }, { order: "asc" }],
