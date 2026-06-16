@@ -8,3 +8,7 @@
 ## 2026-06-15 - Unpaginated Data Structure Memory Bloat in Roadmap
 **Learning:** In `src/app/roadmap/page.tsx`, `prisma.track.findUnique` fetches deeply nested relationships (modules -> topics -> articles/problems). By default, fetching `articles` and using `include` for `problems` fetches all columns, including massive unneeded fields like `contentMd` and `statementMd`. Since the roadmap displays many entities at once, this caused huge memory and transit bloat.
 **Action:** When querying lists or deeply nested structures (like roadmaps or dashboards), always explicitly use `select` to specify exactly the minimum required fields, particularly avoiding markdown strings or large JSON blobs.
+
+## 2026-06-16 - Unpaginated Data Structure Memory Bloat in Article List
+**Learning:** In `src/app/learn/page.tsx`, `prisma.topic.findMany` fetches deeply nested relationships (topics -> articles). By default, fetching `articles` fetches all columns, including massive unneeded fields like `contentMd` and `references`. Since the learn page displays many entities at once, this caused huge memory and transit bloat.
+**Action:** When querying lists or deeply nested structures (like topic's articles), always explicitly use `select` to specify exactly the minimum required fields, particularly avoiding markdown strings or large JSON blobs.
