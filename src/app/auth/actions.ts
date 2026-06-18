@@ -80,7 +80,7 @@ export async function loginAction(
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user?.passwordHash || !verifyPassword(password, user.passwordHash)) {
+  if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
     return { error: "Invalid email or password." };
   }
 

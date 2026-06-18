@@ -1,4 +1,6 @@
-## 2024-06-13 - HMAC Timing Attack in Session Parsing
-**Vulnerability:** The `parseSessionValue` function in `src/lib/auth.ts` was using a simple equality operator (`!==`) to compare the expected HMAC signature against the provided signature. This allows an attacker to perform a timing attack by measuring the time it takes for the comparison to fail, byte by byte, eventually forging a valid signature.
-**Learning:** Even if the underlying hashing algorithm (like SHA256) is secure, the comparison of cryptographic signatures must always be done in constant time to prevent side-channel timing attacks.
-**Prevention:** Always use `crypto.timingSafeEqual` (or a similar constant-time comparison function) when comparing cryptographic hashes, signatures, or MACs.
+## 2025-02-14 - [Authentication Bypass via Unawaited Promise]
+**Vulnerability:** In `src/app/auth/actions.ts`, the `verifyPassword` function was called synchronously without `await`. Since `verifyPassword` is an async function (which returns a Promise), checking its truthiness like `!verifyPassword(...)` always evaluated to false regardless of whether the password was correct. This allowed any password to pass the check and log into an existing user's account.
+**Learning:** This happened because `verifyPassword` was changed to an async function (presumably to use `scryptAsync` so the event loop wasn't blocked) but the caller `loginAction` wasn't updated to `await` the returned promise. When changing a synchronous function to an asynchronous one, all callers must be updated, otherwise logic that relies on the return value can silently break, causing catastrophic vulnerabilities.
+**Prevention:**
+- Enforce strict typing with TypeScript rules like `@typescript-eslint/no-floating-promises` or `@typescript-eslint/no-misused-promises` to catch unawaited promises in logical expressions.
+- Have robust test coverage for authentication flows, particularly negative tests ensuring invalid passwords fail to log in.
