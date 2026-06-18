@@ -1,0 +1,3 @@
+## 2024-06-18 - Skip-to-content links for persistent sidebars
+**Learning:** For desktop interfaces with persistent sidebars that precede main content in the DOM tree (like this curriculum app), keyboard-only users and screen readers are forced to tab through all sidebar navigation items before reaching the actual page content.
+**Action:** Implemented a reusable skip-to-content pattern using standard Tailwind utilities (`sr-only focus:not-sr-only focus:absolute ...`) to allow immediate bypass of the sidebar to a `#main-content` anchor, keeping it invisible for pointer users while solving the A11y pain point.
