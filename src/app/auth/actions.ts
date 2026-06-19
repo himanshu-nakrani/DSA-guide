@@ -80,7 +80,9 @@ export async function loginAction(
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user?.passwordHash || !verifyPassword(password, user.passwordHash)) {
+  // [SECURITY] verifyPassword is async and returns a Promise. It MUST be awaited.
+  // Otherwise, the truthy Promise object bypasses authentication for any valid email.
+  if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
     return { error: "Invalid email or password." };
   }
 
