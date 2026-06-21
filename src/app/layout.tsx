@@ -81,8 +81,14 @@ export default async function RootLayout({
         <InlineScript html={themeBootstrap} />
       </head>
       <body className="min-h-full flex flex-col md:flex-row bg-background text-foreground antialiased">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:px-4 focus:py-2 focus:m-2 focus:bg-background focus:text-foreground focus:border focus:border-border focus:rounded-md focus:shadow-md"
+        >
+          Skip to main content
+        </a>
         <Sidebar searchIndex={searchIndex} />
-        <main className="flex-1 min-w-0 md:overflow-y-auto">{children}</main>
+        <main id="main-content" className="flex-1 min-w-0 md:overflow-y-auto">{children}</main>
         <CommandPalette index={searchIndex} />
       </body>
     </html>
