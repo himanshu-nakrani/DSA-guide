@@ -134,6 +134,7 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
             window.dispatchEvent(new CustomEvent("dsa:open-palette"))
           }
           title="Search (⌘K)"
+          aria-label="Search"
           className="group w-full inline-flex items-center justify-between gap-2 px-3 py-1.5 rounded-sm border border-[color:var(--rule-strong)] bg-transparent text-foreground/70 hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)] transition-colors"
         >
           <span className="inline-flex items-center gap-2 text-[0.85rem]">
