@@ -216,8 +216,12 @@ function sanitizeHref(href: unknown): string | undefined {
   if (typeof href !== "string") return undefined;
   const trimmed = href.trim();
   if (!trimmed) return undefined;
-  if (/^(?:[a-z][a-z0-9+.-]*):/i.test(trimmed)) {
-    const scheme = trimmed.slice(0, trimmed.indexOf(":")).toLowerCase();
+
+  // SECURITY: Browsers ignore control characters and whitespaces when parsing the URL scheme.
+  // Strip them before checking the scheme to prevent XSS via scheme masking.
+  const check = trimmed.replace(/[\x00-\x1F\x7F\s]+/g, "");
+  if (/^(?:[a-z][a-z0-9+.-]*):/i.test(check)) {
+    const scheme = check.slice(0, check.indexOf(":")).toLowerCase();
     const allowed = new Set(["http", "https", "mailto", "tel"]);
     if (!allowed.has(scheme)) return undefined;
   }
