@@ -64,7 +64,8 @@ export function VizButton({
       title={title}
       onClick={onClick}
       disabled={disabled}
-      className={`font-mono text-[0.66rem] uppercase tracking-[0.1em] px-2 py-1 rounded-[2px] border transition-colors ${
+      aria-pressed={active}
+      className={`font-mono text-[0.66rem] uppercase tracking-[0.1em] px-2 py-1 rounded-[2px] border outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] transition-colors ${
         active
           ? "border-[color:var(--ink-blue)] bg-[color:var(--ink-blue)] text-[color:var(--primary-foreground)]"
           : "border-[color:var(--rule-strong)] bg-transparent text-[color:var(--ink)] hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)]"
