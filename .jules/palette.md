@@ -5,3 +5,7 @@
 ## 2024-06-25 - Missing accessible focus and toggle states on interactive visual controls
 **Learning:** Custom visualization controls (`VizButton` and toggle buttons in charts) often lack `aria-pressed` states and clear keyboard focus outlines, rendering interactive diagram state untrackable for screen readers and invisible to keyboard navigators.
 **Action:** Implemented `aria-pressed` based on internal `active`/`on` state and added standard Tailwind focus-visible rings to custom visualization buttons to ensure learning tools are accessible to all users.
+
+## 2026-06-26 - Missing accessible group grouping and state for button toggles
+**Learning:** Groups of buttons functioning as mutually exclusive choices (like problem status selection) often use visual grouping and implicit label tags that cause accessibility issues. A `<label>` tag is invalid without a form input. Also, screen readers cannot determine the selected button without an `aria-pressed` state.
+**Action:** Replaced the invalid `<label>` with a `<span id="...">`, grouped the buttons in a `div` with `role="group"` and `aria-labelledby`, and added `aria-pressed={active}` to each button to properly expose the interactive state.
