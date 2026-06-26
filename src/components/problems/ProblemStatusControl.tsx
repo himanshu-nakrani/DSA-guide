@@ -44,16 +44,17 @@ export function ProblemStatusControl({
 
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">
+      <span id="progress-label" className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">
         Progress
-      </label>
-      <div className="flex flex-wrap gap-2">
+      </span>
+      <div role="group" aria-labelledby="progress-label" className="flex flex-wrap gap-2">
         {progressOptions.map((option) => {
           const active = option === status;
           return (
             <button
               key={option}
               type="button"
+              aria-pressed={active}
               onClick={() => onChange(option)}
               disabled={isPending}
               className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
