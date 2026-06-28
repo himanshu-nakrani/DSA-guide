@@ -17,7 +17,7 @@ export function BookmarkButton({
     return (
       <Link
         href="/auth"
-        className="inline-grid h-8 w-8 place-items-center rounded-sm border border-[color:var(--rule)] text-muted-foreground hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)] transition-colors"
+        className="inline-grid h-8 w-8 place-items-center rounded-sm border border-[color:var(--rule)] text-muted-foreground hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
         aria-label="Sign in to bookmark this problem"
         title="Sign in to bookmark"
       >
@@ -32,11 +32,12 @@ export function BookmarkButton({
       <input type="hidden" name="returnTo" value={returnTo} />
       <button
         type="submit"
-        className={`inline-grid h-8 w-8 place-items-center rounded-sm border transition-colors ${
+        className={`inline-grid h-8 w-8 place-items-center rounded-sm border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] ${
           saved
             ? "border-[color:var(--ink-blue)] bg-[color:var(--ink-blue-wash)] text-[color:var(--ink-blue)]"
             : "border-[color:var(--rule)] text-muted-foreground hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)]"
         }`}
+        aria-pressed={saved}
         aria-label={saved ? "Remove bookmark" : "Bookmark problem"}
         title={saved ? "Remove bookmark" : "Bookmark problem"}
       >
