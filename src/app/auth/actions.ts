@@ -80,9 +80,18 @@ export async function loginAction(
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
+
+  // SECURITY: Prevent username enumeration via timing attacks.
+  // If the user doesn't exist (or has no password), we verify against a dummy hash
+  // so the computational cost of scrypt remains roughly the same.
+  const DUMMY_HASH = "00000000000000000000000000000000:00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+  const hashToVerify = user?.passwordHash || DUMMY_HASH;
+
   // SECURITY: verifyPassword is async. Failing to await it evaluates to true (Promise is truthy),
   // which causes auth bypass. Always await async auth functions.
-  if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
+  const isValidPassword = await verifyPassword(password, hashToVerify);
+
+  if (!user || !user.passwordHash || !isValidPassword) {
     return { error: "Invalid email or password." };
   }
 
