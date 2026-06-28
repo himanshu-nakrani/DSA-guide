@@ -203,7 +203,7 @@ export function ComplexityChart({
         )}
       </svg>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div role="group" aria-label="Complexity curves" className="mt-3 flex flex-wrap gap-2">
         {ALL_CURVES.map((c) => {
           const on = active.has(c.key);
           return (
