@@ -35,12 +35,14 @@ export function HashTableViz({
       caption={caption}
       controls={
         <>
-          <VizButton onClick={() => setStrategy("chaining")} active={strategy === "chaining"}>
-            chaining
-          </VizButton>
-          <VizButton onClick={() => setStrategy("linear-probing")} active={strategy === "linear-probing"}>
-            linear probing
-          </VizButton>
+          <span role="group" aria-label="Collision strategy" className="flex items-center gap-2">
+            <VizButton onClick={() => setStrategy("chaining")} active={strategy === "chaining"}>
+              chaining
+            </VizButton>
+            <VizButton onClick={() => setStrategy("linear-probing")} active={strategy === "linear-probing"}>
+              linear probing
+            </VizButton>
+          </span>
           <VizButton onClick={() => setKeys(seeds)} disabled={keys === seeds}>
             reset
           </VizButton>

@@ -68,13 +68,13 @@ export function TreeTraversal({
     <VizFrame
       caption={caption}
       controls={
-        <>
+        <span role="group" aria-label="Traversal mode" className="flex items-center gap-2">
           {(["inorder", "preorder", "postorder", "bfs"] as Mode[]).map((m) => (
             <VizButton key={m} onClick={() => setMode(m)} active={mode === m}>
               {m}
             </VizButton>
           ))}
-        </>
+        </span>
       }
     >
       <div className="space-y-3">

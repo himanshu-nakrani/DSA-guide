@@ -9,3 +9,7 @@
 ## 2026-06-26 - Missing accessible group grouping and state for button toggles
 **Learning:** Groups of buttons functioning as mutually exclusive choices (like problem status selection) often use visual grouping and implicit label tags that cause accessibility issues. A `<label>` tag is invalid without a form input. Also, screen readers cannot determine the selected button without an `aria-pressed` state.
 **Action:** Replaced the invalid `<label>` with a `<span id="...">`, grouped the buttons in a `div` with `role="group"` and `aria-labelledby`, and added `aria-pressed={active}` to each button to properly expose the interactive state.
+
+## 2025-02-27 - Grouping Mutually Exclusive Toggle Buttons
+**Learning:** Orphaned mutually exclusive choice buttons (like toggles in the visualizations) fail to provide proper context to screen readers, making it unclear they function as a single logical input group. The `aria-pressed` state alone isn't enough context.
+**Action:** Always wrap related toggle button clusters within a container using `role="group"` and an explicit `aria-label` (or `aria-labelledby`) so that screen reader users understand the relationship between the choices.

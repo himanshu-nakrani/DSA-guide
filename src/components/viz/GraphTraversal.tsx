@@ -80,12 +80,14 @@ export function GraphTraversal({
       caption={caption}
       controls={
         <>
-          <VizButton onClick={() => setMode("bfs")} active={mode === "bfs"}>
-            bfs
-          </VizButton>
-          <VizButton onClick={() => setMode("dfs")} active={mode === "dfs"}>
-            dfs
-          </VizButton>
+          <span role="group" aria-label="Traversal mode" className="flex items-center gap-2">
+            <VizButton onClick={() => setMode("bfs")} active={mode === "bfs"}>
+              bfs
+            </VizButton>
+            <VizButton onClick={() => setMode("dfs")} active={mode === "dfs"}>
+              dfs
+            </VizButton>
+          </span>
           <VizButton onClick={() => setStep(0)}>⏮</VizButton>
           <VizButton onClick={() => setPlaying((p) => !p)} active={playing}>
             {playing ? "pause" : "play"}
