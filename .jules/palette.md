@@ -13,3 +13,7 @@
 ## 2025-02-27 - Grouping Mutually Exclusive Toggle Buttons
 **Learning:** Orphaned mutually exclusive choice buttons (like toggles in the visualizations) fail to provide proper context to screen readers, making it unclear they function as a single logical input group. The `aria-pressed` state alone isn't enough context.
 **Action:** Always wrap related toggle button clusters within a container using `role="group"` and an explicit `aria-label` (or `aria-labelledby`) so that screen reader users understand the relationship between the choices.
+
+## 2024-07-01 - Missing keyboard focus on persistent layout toggles
+**Learning:** The `ThemeToggle` component, when rendered in a collapsed sidebar foot, acts as an icon-only button and initially lacks `focus-visible` styles. This makes it challenging for keyboard users to perceive focus on a persistent and frequently accessed layout control.
+**Action:** Added standard focus-visible styles (`outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]`) to the `ThemeToggle` button to ensure it matches the accessibility standards established by other interactive controls like `VizButton`.
