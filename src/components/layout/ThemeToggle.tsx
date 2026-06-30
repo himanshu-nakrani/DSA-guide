@@ -58,8 +58,8 @@ export function ThemeToggle({ collapsed = false }: { collapsed?: boolean }) {
       suppressHydrationWarning
       className={
         collapsed
-          ? "h-9 w-9 grid place-items-center rounded-sm text-foreground/70 hover:text-[color:var(--ink-blue)] transition-colors"
-          : "inline-flex items-center gap-2 h-9 px-2.5 rounded-sm text-sm text-foreground/75 hover:text-[color:var(--ink-blue)] transition-colors"
+          ? "h-9 w-9 grid place-items-center rounded-sm text-foreground/70 hover:text-[color:var(--ink-blue)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
+          : "inline-flex items-center gap-2 h-9 px-2.5 rounded-sm text-sm text-foreground/75 hover:text-[color:var(--ink-blue)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
       }
     >
       <Icon className="h-4 w-4" strokeWidth={1.5} suppressHydrationWarning />
