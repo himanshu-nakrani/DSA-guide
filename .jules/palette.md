@@ -17,3 +17,6 @@
 ## 2024-07-01 - Missing keyboard focus on persistent layout toggles
 **Learning:** The `ThemeToggle` component, when rendered in a collapsed sidebar foot, acts as an icon-only button and initially lacks `focus-visible` styles. This makes it challenging for keyboard users to perceive focus on a persistent and frequently accessed layout control.
 **Action:** Added standard focus-visible styles (`outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]`) to the `ThemeToggle` button to ensure it matches the accessibility standards established by other interactive controls like `VizButton`.
+## 2025-07-01 - Missing focus rings on icon-only layout controls
+**Learning:** Icon-only layout controls (like sidebar collapse/expand buttons) that are removed from the natural document flow often lack explicit focus indicators, making them completely invisible to keyboard users navigating the UI.
+**Action:** Always verify that standalone icon buttons have explicit `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to ensure keyboard accessibility.
