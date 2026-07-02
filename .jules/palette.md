@@ -20,3 +20,7 @@
 ## 2025-07-01 - Missing focus rings on icon-only layout controls
 **Learning:** Icon-only layout controls (like sidebar collapse/expand buttons) that are removed from the natural document flow often lack explicit focus indicators, making them completely invisible to keyboard users navigating the UI.
 **Action:** Always verify that standalone icon buttons have explicit `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to ensure keyboard accessibility.
+
+## 2026-07-02 - Missing accessible focus states on interactive buttons
+**Learning:** Several custom interactive buttons and controls (e.g., FocusMode toggle, SearchTrigger, CopyButton, and ProblemStatusControl) lacked visible `focus-visible` outlines. This creates an accessibility gap where keyboard users cannot perceive when these elements receive focus, making navigation extremely difficult and violating standard accessibility guidelines.
+**Action:** Applied standard Tailwind `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) or CSS equivalents (`outline: 1.5px solid var(--links)`) to these custom buttons to ensure consistent and clear visual focus feedback for keyboard users.
