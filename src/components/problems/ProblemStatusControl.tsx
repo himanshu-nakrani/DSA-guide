@@ -57,7 +57,7 @@ export function ProblemStatusControl({
               aria-pressed={active}
               onClick={() => onChange(option)}
               disabled={isPending}
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+              className={`rounded-full border px-3 py-1.5 text-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] ${
                 active
                   ? "border-[color:var(--ink-blue)] bg-[color:var(--ink-blue-wash)] text-[color:var(--ink-blue)]"
                   : "border-[color:var(--rule)] text-muted-foreground hover:text-foreground"

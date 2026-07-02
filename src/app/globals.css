@@ -994,6 +994,12 @@ html[data-focus-mode] .reader-article {
   opacity: 1;
   transform: translateY(0);
 }
+.code-block .copy-button:focus-visible {
+  outline: 1.5px solid var(--links);
+  outline-offset: 2px;
+  opacity: 1;
+  transform: translateY(0);
+}
 .code-block .copy-button:hover {
   color: var(--links);
   border-color: color-mix(in srgb, var(--links) 40%, var(--border));

@@ -84,7 +84,7 @@ export function FocusMode() {
       aria-pressed={on}
       title={on ? "Exit focus mode (esc)" : "Enter focus mode (f)"}
       suppressHydrationWarning
-      className="inline-flex items-center gap-1.5 text-[0.7rem] font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors"
+      className="inline-flex items-center gap-1.5 text-[0.7rem] font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
     >
       <span suppressHydrationWarning className="inline-flex items-center gap-1.5">
         {on ? <X className="h-3 w-3" /> : <Focus className="h-3 w-3" />}
