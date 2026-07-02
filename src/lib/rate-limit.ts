@@ -125,12 +125,12 @@ function consume(key: string, policy: RateLimitPolicy, cost = 1): RateLimitResul
  * identifier is present, fall back to a coarse bucket keyed on action name.
  */
 function identifierFor(name: string, formData: FormData | null): string {
-  const raw = formData?.get("identifier");
-  if (typeof raw === "string" && raw.trim()) return raw.trim().toLowerCase();
   const email = formData?.get("email");
   if (typeof email === "string" && email.trim()) return email.trim().toLowerCase();
   const slug = formData?.get("slug") ?? formData?.get("problemSlug");
   if (typeof slug === "string" && slug.trim()) return slug.trim();
+  const raw = formData?.get("identifier");
+  if (typeof raw === "string" && raw.trim()) return raw.trim().toLowerCase();
   return "anonymous";
 }
 
