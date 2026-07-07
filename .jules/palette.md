@@ -24,3 +24,7 @@
 ## 2026-07-02 - Missing accessible focus states on interactive buttons
 **Learning:** Several custom interactive buttons and controls (e.g., FocusMode toggle, SearchTrigger, CopyButton, and ProblemStatusControl) lacked visible `focus-visible` outlines. This creates an accessibility gap where keyboard users cannot perceive when these elements receive focus, making navigation extremely difficult and violating standard accessibility guidelines.
 **Action:** Applied standard Tailwind `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) or CSS equivalents (`outline: 1.5px solid var(--links)`) to these custom buttons to ensure consistent and clear visual focus feedback for keyboard users.
+
+## 2025-07-03 - Missing loading indicators on auth forms
+**Learning:** Auth forms are critical interaction points and submit buttons that only swap text ("Please wait...") provide insufficient visual feedback compared to standard design patterns, especially since network latency can cause these states to linger.
+**Action:** When creating forms with asynchronous submission, always ensure the submit button includes a visual loading indicator (like a spinner) alongside the pending text, taking care to hide the spinner from screen readers (using `aria-hidden="true"`) to prevent redundant announcements.
