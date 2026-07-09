@@ -128,11 +128,13 @@ function identifierFor(name: string, formData: FormData | null): string {
   if (name === "login" || name === "register") {
     const email = formData?.get("email");
     if (typeof email === "string" && email.trim()) return email.trim().toLowerCase();
+    return "anonymous";
   }
 
   if (name === "progress" || name === "bookmark") {
     const slug = formData?.get("slug") ?? formData?.get("problemSlug");
     if (typeof slug === "string" && slug.trim()) return slug.trim();
+    return "anonymous";
   }
 
   const raw = formData?.get("identifier");
