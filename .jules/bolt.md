@@ -12,3 +12,7 @@
 ## 2026-06-16 - Unpaginated Data Structure Memory Bloat in Article List
 **Learning:** In `src/app/learn/page.tsx`, `prisma.topic.findMany` fetches deeply nested relationships (topics -> articles). By default, fetching `articles` fetches all columns, including massive unneeded fields like `contentMd` and `references`. Since the learn page displays many entities at once, this caused huge memory and transit bloat.
 **Action:** When querying lists or deeply nested structures (like topic's articles), always explicitly use `select` to specify exactly the minimum required fields, particularly avoiding markdown strings or large JSON blobs.
+
+## 2026-06-17 - Precomputing Search Strings in React
+**Learning:** In search or filtering components, computing searchable strings inline during the render cycle or in a dependency array that changes often (like a query state) can cause main thread blocking on every keystroke.
+**Action:** Precompute searchable strings (e.g., lowercasing and concatenating fields) in a `useMemo` that strictly depends on the data source, rather than the query input.

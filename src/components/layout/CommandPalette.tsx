@@ -53,29 +53,38 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
     };
   }, [open]);
 
+  // ⚡ BOLT: Precompute searchable strings so we don't recalculate on every keystroke.
+  // This prevents main thread blocking by avoiding string concatenation/lowercasing during typing.
+  const precomputedIndex = useMemo(() => {
+    return index.map((item) => ({
+      item,
+      hay: (
+        item.title +
+        " " +
+        ("summary" in item ? item.summary : "") +
+        " " +
+        ("moduleName" in item ? item.moduleName : "") +
+        " " +
+        ("topicName" in item ? item.topicName : "") +
+        " " +
+        ("difficulty" in item ? item.difficulty : "")
+      ).toLowerCase(),
+      titleLower: item.title.toLowerCase(),
+    }));
+  }, [index]);
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return index.slice(0, 24);
+    if (!q) return precomputedIndex.slice(0, 24).map((x) => x.item);
     const tokens = q.split(/\s+/);
-    const scored = index
-      .map((item) => {
-        const hay = (
-          item.title +
-          " " +
-          ("summary" in item ? item.summary : "") +
-          " " +
-          ("moduleName" in item ? item.moduleName : "") +
-          " " +
-          ("topicName" in item ? item.topicName : "") +
-          " " +
-          ("difficulty" in item ? item.difficulty : "")
-        ).toLowerCase();
+    const scored = precomputedIndex
+      .map(({ item, hay, titleLower }) => {
         let score = 0;
         for (const t of tokens) {
           const idx = hay.indexOf(t);
           if (idx === -1) return null;
           score += idx === 0 ? 8 : hay.includes(" " + t) ? 4 : 1;
-          if (item.title.toLowerCase().includes(t)) score += 5;
+          if (titleLower.includes(t)) score += 5;
         }
         return { item, score };
       })
@@ -84,7 +93,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
       .slice(0, 40)
       .map((x) => x.item);
     return scored;
-  }, [query, index]);
+  }, [query, precomputedIndex]);
 
   useEffect(() => {
     const el = listRef.current?.querySelector<HTMLElement>(`[data-idx="${active}"]`);
