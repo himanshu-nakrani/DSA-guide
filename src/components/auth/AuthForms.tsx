@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useId } from "react";
 import { Loader2 } from "lucide-react";
 import { loginAction, registerAction, type AuthFormState } from "@/app/auth/actions";
 
@@ -20,6 +20,7 @@ function AuthForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  const formId = useId();
 
   return (
     <form action={formAction} className="surface-card p-6 md:p-7 space-y-4">
@@ -30,21 +31,28 @@ function AuthForm({
       </div>
 
       {includeName && (
-        <label className="block space-y-1.5">
-          <span className="text-sm font-medium">Name</span>
+        <div className="block space-y-1.5">
+          <label htmlFor={`${formId}-name`} className="text-sm font-medium">
+            Name
+          </label>
           <input
+            id={`${formId}-name`}
             type="text"
             name="name"
             autoComplete="name"
             className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 outline-none focus:border-[color:var(--ink-blue)]"
             placeholder="Ada Lovelace"
           />
-        </label>
+        </div>
       )}
 
-      <label className="block space-y-1.5">
-        <span className="text-sm font-medium">Email</span>
+      <div className="block space-y-1.5">
+        <label htmlFor={`${formId}-email`} className="text-sm font-medium">
+          Email <span aria-hidden="true" className="text-red-500">*</span>
+          <span className="sr-only"> (required)</span>
+        </label>
         <input
+          id={`${formId}-email`}
           type="email"
           name="email"
           autoComplete="email"
@@ -52,11 +60,15 @@ function AuthForm({
           className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 outline-none focus:border-[color:var(--ink-blue)]"
           placeholder="you@example.com"
         />
-      </label>
+      </div>
 
-      <label className="block space-y-1.5">
-        <span className="text-sm font-medium">Password</span>
+      <div className="block space-y-1.5">
+        <label htmlFor={`${formId}-password`} className="text-sm font-medium">
+          Password <span aria-hidden="true" className="text-red-500">*</span>
+          <span className="sr-only"> (required)</span>
+        </label>
         <input
+          id={`${formId}-password`}
           type="password"
           name="password"
           autoComplete={includeName ? "new-password" : "current-password"}
@@ -64,10 +76,10 @@ function AuthForm({
           className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 outline-none focus:border-[color:var(--ink-blue)]"
           placeholder="At least 8 characters"
         />
-      </label>
+      </div>
 
       {state.error && (
-        <p className="rounded-md border border-red-300/60 bg-red-500/8 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+        <p role="alert" className="rounded-md border border-red-300/60 bg-red-500/8 px-3 py-2 text-sm text-red-700 dark:text-red-300">
           {state.error}
         </p>
       )}
