@@ -16,3 +16,7 @@
 ## 2026-06-17 - Precomputing Search Strings in React
 **Learning:** In search or filtering components, computing searchable strings inline during the render cycle or in a dependency array that changes often (like a query state) can cause main thread blocking on every keystroke.
 **Action:** Precompute searchable strings (e.g., lowercasing and concatenating fields) in a `useMemo` that strictly depends on the data source, rather than the query input.
+
+## 2026-06-18 - Replacing O(N²) Array Lookups with O(1) Sets in List Traversals
+**Learning:** In list and dashboard views (like `src/app/dashboard/page.tsx`), iterating over items (like modules/topics) and checking an array of user state (like `readSlugs.includes(slug)`) inside `.map()`, `.filter()`, or `.find()` loops creates an O(N*M) or O(N²) performance bottleneck, blocking the main thread when user state scales.
+**Action:** Always convert user state arrays into a `Set` (e.g., `const readSlugSet = new Set(readSlugs)`) before traversing lists, and use `.has()` for O(1) lookups to avoid O(N²) scaling issues.
