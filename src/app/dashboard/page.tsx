@@ -174,6 +174,9 @@ export default async function DashboardPage() {
   const allArticles = articleProgress;
   const readSlugs = Array.from(new Set(articleProgress.map((entry) => entry.article.slug)));
 
+  // ⚡ Bolt: Use a Set for O(1) lookups below instead of O(N) array .includes()
+  const readSlugSet = new Set(readSlugs);
+
   const totalArticles = modules.reduce(
     (sum, module) => sum + module.topics.reduce((inner, topic) => inner + topic.articles.length, 0),
     0,
@@ -188,7 +191,7 @@ export default async function DashboardPage() {
 
   const nextModule = modules.find((module) => {
     const moduleSlugs = module.topics.flatMap((topic) => topic.articles.map((article) => article.slug));
-    return moduleSlugs.some((slug) => !readSlugs.includes(slug));
+    return moduleSlugs.some((slug) => !readSlugSet.has(slug));
   });
 
   const statusBuckets = [
@@ -209,7 +212,7 @@ export default async function DashboardPage() {
   const bestDayCount = Math.max(1, ...activityDays.map((day) => day.count));
   const moduleCompletion = modules.map((module) => {
     const moduleSlugs = module.topics.flatMap((topic) => topic.articles.map((article) => article.slug));
-    const readCount = moduleSlugs.filter((slug) => readSlugs.includes(slug)).length;
+    const readCount = moduleSlugs.filter((slug) => readSlugSet.has(slug)).length;
     const total = moduleSlugs.length;
     const pct = total === 0 ? 0 : Math.round((readCount / total) * 100);
     return {
@@ -217,7 +220,7 @@ export default async function DashboardPage() {
       readCount,
       total,
       pct,
-      nextArticle: module.topics.flatMap((topic) => topic.articles).find((article) => !readSlugs.includes(article.slug)) ?? null,
+      nextArticle: module.topics.flatMap((topic) => topic.articles).find((article) => !readSlugSet.has(article.slug)) ?? null,
     };
   });
 
