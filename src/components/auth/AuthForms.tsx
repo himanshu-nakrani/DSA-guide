@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useId } from "react";
-import { Loader2 } from "lucide-react";
+import { useActionState, useId, useState } from "react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { loginAction, registerAction, type AuthFormState } from "@/app/auth/actions";
 
 const initialState: AuthFormState = {};
@@ -19,8 +19,11 @@ function AuthForm({
   includeName?: boolean;
   submitLabel: string;
 }) {
+
   const [state, formAction, pending] = useActionState(action, initialState);
   const formId = useId();
+  const [showPassword, setShowPassword] = useState(false);
+
 
   return (
     <form action={formAction} className="surface-card p-6 md:p-7 space-y-4">
@@ -67,15 +70,31 @@ function AuthForm({
           Password <span aria-hidden="true" className="text-red-500">*</span>
           <span className="sr-only"> (required)</span>
         </label>
-        <input
-          id={`${formId}-password`}
-          type="password"
-          name="password"
-          autoComplete={includeName ? "new-password" : "current-password"}
-          required
-          className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 outline-none focus:border-[color:var(--ink-blue)]"
-          placeholder="At least 8 characters"
-        />
+        <div className="relative">
+          <input
+            id={`${formId}-password`}
+            type={showPassword ? "text" : "password"}
+            name="password"
+            autoComplete={includeName ? "new-password" : "current-password"}
+            required
+            className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background pl-3 pr-10 py-2 outline-none focus:border-[color:var(--ink-blue)]"
+            placeholder="At least 8 characters"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            title={showPassword ? "Hide password" : "Show password"}
+            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-muted-foreground hover:text-[color:var(--ink-blue)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] rounded-md"
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" strokeWidth={1.5} />
+            ) : (
+              <Eye className="h-4 w-4" strokeWidth={1.5} />
+            )}
+          </button>
+        </div>
       </div>
 
       {state.error && (
