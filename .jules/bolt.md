@@ -20,3 +20,7 @@
 ## 2026-06-18 - Replacing O(N²) Array Lookups with O(1) Sets in List Traversals
 **Learning:** In list and dashboard views (like `src/app/dashboard/page.tsx`), iterating over items (like modules/topics) and checking an array of user state (like `readSlugs.includes(slug)`) inside `.map()`, `.filter()`, or `.find()` loops creates an O(N*M) or O(N²) performance bottleneck, blocking the main thread when user state scales.
 **Action:** Always convert user state arrays into a `Set` (e.g., `const readSlugSet = new Set(readSlugs)`) before traversing lists, and use `.has()` for O(1) lookups to avoid O(N²) scaling issues.
+
+## 2024-07-17 - [Optimizing Deep Prisma Relationships]
+**Learning:** Prisma's `include` on deeply nested relations (like `topics.topic.module`) fetches all fields of the related models by default, which can be disastrous for memory and transit size when models contain large text fields (like `statementMd` or `examplesJson`), even if you are just trying to display a list view.
+**Action:** Always prefer `select` over `include` when fetching list views or deeply nested relationships, explicitly listing only the required fields (e.g., `id`, `slug`, `name`). This keeps payload sizes minimal and avoids N+1 style data bloat.
