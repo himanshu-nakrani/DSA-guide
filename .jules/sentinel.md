@@ -30,3 +30,8 @@
 **Vulnerability:** The rate limiter identifier derivation allowed attackers to spoof their identity. By passing a different target identifier (e.g., via the generic `identifier` field in a payload) when specific action fields (like `email` for login) were missing, an attacker could artificially consume the quota of other users (Denial of Service/Account Lockout).
 **Learning:** When determining rate limiting buckets based on user inputs, it is critical to ensure that missing primary identifiers DO NOT fall through to generic fallback identifier checks in the same payload.
 **Prevention:** Immediately terminate key derivation evaluation (e.g., return "anonymous") once it enters an action-specific branch, preventing malicious field injection from taking effect.
+
+## 2026-07-18 - [DoS Risk via Resource Exhaustion]
+**Vulnerability:** The authentication endpoints (`registerAction`, `loginAction`) lacked maximum length constraints on user inputs (e.g., passwords, emails, names).
+**Learning:** Without input length limits, attackers could send excessively long strings. When passed to computationally expensive functions like `scrypt`, this could cause severe resource exhaustion (CPU and memory) and stall the event loop, leading to a Denial of Service (DoS) for all other users.
+**Prevention:** Enforce strict maximum length constraints (e.g., 256 characters) on all user inputs in API and authentication endpoints *before* any processing or database lookups occur.

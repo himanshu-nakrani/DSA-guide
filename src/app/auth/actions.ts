@@ -42,6 +42,9 @@ export async function registerAction(
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
+  if (password.length > 256 || email.length > 256 || name.length > 256) {
+    return { error: "Input is too long." };
+  }
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -77,6 +80,9 @@ export async function loginAction(
 
   if (!email || !password) {
     return { error: "Email and password are required." };
+  }
+  if (password.length > 256 || email.length > 256) {
+    return { error: "Input is too long." };
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
