@@ -31,6 +31,10 @@
 **Learning:** When determining rate limiting buckets based on user inputs, it is critical to ensure that missing primary identifiers DO NOT fall through to generic fallback identifier checks in the same payload.
 **Prevention:** Immediately terminate key derivation evaluation (e.g., return "anonymous") once it enters an action-specific branch, preventing malicious field injection from taking effect.
 
+## 2024-07-17 - Authentication DoS via Extremely Long Inputs
+**Vulnerability:** The authentication endpoints (`registerAction` and `loginAction`) lacked maximum length constraints for user inputs. Submitting an extremely long password string (e.g., millions of characters) could cause the Node event loop to block heavily while allocating memory or processing the slow, CPU-intensive `scrypt` hashing function, leading to Denial of Service (DoS) for other users.
+**Learning:** Functions that perform computationally expensive operations like cryptographic hashing must enforce strict, reasonable upper bounds on input sizes to prevent asymmetric resource exhaustion attacks.
+**Prevention:** Always validate maximum input lengths on API endpoints, especially for fields subjected to heavy computation or direct database lookups (like passwords or emails). Common limits are 72 characters for passwords and 255 characters for emails.
 ## 2026-07-18 - [DoS Risk via Resource Exhaustion]
 **Vulnerability:** The authentication endpoints (`registerAction`, `loginAction`) lacked maximum length constraints on user inputs (e.g., passwords, emails, names).
 **Learning:** Without input length limits, attackers could send excessively long strings. When passed to computationally expensive functions like `scrypt`, this could cause severe resource exhaustion (CPU and memory) and stall the event loop, leading to a Denial of Service (DoS) for all other users.

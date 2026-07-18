@@ -46,6 +46,12 @@ export async function registerAction(
     return { error: "Input is too long." };
   }
 
+  // SECURITY: Prevent resource exhaustion (DoS) via extremely long inputs.
+  // Scrypt hashing or database lookups with massive strings can block the event loop or crash the server.
+  if (email.length > 255 || password.length > 72 || name.length > 255) {
+    return { error: "Input exceeds maximum allowed length." };
+  }
+
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     return { error: "An account with that email already exists." };
@@ -83,6 +89,11 @@ export async function loginAction(
   }
   if (password.length > 256 || email.length > 256) {
     return { error: "Input is too long." };
+  }
+
+  // SECURITY: Prevent resource exhaustion (DoS) via extremely long inputs.
+  if (email.length > 255 || password.length > 72) {
+    return { error: "Invalid email or password." };
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
