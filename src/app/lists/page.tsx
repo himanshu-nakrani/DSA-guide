@@ -65,9 +65,14 @@ export default async function ListsPage() {
                 difficulty: true,
                 acceptanceRate: true,
                 topics: {
-                  include: {
+                  select: {
                     topic: {
-                      include: { module: true },
+                      select: {
+                        id: true,
+                        slug: true,
+                        name: true,
+                        module: { select: { id: true, slug: true, name: true } },
+                      },
                     },
                   },
                 },

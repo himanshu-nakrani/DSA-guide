@@ -126,7 +126,18 @@ export default async function ProblemDetailPage({
       title: true,
       difficulty: true,
       acceptanceRate: true,
-      topics: { include: { topic: { include: { module: true } } } },
+      topics: {
+        select: {
+          topic: {
+            select: {
+              id: true,
+              slug: true,
+              name: true,
+              module: { select: { id: true, slug: true, name: true } },
+            },
+          },
+        },
+      },
       hints: { select: { id: true } },
       editorial: { select: { id: true } },
     },

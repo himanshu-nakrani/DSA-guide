@@ -71,7 +71,13 @@ export default async function ProblemsPage({
   const topics = await prisma.topic.findMany({
     where: { problems: { some: { problem: { status: "PUBLISHED" } } } },
     orderBy: [{ module: { order: "asc" } }, { order: "asc" }],
-    include: { module: true },
+    // ⚡ Bolt: Use `select` instead of `include` to minimize fetched data size
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      module: { select: { name: true } },
+    },
   });
 
   const problemWhere: Prisma.ProblemWhereInput = {
@@ -132,9 +138,15 @@ export default async function ProblemsPage({
       difficulty: true,
       acceptanceRate: true,
       topics: {
-        include: {
+        // ⚡ Bolt: Use `select` instead of `include` for relationships to prevent fetching unnecessary fields
+        select: {
           topic: {
-            include: { module: true },
+            select: {
+              id: true,
+              slug: true,
+              name: true,
+              module: { select: { id: true, slug: true, name: true } },
+            },
           },
         },
       },
