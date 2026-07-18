@@ -42,6 +42,9 @@ export async function registerAction(
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
+  if (password.length > 256 || email.length > 256 || name.length > 256) {
+    return { error: "Input is too long." };
+  }
 
   // SECURITY: Prevent resource exhaustion (DoS) via extremely long inputs.
   // Scrypt hashing or database lookups with massive strings can block the event loop or crash the server.
@@ -83,6 +86,9 @@ export async function loginAction(
 
   if (!email || !password) {
     return { error: "Email and password are required." };
+  }
+  if (password.length > 256 || email.length > 256) {
+    return { error: "Input is too long." };
   }
 
   // SECURITY: Prevent resource exhaustion (DoS) via extremely long inputs.

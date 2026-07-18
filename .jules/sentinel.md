@@ -35,3 +35,7 @@
 **Vulnerability:** The authentication endpoints (`registerAction` and `loginAction`) lacked maximum length constraints for user inputs. Submitting an extremely long password string (e.g., millions of characters) could cause the Node event loop to block heavily while allocating memory or processing the slow, CPU-intensive `scrypt` hashing function, leading to Denial of Service (DoS) for other users.
 **Learning:** Functions that perform computationally expensive operations like cryptographic hashing must enforce strict, reasonable upper bounds on input sizes to prevent asymmetric resource exhaustion attacks.
 **Prevention:** Always validate maximum input lengths on API endpoints, especially for fields subjected to heavy computation or direct database lookups (like passwords or emails). Common limits are 72 characters for passwords and 255 characters for emails.
+## 2026-07-18 - [DoS Risk via Resource Exhaustion]
+**Vulnerability:** The authentication endpoints (`registerAction`, `loginAction`) lacked maximum length constraints on user inputs (e.g., passwords, emails, names).
+**Learning:** Without input length limits, attackers could send excessively long strings. When passed to computationally expensive functions like `scrypt`, this could cause severe resource exhaustion (CPU and memory) and stall the event loop, leading to a Denial of Service (DoS) for all other users.
+**Prevention:** Enforce strict maximum length constraints (e.g., 256 characters) on all user inputs in API and authentication endpoints *before* any processing or database lookups occur.
