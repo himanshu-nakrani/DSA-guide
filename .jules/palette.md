@@ -35,3 +35,6 @@
 ## 2026-07-16 - [Add password visibility toggle]
 **Learning:** Adding a "show password" toggle significantly improves accessibility and usability, particularly for users with cognitive or motor impairments who might struggle to type complex passwords accurately without visual feedback. Including explicit `aria-label`, `aria-pressed`, and `focus-visible` styles ensures screen readers and keyboard users can effectively navigate and interact with the toggle.
 **Action:** Consistently apply password visibility toggles on authentication forms using this accessible pattern to reduce login friction and password reset requests.
+## 2024-07-24 - Server Action Form Feedback
+**Learning:** Next.js Server Actions executed via native HTML forms (`<form action={myAction}>`) do not provide default loading indicators. Without explicit `useFormStatus` hooks, users receive no visual feedback that their submission (like bookmarking a problem) is processing.
+**Action:** Always extract submit buttons inside Server Action forms into a separate Client Component that uses `useFormStatus()` to provide immediate visual feedback (e.g., a spinner and disabled state).
