@@ -137,8 +137,6 @@ function identifierFor(name: string, formData: FormData | null): string {
     return "anonymous";
   }
 
-  const raw = formData?.get("identifier");
-  if (typeof raw === "string" && raw.trim()) return raw.trim().toLowerCase();
   return "anonymous";
 }
 
