@@ -38,3 +38,7 @@
 ## 2024-07-24 - Server Action Form Feedback
 **Learning:** Next.js Server Actions executed via native HTML forms (`<form action={myAction}>`) do not provide default loading indicators. Without explicit `useFormStatus` hooks, users receive no visual feedback that their submission (like bookmarking a problem) is processing.
 **Action:** Always extract submit buttons inside Server Action forms into a separate Client Component that uses `useFormStatus()` to provide immediate visual feedback (e.g., a spinner and disabled state).
+
+## 2025-10-24 - Server Action Form Feedback for Logout
+**Learning:** Next.js Server Actions executed via native HTML forms (`<form action={logoutAction}>`) do not provide default loading indicators. Without explicit `useFormStatus` hooks, users receive no visual feedback that their sign out is processing.
+**Action:** Always extract submit buttons inside Server Action forms (like `LogoutButton`) into a separate Client Component that uses `useFormStatus()` to provide immediate visual feedback (e.g., a spinner and disabled state).
