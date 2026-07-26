@@ -131,8 +131,14 @@ function identifierFor(name: string, formData: FormData | null): string {
     return "anonymous";
   }
 
-  if (name === "progress" || name === "bookmark") {
-    const slug = formData?.get("slug") ?? formData?.get("problemSlug");
+  if (name === "progress") {
+    const slug = formData?.get("slug");
+    if (typeof slug === "string" && slug.trim()) return slug.trim();
+    return "anonymous";
+  }
+
+  if (name === "bookmark") {
+    const slug = formData?.get("problemSlug");
     if (typeof slug === "string" && slug.trim()) return slug.trim();
     return "anonymous";
   }

@@ -43,3 +43,8 @@
 **Vulnerability:** The rate limiter identifier derivation allowed attackers to spoof their identity. By passing a different target identifier (e.g., via the generic `identifier` field in a payload) when specific action fields (like `email` for login) were missing, an attacker could artificially consume the quota of other users (Denial of Service/Account Lockout).
 **Learning:** When determining rate limiting buckets based on user inputs, it is critical to ensure that missing primary identifiers DO NOT fall through to generic fallback identifier checks in the same payload.
 **Prevention:** Immediately terminate key derivation evaluation (e.g., return "anonymous") once it enters an action-specific branch, preventing malicious field injection from taking effect.
+
+## 2026-07-26 - Rate Limiter Bypass via Sibling Field Injection
+**Vulnerability:** The rate limiter identifier derivation in `identifierFor` allowed attackers to spoof keys for progress and bookmark actions. Because the logic checked for `slug` OR `problemSlug` in the same block for both actions, an attacker could bypass limits by injecting the non-expected field (e.g., sending `slug` to the bookmark action instead of `problemSlug`).
+**Learning:** Combining key extraction logic for distinct actions allows attackers to exploit the fallback behavior by injecting unexpected fields, resulting in rate limit bypass and potential DoS.
+**Prevention:** Strictly restrict key extraction to the exact expected fields for the given action type (e.g., only check `slug` for progress, only check `problemSlug` for bookmarks). Avoid shared fallback logic.
