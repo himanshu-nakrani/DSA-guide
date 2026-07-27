@@ -24,3 +24,6 @@
 ## 2024-07-17 - [Optimizing Deep Prisma Relationships]
 **Learning:** Prisma's `include` on deeply nested relations (like `topics.topic.module`) fetches all fields of the related models by default, which can be disastrous for memory and transit size when models contain large text fields (like `statementMd` or `examplesJson`), even if you are just trying to display a list view.
 **Action:** Always prefer `select` over `include` when fetching list views or deeply nested relationships, explicitly listing only the required fields (e.g., `id`, `slug`, `name`). This keeps payload sizes minimal and avoids N+1 style data bloat.
+## 2025-05-18 - Hidden O(N²) bottlenecks in array mapping
+**Learning:** Using array inclusion methods like `.includes()` or `.some()` inside list traversals (such as React's `.map()` for rendering or graph adjacency loops) silently creates an O(N²) bottleneck, scaling quadratically with data size.
+**Action:** When evaluating inclusion repeatedly inside a traversal, precompute the target array into a `Set` before the loop (or alongside it) and use `.has()` for strict O(1) lookups.
