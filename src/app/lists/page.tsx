@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Bookmark, Plus } from "lucide-react";
 import { createListAction, removeProblemFromListAction } from "@/app/lists/actions";
+import { CreateListButton, RemoveListButton } from "./SubmitButtons";
 import { ProblemCard } from "@/components/problems/ProblemCard";
 import { getCurrentUser } from "@/lib/auth";
 import { BOOKMARK_LIST_NAME, getBookmarkProblemIds, getOrCreateBookmarkList } from "@/lib/lists";
@@ -145,9 +146,7 @@ export default async function ListsPage() {
             placeholder="Optional description"
             className="rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
           />
-          <button type="submit" className="btn-ink justify-center">
-            Create
-          </button>
+          <CreateListButton />
         </form>
       </section>
 
@@ -195,12 +194,7 @@ export default async function ListsPage() {
                         <input type="hidden" name="listId" value={list.id} />
                         <input type="hidden" name="problemSlug" value={item.problem.slug} />
                         <input type="hidden" name="returnTo" value="/lists" />
-                        <button
-                          type="submit"
-                          className="text-sm text-muted-foreground hover:text-[color:var(--ink-blue)] transition-colors"
-                        >
-                          Remove from {list.name}
-                        </button>
+                        <RemoveListButton listName={list.name} />
                       </form>
                     </div>
                   );
