@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { getOrCreateBookmarkList } from "@/lib/lists";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -45,6 +46,9 @@ export async function createListAction(formData: FormData) {
 }
 
 export async function toggleBookmarkAction(formData: FormData) {
+  const rateLimit = await checkRateLimit("bookmark", formData);
+  if (rateLimit.limited) return;
+
   const user = await getCurrentUser();
   if (!user) return;
 
