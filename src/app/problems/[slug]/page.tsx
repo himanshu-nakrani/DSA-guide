@@ -9,6 +9,7 @@ import { getProblemExternalUrl } from "@/lib/problem-links";
 import { BookmarkButton } from "@/components/problems/BookmarkButton";
 import { ProblemCard } from "@/components/problems/ProblemCard";
 import { ProblemStatusControl } from "@/components/problems/ProblemStatusControl";
+import { SaveToListButton } from "./SubmitButton";
 import { difficultyClass, difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -225,9 +226,7 @@ export default async function ProblemDetailPage({
                     <option key={list.id} value={list.id}>{list.name}</option>
                   ))}
                 </select>
-                <button type="submit" className="btn-ink">
-                  Save
-                </button>
+                <SaveToListButton />
               </div>
             </form>
           )}
