@@ -72,6 +72,13 @@ export function GraphTraversal({
   });
 
   const f = frames[step];
+
+  // ⚡ Bolt: Precompute Sets for O(1) lookups to avoid O(N^2) bottlenecks inside map
+  const frontierSet = React.useMemo(() => new Set(f.frontier), [f.frontier]);
+  const traversedEdgesSet = React.useMemo(() => new Set(
+    f.treeEdges.map(([x, y]) => `${Math.min(x, y)}-${Math.max(x, y)}`)
+  ), [f.treeEdges]);
+
   const W = 620;
   const H = 260;
 
@@ -103,9 +110,8 @@ export function GraphTraversal({
           {graph.edges.map(([a, b], i) => {
             const A = graph.nodes[a];
             const B = graph.nodes[b];
-            const traversed = f.treeEdges.some(
-              ([x, y]) => (x === a && y === b) || (x === b && y === a),
-            );
+            const edgeKey = `${Math.min(a, b)}-${Math.max(a, b)}`;
+            const traversed = traversedEdgesSet.has(edgeKey);
             return (
               <line
                 key={i}
@@ -120,7 +126,7 @@ export function GraphTraversal({
           })}
           {graph.nodes.map((n) => {
             const visited = f.visited.has(n.id);
-            const inFrontier = f.frontier.includes(n.id);
+            const inFrontier = frontierSet.has(n.id);
             const isCurrent = f.current === n.id;
             return (
               <g key={n.id}>
@@ -211,6 +217,8 @@ function computeFrames(g: Graph, start: number, mode: Mode): Frame[] {
   const frames: Frame[] = [];
   const visited = new Set<number>();
   const frontier: number[] = [start];
+  // ⚡ Bolt: Maintain a companion Set to O(1) check inclusion in the frontier array
+  const frontierSet = new Set<number>([start]);
   const order: number[] = [];
   const treeEdges: Edge[] = [];
   frames.push({
@@ -223,6 +231,7 @@ function computeFrames(g: Graph, start: number, mode: Mode): Frame[] {
 
   while (frontier.length) {
     const u = mode === "bfs" ? frontier.shift()! : frontier.pop()!;
+    frontierSet.delete(u);
     if (visited.has(u)) {
       frames.push({
         current: null,
@@ -237,8 +246,9 @@ function computeFrames(g: Graph, start: number, mode: Mode): Frame[] {
     order.push(u);
     const neighbors = (adj.get(u) ?? []).slice().sort((a, b) => a - b);
     for (const v of neighbors) {
-      if (!visited.has(v) && !frontier.includes(v)) {
+      if (!visited.has(v) && !frontierSet.has(v)) {
         frontier.push(v);
+        frontierSet.add(v);
         treeEdges.push([u, v]);
       }
     }
