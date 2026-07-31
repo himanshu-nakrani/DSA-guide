@@ -22,7 +22,8 @@ export type AuthFormState = {
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
-  return typeof value === "string" ? value.trim() : "";
+  // SECURITY: Cap length before trimming to prevent DoS via massive strings.
+  return typeof value === "string" ? value.slice(0, 4096).trim() : "";
 }
 
 export async function registerAction(

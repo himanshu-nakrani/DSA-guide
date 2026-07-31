@@ -8,7 +8,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
-  return typeof value === "string" ? value.trim() : "";
+  // SECURITY: Cap length before trimming to prevent DoS via massive strings.
+  return typeof value === "string" ? value.slice(0, 4096).trim() : "";
 }
 
 async function getProblemId(slug: string) {
@@ -33,6 +34,9 @@ export async function createListAction(formData: FormData) {
   const name = getString(formData, "name");
   const description = getString(formData, "description");
   if (!name) return;
+
+  // SECURITY: Prevent unbounded storage bloat.
+  if (name.length > 255 || description.length > 1024) return;
 
   await prisma.customList.create({
     data: {
