@@ -127,19 +127,28 @@ function consume(key: string, policy: RateLimitPolicy, cost = 1): RateLimitResul
 function identifierFor(name: string, formData: FormData | null): string {
   if (name === "login" || name === "register") {
     const email = formData?.get("email");
-    if (typeof email === "string" && email.trim()) return email.trim().toLowerCase();
+    if (typeof email === "string") {
+      const val = email.slice(0, 255).trim();
+      if (val) return val.toLowerCase();
+    }
     return "anonymous";
   }
 
   if (name === "progress") {
     const slug = formData?.get("slug");
-    if (typeof slug === "string" && slug.trim()) return slug.trim();
+    if (typeof slug === "string") {
+      const val = slug.slice(0, 255).trim();
+      if (val) return val;
+    }
     return "anonymous";
   }
 
   if (name === "bookmark") {
     const slug = formData?.get("problemSlug");
-    if (typeof slug === "string" && slug.trim()) return slug.trim();
+    if (typeof slug === "string") {
+      const val = slug.slice(0, 255).trim();
+      if (val) return val;
+    }
     return "anonymous";
   }
 
