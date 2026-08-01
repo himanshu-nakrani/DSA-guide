@@ -10,34 +10,50 @@ export function isProblemStarted(status?: ProgressStatus | null) {
   return Boolean(status && status !== ProgressStatus.NEW);
 }
 
+// ⚡ Bolt: Single pass iteration over a Set avoids intermediate Array allocations
+// and multiple O(N) filter traversals.
 export function summarizeProblemProgress(
   problemIds: string[],
   progressByProblemId: Map<string, ProgressStatus>,
 ) {
-  const uniqueProblemIds = Array.from(new Set(problemIds));
-  const solved = uniqueProblemIds.filter((problemId) =>
-    isProblemComplete(progressByProblemId.get(problemId)),
-  ).length;
-  const started = uniqueProblemIds.filter((problemId) =>
-    isProblemStarted(progressByProblemId.get(problemId)),
-  ).length;
+  const uniqueProblemIds = new Set(problemIds);
+  let solved = 0;
+  let started = 0;
 
+  for (const problemId of uniqueProblemIds) {
+    const status = progressByProblemId.get(problemId);
+    if (isProblemComplete(status)) solved++;
+    if (isProblemStarted(status)) started++;
+  }
+
+  const total = uniqueProblemIds.size;
   return {
-    total: uniqueProblemIds.length,
+    total,
     solved,
     started,
-    percent: uniqueProblemIds.length === 0 ? 0 : Math.round((solved / uniqueProblemIds.length) * 100),
+    percent: total === 0 ? 0 : Math.round((solved / total) * 100),
   };
 }
 
+// ⚡ Bolt: A single loop replaces multiple Array.prototype.find calls to prevent
+// multiple O(N) traversals, returning early for the first unstarted problem.
 export function pickNextProblem<T extends { id: string }>(
   problems: T[],
   progressByProblemId: Map<string, ProgressStatus>,
 ) {
-  return (
-    problems.find((problem) => !isProblemStarted(progressByProblemId.get(problem.id))) ??
-    problems.find((problem) => !isProblemComplete(progressByProblemId.get(problem.id))) ??
-    problems[0] ??
-    null
-  );
+  let firstUncompleted = null;
+
+  for (const problem of problems) {
+    const status = progressByProblemId.get(problem.id);
+
+    if (!isProblemStarted(status)) {
+      return problem;
+    }
+
+    if (!firstUncompleted && !isProblemComplete(status)) {
+      firstUncompleted = problem;
+    }
+  }
+
+  return firstUncompleted ?? problems[0] ?? null;
 }
