@@ -27,3 +27,7 @@
 ## 2025-05-18 - Hidden O(N²) bottlenecks in array mapping
 **Learning:** Using array inclusion methods like `.includes()` or `.some()` inside list traversals (such as React's `.map()` for rendering or graph adjacency loops) silently creates an O(N²) bottleneck, scaling quadratically with data size.
 **Action:** When evaluating inclusion repeatedly inside a traversal, precompute the target array into a `Set` before the loop (or alongside it) and use `.has()` for strict O(1) lookups.
+
+## 2026-08-02 - Prevent Hidden O(N) Array Allocations in Aggregations
+**Learning:** Chaining array methods like `.flatMap().map().some()` or `.filter().length` in performance-sensitive views like the dashboard creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread.
+**Action:** Use explicit single-pass iteration (like `for...of`) when aggregating or searching over collections to prevent unnecessary allocations and redundant passes.

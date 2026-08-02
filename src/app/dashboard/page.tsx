@@ -182,16 +182,24 @@ export default async function DashboardPage() {
     0,
   );
   const articlePct = totalArticles === 0 ? 0 : Math.round((readSlugs.length / totalArticles) * 100);
-  const solvedCount = allProblems.filter(
-    (entry) => entry.status === ProgressStatus.SOLVED || entry.status === ProgressStatus.MASTERED,
-  ).length;
-  const attemptedCount = allProblems.filter(
-    (entry) => entry.status === ProgressStatus.ATTEMPTED || entry.status === ProgressStatus.NEEDS_REVISION,
-  ).length;
+  // ⚡ Bolt: Prevent chained array allocations using explicit single-pass iteration
+  let solvedCount = 0;
+  let attemptedCount = 0;
+  for (const entry of allProblems) {
+    if (entry.status === ProgressStatus.SOLVED || entry.status === ProgressStatus.MASTERED) {
+      solvedCount++;
+    } else if (entry.status === ProgressStatus.ATTEMPTED || entry.status === ProgressStatus.NEEDS_REVISION) {
+      attemptedCount++;
+    }
+  }
 
   const nextModule = modules.find((module) => {
-    const moduleSlugs = module.topics.flatMap((topic) => topic.articles.map((article) => article.slug));
-    return moduleSlugs.some((slug) => !readSlugSet.has(slug));
+    for (const topic of module.topics) {
+      for (const article of topic.articles) {
+        if (!readSlugSet.has(article.slug)) return true;
+      }
+    }
+    return false;
   });
 
   const statusBuckets = [
@@ -211,16 +219,28 @@ export default async function DashboardPage() {
   const currentStreak = computeCurrentStreak(activityDays.map((day) => day.dateKey));
   const bestDayCount = Math.max(1, ...activityDays.map((day) => day.count));
   const moduleCompletion = modules.map((module) => {
-    const moduleSlugs = module.topics.flatMap((topic) => topic.articles.map((article) => article.slug));
-    const readCount = moduleSlugs.filter((slug) => readSlugSet.has(slug)).length;
-    const total = moduleSlugs.length;
+    let readCount = 0;
+    let total = 0;
+    let nextArticle: { id: string; slug: string; title: string; } | null = null;
+
+    for (const topic of module.topics) {
+      for (const article of topic.articles) {
+        total++;
+        if (readSlugSet.has(article.slug)) {
+          readCount++;
+        } else if (!nextArticle) {
+          nextArticle = article;
+        }
+      }
+    }
+
     const pct = total === 0 ? 0 : Math.round((readCount / total) * 100);
     return {
       name: module.name,
       readCount,
       total,
       pct,
-      nextArticle: module.topics.flatMap((topic) => topic.articles).find((article) => !readSlugSet.has(article.slug)) ?? null,
+      nextArticle,
     };
   });
 
