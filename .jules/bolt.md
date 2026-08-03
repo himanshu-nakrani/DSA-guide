@@ -34,3 +34,7 @@
 ## 2026-08-02 - Prevent Hidden O(N) Array Allocations in Aggregations
 **Learning:** Chaining array methods like `.flatMap().map().some()` or `.filter().length` in performance-sensitive views like the dashboard creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread.
 **Action:** Use explicit single-pass iteration (like `for...of`) when aggregating or searching over collections to prevent unnecessary allocations and redundant passes.
+
+## 2026-08-03 - Prevent Hidden O(N) Array Allocations in Aggregations
+**Learning:** Chaining array methods like `.flatMap().map().some()` or `.map().filter().sort().slice().map()` in performance-sensitive views creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread.
+**Action:** Use explicit single-pass iteration (like `for...of`) when aggregating or searching over collections to prevent unnecessary allocations and redundant passes. DO NOT do this for small constant-size arrays or simple concise conditions like `.filter(Boolean).length` as that hurts readability for unmeasurable gains.
