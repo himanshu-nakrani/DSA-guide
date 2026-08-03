@@ -14,6 +14,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing article slug." }, { status: 400 });
   }
 
+  // SECURITY: Validate type and enforce strict maximum length constraints on JSON request body fields
+  // before processing to prevent unhandled type exceptions and database-level resource exhaustion (DoS) attacks.
+  if (typeof body.slug !== "string" || body.slug.length > 255) {
+    return NextResponse.json({ error: "Invalid article slug." }, { status: 400 });
+  }
+
   const rateLimit = await checkRateLimit("progress", {
     get: (key: string) => (key === "slug" ? body.slug : null),
   } as unknown as FormData);
