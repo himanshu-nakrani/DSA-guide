@@ -46,3 +46,7 @@
 ## $(date +%Y-%m-%d) - Adding loading states to Server Action forms
 **Learning:** Next.js Server Actions executed via native HTML `<form action={...}>` do not provide automatic loading states. This causes a poor user experience as the user might click the submit button multiple times before the server responds, without any visual feedback.
 **Action:** Always extract submit buttons for Server Action forms into a separate Client Component that uses `useFormStatus()` from `react-dom` to read the `pending` state, allowing for a disabled state and a loading spinner to provide immediate feedback to users during network requests.
+
+## 2026-07-28 - Missing accessible state for standalone layout toggles
+**Learning:** Standalone toggle buttons (like theme switchers) often rely on visual cues (like switching icons) or dynamic `aria-label` changes to indicate their state. However, dynamic labels are insufficient for conveying the toggle mechanism to screen reader users, who need to understand that the element is a two-state button.
+**Action:** Always use the `aria-pressed` attribute on standalone layout toggles to properly expose their interactive state and type to assistive technologies, ensuring they are recognized as toggle buttons rather than standard action buttons.

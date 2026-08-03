@@ -31,3 +31,6 @@
 ## 2024-08-01 - [Avoid Intermediate Array Allocations in Reduction Helpers]
 **Learning:** Utilizing chained array methods (like `.filter().length` or chained `.find()`s) inside frequently called data reduction helpers (e.g., used in nested map renders like the roadmap module completion) causes unnecessary intermediate array allocations, memory pressure, and repeated O(N) traversals.
 **Action:** When aggregating or finding items over a collection in performance-sensitive or heavily-nested loops, prefer explicit single-pass iteration (like `for...of`) and standard variables to track counts and conditions.
+## 2026-08-02 - Prevent Hidden O(N) Array Allocations in Aggregations
+**Learning:** Chaining array methods like `.flatMap().map().some()` or `.filter().length` in performance-sensitive views like the dashboard creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread.
+**Action:** Use explicit single-pass iteration (like `for...of`) when aggregating or searching over collections to prevent unnecessary allocations and redundant passes.

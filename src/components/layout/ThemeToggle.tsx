@@ -54,6 +54,7 @@ export function ThemeToggle({ collapsed = false }: { collapsed?: boolean }) {
       type="button"
       onClick={toggle}
       aria-label={label}
+      aria-pressed={theme === "dark"}
       title={label}
       suppressHydrationWarning
       className={
