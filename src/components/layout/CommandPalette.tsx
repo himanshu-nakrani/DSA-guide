@@ -77,22 +77,33 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
     const q = query.trim().toLowerCase();
     if (!q) return precomputedIndex.slice(0, 24).map((x) => x.item);
     const tokens = q.split(/\s+/);
-    const scored = precomputedIndex
-      .map(({ item, hay, titleLower }) => {
-        let score = 0;
-        for (const t of tokens) {
-          const idx = hay.indexOf(t);
-          if (idx === -1) return null;
-          score += idx === 0 ? 8 : hay.includes(" " + t) ? 4 : 1;
-          if (titleLower.includes(t)) score += 5;
+
+    // Optimization: Avoid chained array allocations (.map.filter.sort.slice)
+    // to reduce memory pressure during frequent search keystrokes
+    const matches: { item: SearchItem; score: number }[] = [];
+
+    for (const { item, hay, titleLower } of precomputedIndex) {
+      let score = 0;
+      let isMatch = true;
+      for (const t of tokens) {
+        const idx = hay.indexOf(t);
+        if (idx === -1) {
+          isMatch = false;
+          break;
         }
-        return { item, score };
-      })
-      .filter((x): x is { item: SearchItem; score: number } => x !== null)
+        score += idx === 0 ? 8 : hay.includes(" " + t) ? 4 : 1;
+        if (titleLower.includes(t)) score += 5;
+      }
+
+      if (isMatch) {
+        matches.push({ item, score });
+      }
+    }
+
+    return matches
       .sort((a, b) => b.score - a.score)
       .slice(0, 40)
       .map((x) => x.item);
-    return scored;
   }, [query, precomputedIndex]);
 
   useEffect(() => {
