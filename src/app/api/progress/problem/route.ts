@@ -18,6 +18,13 @@ export async function POST(request: Request) {
   if (!body?.slug || !body.status) {
     return NextResponse.json({ error: "Missing problem slug or status." }, { status: 400 });
   }
+
+  // SECURITY: Validate type and enforce strict maximum length constraints on JSON request body fields
+  // before processing to prevent unhandled type exceptions and database-level resource exhaustion (DoS) attacks.
+  if (typeof body.slug !== "string" || body.slug.length > 255) {
+    return NextResponse.json({ error: "Invalid problem slug." }, { status: 400 });
+  }
+
   if (!Object.values(ProgressStatus).includes(body.status)) {
     return NextResponse.json({ error: "Invalid status." }, { status: 400 });
   }
