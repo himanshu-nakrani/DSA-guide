@@ -110,28 +110,41 @@ export default async function RoadmapPage() {
       {/* Vertical step timeline */}
       <ol className="bloom">
         {track.modules.map((module, i) => {
-          const articleCount = module.topics.reduce(
-            (s, t) => s + t.articles.length,
-            0,
-          );
-          const problemCount = module.topics.reduce(
-            (s, t) => s + t.problems.length,
-            0,
-          );
-          const moduleSlugs = module.topics.flatMap((t) =>
-            t.articles.map((a) => a.slug),
-          );
-          const readArticleCount = moduleSlugs.filter((slug) => readSlugSet.has(slug)).length;
-          const moduleProblems = module.topics.flatMap((topic) =>
-            topic.problems.map((entry) => entry.problem),
-          );
+          // ⚡ Bolt: Single-pass iteration to prevent hidden O(N) array allocations
+          // and redundant O(N) traversals across deeply nested relationships.
+          let articleCount = 0;
+          let problemCount = 0;
+          let readArticleCount = 0;
+          const moduleSlugs: string[] = [];
+          const moduleProblems: Array<{
+            id: string;
+            slug: string;
+            title: string;
+            difficulty: import("@/generated/prisma").Difficulty;
+            acceptanceRate: number;
+          }> = [];
+          let firstArticle = null;
+
+          for (const topic of module.topics) {
+            articleCount += topic.articles.length;
+            problemCount += topic.problems.length;
+
+            for (const article of topic.articles) {
+              if (!firstArticle) firstArticle = article;
+              moduleSlugs.push(article.slug);
+              if (readSlugSet.has(article.slug)) readArticleCount++;
+            }
+
+            for (const entry of topic.problems) {
+              moduleProblems.push(entry.problem);
+            }
+          }
+
           const moduleProblemSummary = summarizeProblemProgress(
             moduleProblems.map((problem) => problem.id),
             problemProgressMap,
           );
           const nextProblem = pickNextProblem(moduleProblems, problemProgressMap);
-          const firstArticle =
-            module.topics.flatMap((t) => t.articles)[0] ?? null;
           const isLast = i === track.modules.length - 1;
 
           return (
