@@ -31,6 +31,13 @@ export async function createListAction(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) return;
 
+  // SECURITY: All state-modifying Next.js Server Actions must be protected by rate limits
+  // to prevent resource exhaustion and Denial of Service (DoS). We use the authenticated user.id.
+  const rateLimitFormData = new FormData();
+  rateLimitFormData.append("userId", user.id);
+  const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData);
+  if (rateLimit.limited) return;
+
   const name = getString(formData, "name");
   const description = getString(formData, "description");
   if (!name) return;
@@ -50,11 +57,15 @@ export async function createListAction(formData: FormData) {
 }
 
 export async function toggleBookmarkAction(formData: FormData) {
-  const rateLimit = await checkRateLimit("bookmark", formData);
-  if (rateLimit.limited) return;
-
   const user = await getCurrentUser();
   if (!user) return;
+
+  // SECURITY: All state-modifying Next.js Server Actions must be protected by rate limits
+  // to prevent resource exhaustion and Denial of Service (DoS). We use the authenticated user.id.
+  const rateLimitFormData = new FormData();
+  rateLimitFormData.append("userId", user.id);
+  const rateLimit = await checkRateLimit("bookmark", rateLimitFormData);
+  if (rateLimit.limited) return;
 
   const problemSlug = getString(formData, "problemSlug");
   const returnTo = getString(formData, "returnTo");
@@ -95,6 +106,13 @@ export async function addProblemToListAction(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) return;
 
+  // SECURITY: All state-modifying Next.js Server Actions must be protected by rate limits
+  // to prevent resource exhaustion and Denial of Service (DoS). We use the authenticated user.id.
+  const rateLimitFormData = new FormData();
+  rateLimitFormData.append("userId", user.id);
+  const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData);
+  if (rateLimit.limited) return;
+
   const listId = getString(formData, "listId");
   const problemSlug = getString(formData, "problemSlug");
   const returnTo = getString(formData, "returnTo");
@@ -134,6 +152,13 @@ export async function addProblemToListAction(formData: FormData) {
 export async function removeProblemFromListAction(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) return;
+
+  // SECURITY: All state-modifying Next.js Server Actions must be protected by rate limits
+  // to prevent resource exhaustion and Denial of Service (DoS). We use the authenticated user.id.
+  const rateLimitFormData = new FormData();
+  rateLimitFormData.append("userId", user.id);
+  const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData);
+  if (rateLimit.limited) return;
 
   const listId = getString(formData, "listId");
   const problemSlug = getString(formData, "problemSlug");

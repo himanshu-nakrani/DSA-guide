@@ -48,6 +48,8 @@ const POLICIES: Record<string, RateLimitPolicy> = {
   progress: { capacity: 30, refillPerSecond: 5 },
   // Bookmark toggles fire on click.
   bookmark: { capacity: 30, refillPerSecond: 2 },
+  // List mutations (create, add, remove)
+  list_mutate: { capacity: 20, refillPerSecond: 1 },
 };
 
 const buckets = new Map<string, Bucket>();
@@ -143,10 +145,10 @@ function identifierFor(name: string, formData: FormData | null): string {
     return "anonymous";
   }
 
-  if (name === "bookmark") {
-    const slug = formData?.get("problemSlug");
-    if (typeof slug === "string") {
-      const val = slug.slice(0, 255).trim();
+  if (name === "bookmark" || name === "list_mutate") {
+    const userId = formData?.get("userId");
+    if (typeof userId === "string") {
+      const val = userId.slice(0, 255).trim();
       if (val) return val;
     }
     return "anonymous";
