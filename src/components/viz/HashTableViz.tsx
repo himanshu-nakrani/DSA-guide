@@ -121,6 +121,7 @@ export function HashTableViz({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="insert key…"
+            aria-label="Key to insert"
             className="flex-1 border border-border bg-background px-3 py-1.5 font-mono text-xs focus:outline-none focus:border-foreground"
           />
           <VizButton>insert</VizButton>

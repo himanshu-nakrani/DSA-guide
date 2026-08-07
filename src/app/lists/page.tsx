@@ -134,6 +134,7 @@ export default async function ListsPage() {
 
         <form action={createListAction} className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
           <input
+            aria-label="List name"
             type="text"
             name="name"
             required
@@ -141,6 +142,7 @@ export default async function ListsPage() {
             className="rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
           />
           <input
+            aria-label="List description"
             type="text"
             name="description"
             placeholder="Optional description"

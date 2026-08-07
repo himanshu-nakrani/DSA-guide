@@ -50,3 +50,7 @@
 ## 2026-07-28 - Missing accessible state for standalone layout toggles
 **Learning:** Standalone toggle buttons (like theme switchers) often rely on visual cues (like switching icons) or dynamic `aria-label` changes to indicate their state. However, dynamic labels are insufficient for conveying the toggle mechanism to screen reader users, who need to understand that the element is a two-state button.
 **Action:** Always use the `aria-pressed` attribute on standalone layout toggles to properly expose their interactive state and type to assistive technologies, ensuring they are recognized as toggle buttons rather than standard action buttons.
+
+## 2024-08-01 - Missing accessible labels on inline form inputs
+**Learning:** Inline forms (like the "Create List" form, command palette, and visualization inputs) that omit visual `<label>` elements for layout purposes leave screen reader users without proper context, as `placeholder` text is not a reliable or compliant substitute for an explicit label.
+**Action:** Always provide an `aria-label` (or visually hidden `<label>`) for form inputs when a visible label is omitted from the design to ensure the input's purpose is exposed to assistive technologies.
