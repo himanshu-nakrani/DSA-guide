@@ -175,6 +175,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
             }}
             onKeyDown={onInputKey}
             placeholder="Search articles, topics, modules…"
+            aria-label="Search articles, topics, modules"
             className="flex-1 bg-transparent outline-none text-[0.95rem] placeholder:text-muted-foreground font-display"
             autoComplete="off"
             spellCheck={false}
