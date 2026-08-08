@@ -66,9 +66,17 @@ export default async function RoadmapPage() {
   }
 
   const readSlugs = user ? await getUserReadArticleSlugs(user.id) : [];
-  const problemIds = track.modules.flatMap((module) =>
-    module.topics.flatMap((topic) => topic.problems.map((entry) => entry.problemId)),
-  );
+
+  // ⚡ Bolt: Single-pass iteration to avoid chained flatMap/map intermediate array allocations
+  const problemIds: string[] = [];
+  for (const trackModule of track.modules) {
+    for (const topic of trackModule.topics) {
+      for (const entry of topic.problems) {
+        problemIds.push(entry.problemId);
+      }
+    }
+  }
+
   const problemProgressRows = user
     ? await prisma.userProblemProgress.findMany({
         where: {

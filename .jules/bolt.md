@@ -42,3 +42,7 @@
 ## 2025-02-18 - Replacing Chained Array Methods with Single-Pass Iteration
 **Learning:** Utilizing chained array methods like `.flatMap()`, `.map()`, and `.filter().length` inside frequently called data reduction loops (like rendering modules in a roadmap view) causes hidden O(N) intermediate array allocations and redundant O(N) traversals, adding significant overhead.
 **Action:** Replace chained array allocations with single-pass explicit iteration (`for...of` loops) when processing nested lists to prevent unnecessary intermediate arrays and multiple traversals.
+
+## 2026-08-04 - Prevent Hidden O(N) Array Allocations in Aggregations
+**Learning:** Chaining array methods like `.flatMap().flatMap().map()` in performance-sensitive views creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread.
+**Action:** Use explicit single-pass iteration (like `for...of`) when extracting deeply nested fields (e.g. `track.modules -> module.topics -> topic.problems`) to prevent unnecessary allocations and redundant passes.
