@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   }
 
   const rateLimit = await checkRateLimit("progress", {
-    get: (key: string) => (key === "slug" ? body.slug : null),
+    get: (key: string) => (key === "userId" ? user.id : null),
   } as unknown as FormData);
   if (rateLimit.limited) {
     return NextResponse.json(

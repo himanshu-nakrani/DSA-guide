@@ -136,16 +136,7 @@ function identifierFor(name: string, formData: FormData | null): string {
     return "anonymous";
   }
 
-  if (name === "progress") {
-    const slug = formData?.get("slug");
-    if (typeof slug === "string") {
-      const val = slug.slice(0, 255).trim();
-      if (val) return val;
-    }
-    return "anonymous";
-  }
-
-  if (name === "bookmark" || name === "list_mutate") {
+  if (name === "progress" || name === "bookmark" || name === "list_mutate") {
     const userId = formData?.get("userId");
     if (typeof userId === "string") {
       const val = userId.slice(0, 255).trim();
