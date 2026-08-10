@@ -231,15 +231,23 @@ export default async function RoadmapPage() {
                       </div>
                       <div className="grid gap-3 md:grid-cols-2">
                         {module.topics.map((topic) => {
-                          const topicSlugs = topic.articles.map((article) => article.slug);
-                          const topicProblemIds = topic.problems.map((entry) => entry.problemId);
+                          // ⚡ Bolt: Prevent hidden O(N) array allocations (.map.filter.length) using explicit iteration
+                          let topicReadCount = 0;
+                          for (const article of topic.articles) {
+                            if (readSlugSet.has(article.slug)) {
+                              topicReadCount++;
+                            }
+                          }
+
+                          const topicProblemIds: string[] = [];
+                          for (const entry of topic.problems) {
+                            topicProblemIds.push(entry.problemId);
+                          }
+
                           const topicProblemSummary = summarizeProblemProgress(
                             topicProblemIds,
                             problemProgressMap,
                           );
-                          const topicReadCount = topicSlugs.filter((articleSlug) =>
-                            readSlugSet.has(articleSlug),
-                          ).length;
                           const topicPercent =
                             topic.articles.length + topicProblemSummary.total === 0
                               ? 0

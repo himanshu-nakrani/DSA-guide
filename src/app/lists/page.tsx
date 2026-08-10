@@ -92,7 +92,15 @@ export default async function ListsPage() {
     ...lists.filter((list) => list.name === BOOKMARK_LIST_NAME),
     ...lists.filter((list) => list.name !== BOOKMARK_LIST_NAME),
   ];
-  const savedCount = new Set(lists.flatMap((list) => list.items.map((item) => item.problemId))).size;
+
+  // ⚡ Bolt: Prevent hidden O(N) array allocations (.flatMap.map) using explicit iteration
+  const savedSet = new Set<string>();
+  for (const list of lists) {
+    for (const item of list.items) {
+      savedSet.add(item.problemId);
+    }
+  }
+  const savedCount = savedSet.size;
 
   return (
     <div className="max-w-6xl mx-auto px-6 md:px-12 py-16 space-y-10">
