@@ -46,3 +46,6 @@
 ## 2026-08-04 - Prevent Hidden O(N) Array Allocations in Aggregations
 **Learning:** Chaining array methods like `.flatMap().flatMap().map()` in performance-sensitive views creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread.
 **Action:** Use explicit single-pass iteration (like `for...of`) when extracting deeply nested fields (e.g. `track.modules -> module.topics -> topic.problems`) to prevent unnecessary allocations and redundant passes.
+## 2026-08-05 - Prevent Hidden O(N) Array Allocations in Aggregations
+**Learning:** Chaining array methods like `.map().map()` and spreading large arrays (e.g. `Math.max(...array)`) in performance-sensitive views creates hidden O(N) intermediate array allocations and redundant O(N) traversals. Large spreads also risk exceeding call stack limits (e.g., in `Math.max(...)`).
+**Action:** Use explicit single-pass iteration (like `for...of`) when aggregating over collections (like extracting deeply nested fields or generating keys and maximums) to prevent unnecessary allocations, redundant passes, and V8 call stack size exceptions.
