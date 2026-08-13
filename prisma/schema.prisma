@@ -223,6 +223,14 @@ model CustomListItem {
   @@unique([listId, problemId])
 }
 
+model RateLimitBucket {
+  key       String   @id
+  tokens    Float
+  updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
+}
+
 model Article {
   id              String         @id @default(cuid())
   slug            String         @unique

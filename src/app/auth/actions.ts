@@ -1,16 +1,13 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@/generated/prisma";
 import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { clearSession, hashPassword, setSession, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// `redirect()` throws a special Next.js error that aborts rendering; any code
-// after it (including `revalidatePath`) is unreachable. We revalidate first
-// and let `redirect` close out the function via throw. The `never` return
-// type tells TypeScript that callers don't need an explicit `return` after
-// this (the function never falls through).
 function finishAuthRedirect(destination: string): never {
   revalidatePath("/", "layout");
   redirect(destination);
@@ -22,16 +19,39 @@ export type AuthFormState = {
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
-  // SECURITY: Cap length before trimming to prevent DoS via massive strings.
   return typeof value === "string" ? value.slice(0, 4096).trim() : "";
+}
+
+function isValidEmail(email: string) {
+  // A deliberately conservative boundary check; full RFC parsing is neither
+  // needed nor desirable for account identifiers.
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
+}
+
+async function clientAddress() {
+  const requestHeaders = await headers();
+  // Deployment proxies must overwrite these headers before traffic reaches the
+  // app. Prefer provider-controlled headers over generic forwarded headers.
+  const raw =
+    requestHeaders.get("x-vercel-forwarded-for") ??
+    requestHeaders.get("cf-connecting-ip") ??
+    requestHeaders.get("x-real-ip") ??
+    requestHeaders.get("x-forwarded-for") ??
+    "unknown";
+  return raw.split(",")[0]?.trim().slice(0, 255) || "unknown";
+}
+
+async function enforceNetworkLimit(name: "login" | "register") {
+  const rateLimit = await checkRateLimit(name, null, 1, { identifier: await clientAddress() });
+  return rateLimit.limited ? rateLimitedResponse(rateLimit) : null;
 }
 
 export async function registerAction(
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const rateLimit = await checkRateLimit("register", formData);
-  if (rateLimit.limited) return rateLimitedResponse(rateLimit);
+  const networkError = await enforceNetworkLimit("register");
+  if (networkError) return networkError;
 
   const name = getString(formData, "name");
   const email = getString(formData, "email").toLowerCase();
@@ -40,38 +60,44 @@ export async function registerAction(
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
+  if (!isValidEmail(email)) {
+    return { error: "Enter a valid email address." };
+  }
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
-  if (password.length > 256 || email.length > 256 || name.length > 256) {
-    return { error: "Input is too long." };
+  if (password.length > 72 || name.length > 255) {
+    return { error: "Input exceeds the maximum allowed length." };
   }
 
-  // SECURITY: Prevent resource exhaustion (DoS) via extremely long inputs.
-  // Scrypt hashing or database lookups with massive strings can block the event loop or crash the server.
-  if (email.length > 255 || password.length > 72 || name.length > 255) {
-    return { error: "Input exceeds maximum allowed length." };
-  }
-
-  const existing = await prisma.user.findUnique({ where: { email } });
+  // Do not disclose whether the address is already registered.
+  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) {
-    return { error: "An account with that email already exists." };
+    return { error: "Unable to create an account with those details." };
   }
 
-  const passwordHash = await hashPassword(password);
-  const user = await prisma.user.create({
-    data: {
-      email,
-      name: name || null,
-      passwordHash,
-      // Stamp the password-change moment so any future session token
-      // whose iat predates this is rejected.
-      passwordChangedAt: new Date(),
-      profile: { create: {} },
-    },
-  });
+  try {
+    const passwordHash = await hashPassword(password);
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name: name || null,
+        passwordHash,
+        passwordChangedAt: new Date(),
+        profile: { create: {} },
+      },
+    });
 
-  await setSession(user.id);
+    await setSession(user.id);
+  } catch (error) {
+    // Covers a race on the unique email constraint without turning it into an
+    // account-existence oracle.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return { error: "Unable to create an account with those details." };
+    }
+    throw error;
+  }
+
   finishAuthRedirect("/learn");
 }
 
@@ -79,8 +105,8 @@ export async function loginAction(
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const rateLimit = await checkRateLimit("login", formData);
-  if (rateLimit.limited) return rateLimitedResponse(rateLimit);
+  const networkError = await enforceNetworkLimit("login");
+  if (networkError) return networkError;
 
   const email = getString(formData, "email").toLowerCase();
   const password = getString(formData, "password");
@@ -88,26 +114,16 @@ export async function loginAction(
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
-  if (password.length > 256 || email.length > 256) {
-    return { error: "Input is too long." };
-  }
-
-  // SECURITY: Prevent resource exhaustion (DoS) via extremely long inputs.
-  if (email.length > 255 || password.length > 72) {
+  if (!isValidEmail(email) || password.length > 72) {
     return { error: "Invalid email or password." };
   }
 
+  const accountRateLimit = await checkRateLimit("login_account", null, 1, { identifier: email });
+  if (accountRateLimit.limited) return rateLimitedResponse(accountRateLimit);
+
   const user = await prisma.user.findUnique({ where: { email } });
-
-  // SECURITY: Prevent username enumeration via timing attacks.
-  // If the user doesn't exist (or has no password), we verify against a dummy hash
-  // so the computational cost of scrypt remains roughly the same.
-  const DUMMY_HASH = "00000000000000000000000000000000:00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-  const hashToVerify = user?.passwordHash || DUMMY_HASH;
-
-  // SECURITY: verifyPassword is async. Failing to await it evaluates to true (Promise is truthy),
-  // which causes auth bypass. Always await async auth functions.
-  const isValidPassword = await verifyPassword(password, hashToVerify);
+  const dummyHash = "00000000000000000000000000000000:00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+  const isValidPassword = await verifyPassword(password, user?.passwordHash || dummyHash);
 
   if (!user || !user.passwordHash || !isValidPassword) {
     return { error: "Invalid email or password." };

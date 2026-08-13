@@ -55,6 +55,7 @@ export default async function ListsPage() {
       orderBy: [{ name: "asc" }, { updatedAt: "desc" }],
       include: {
         items: {
+          where: { problem: { status: "PUBLISHED" } },
           orderBy: { order: "asc" },
           include: {
             problem: {

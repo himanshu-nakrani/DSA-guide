@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { ArticleStatus, ProgressStatus } from "@/generated/prisma";
+import { ArticleStatus, ProblemStatus, ProgressStatus } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
 import { ArticleLink } from "@/components/article/ArticleLink";
 import { ProgressNode } from "@/components/roadmap/ProgressNode";
@@ -36,6 +36,7 @@ export default async function RoadmapPage() {
                 },
               },
               problems: {
+                where: { problem: { status: ProblemStatus.PUBLISHED } },
                 // ⚡ Bolt: Use `select` instead of `include` to avoid fetching large text fields (like `statementMd`, `examplesJson`)
                 select: {
                   problemId: true,

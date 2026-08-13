@@ -34,12 +34,12 @@ describe('problem-progress', () => {
       expect(pickNextProblem(problems, progress)).toEqual({ id: '2' });
     });
 
-    it('should pick first problem when all are completed', () => {
+    it('should return null when all problems are completed', () => {
       const progress = new Map();
       progress.set('1', ProgressStatus.SOLVED);
       progress.set('2', ProgressStatus.MASTERED);
       progress.set('3', ProgressStatus.SOLVED);
-      expect(pickNextProblem(problems, progress)).toEqual({ id: '1' });
+      expect(pickNextProblem(problems, progress)).toBeNull();
     });
   });
 });

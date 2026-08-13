@@ -13,10 +13,11 @@ import { SaveToListButton } from "./SubmitButton";
 import { difficultyClass, difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { publicProblemWhere } from "@/lib/publication";
 
 export async function generateStaticParams() {
   const problems = await prisma.problem.findMany({
-    where: { status: "PUBLISHED" },
+    where: publicProblemWhere(),
     select: { slug: true },
   });
 
@@ -29,8 +30,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const problem = await prisma.problem.findUnique({
-    where: { slug },
+  const problem = await prisma.problem.findFirst({
+    where: publicProblemWhere(slug),
     select: { title: true, statementMd: true },
   });
 
@@ -50,8 +51,8 @@ export default async function ProblemDetailPage({
   const { slug } = await params;
   const user = await getCurrentUser();
 
-  const problem = await prisma.problem.findUnique({
-    where: { slug },
+  const problem = await prisma.problem.findFirst({
+    where: publicProblemWhere(slug),
     include: {
       topics: {
         include: {
@@ -79,7 +80,7 @@ export default async function ProblemDetailPage({
     },
   });
 
-  if (!problem || problem.status !== "PUBLISHED") notFound();
+  if (!problem) notFound();
 
   const currentStatus = user
     ? (
