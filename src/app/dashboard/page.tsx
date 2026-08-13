@@ -212,12 +212,20 @@ export default async function DashboardPage() {
     items: allProblems.filter((entry) => entry.status === status),
   }));
 
-  const activityDays = buildActivityDays([
-    ...allArticles.map((entry) => entry.readAt),
-    ...allProblems.map((entry) => entry.updatedAt),
-  ]);
-  const currentStreak = computeCurrentStreak(activityDays.map((day) => day.dateKey));
-  const bestDayCount = Math.max(1, ...activityDays.map((day) => day.count));
+  // ⚡ Bolt: Prevent hidden O(N) array allocations (.map().map()) using explicit single-pass iteration
+  const activityDates: Date[] = [];
+  for (const entry of allArticles) activityDates.push(entry.readAt);
+  for (const entry of allProblems) activityDates.push(entry.updatedAt);
+
+  const activityDays = buildActivityDays(activityDates);
+
+  const dateKeys: string[] = [];
+  let bestDayCount = 1;
+  for (const day of activityDays) {
+    dateKeys.push(day.dateKey);
+    if (day.count > bestDayCount) bestDayCount = day.count;
+  }
+  const currentStreak = computeCurrentStreak(dateKeys);
   const moduleCompletion = modules.map((module) => {
     let readCount = 0;
     let total = 0;
