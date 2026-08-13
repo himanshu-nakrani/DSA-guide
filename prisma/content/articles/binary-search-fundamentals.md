@@ -108,6 +108,25 @@ Four invariants to keep in mind:
 } }
 ```
 
+## Quick Boundary Check
+
+Before reaching for a template, make the interval convention explicit. This
+one question catches the most common translation error between the proof and
+the code.
+
+```viz
+{ "type": "knowledge-check", "props": {
+  "question": "With an inclusive search window [L, R], a midpoint M whose value is smaller than the target should update which boundary?",
+  "answer": 2,
+  "choices": [
+    { "label": "Set R = M because the target must be in the left half." },
+    { "label": "Set L = M because M was too small but might still be the answer." },
+    { "label": "Set L = M + 1 because M and every smaller index have been ruled out.", "explanation": "The interval is inclusive, so retaining M would repeat the same state when only two elements remain. Moving to M + 1 both preserves the candidate-window invariant and guarantees progress." },
+    { "label": "Set R = M - 1 only when the array contains duplicates." }
+  ]
+} }
+```
+
 ## Variants You Will Actually Need
 
 Plain "find target or report missing" is rarely the actual problem. The

@@ -65,6 +65,12 @@ const REGISTRY: Record<string, LazyViz> = {
   "architecture": React.lazy(() =>
     import("./Architecture").then((m) => ({ default: m.Architecture as React.ComponentType<Record<string, unknown>> })),
   ),
+  "invariant-trace": React.lazy(() =>
+    import("./InvariantTrace").then((m) => ({ default: m.InvariantTrace as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "knowledge-check": React.lazy(() =>
+    import("./KnowledgeCheck").then((m) => ({ default: m.KnowledgeCheck as React.ComponentType<Record<string, unknown>> })),
+  ),
 };
 
 export function Viz({ raw }: { raw: string }) {

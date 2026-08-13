@@ -4,19 +4,86 @@ import matter from "gray-matter";
 
 const ARTICLE_DIR = path.join(__dirname, "..", "prisma", "content", "articles");
 const LEVELS = new Set(["FOUNDATION", "INTERMEDIATE", "ADVANCED"]);
+const VIZ_TYPES = new Set([
+  "callout",
+  "complexity-chart",
+  "growth-table",
+  "array-memory",
+  "binary-search",
+  "linear-vs-binary",
+  "two-pointers",
+  "sliding-window",
+  "hash-table",
+  "linked-list",
+  "stack-queue",
+  "tree-traversal",
+  "graph-traversal",
+  "dp-grid",
+  "dijkstra",
+  "recursion-tree",
+  "architecture",
+  "invariant-trace",
+  "knowledge-check",
+]);
 const errors: string[] = [];
+
+type VizConfig = { type?: unknown; props?: unknown };
 
 function fail(file: string, message: string) {
   errors.push(`${file}: ${message}`);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function validateKnowledgeCheck(file: string, props: Record<string, unknown>) {
+  if (typeof props.question !== "string" || !props.question.trim()) {
+    fail(file, "knowledge-check requires a non-empty string question.");
+  }
+  if (!Array.isArray(props.choices) || props.choices.length < 2) {
+    fail(file, "knowledge-check requires at least two choices.");
+    return;
+  }
+  for (const choice of props.choices) {
+    if (!isRecord(choice) || typeof choice.label !== "string" || !choice.label.trim()) {
+      fail(file, "every knowledge-check choice requires a non-empty string label.");
+      break;
+    }
+  }
+  if (!Number.isInteger(props.answer) || (props.answer as number) < 0 || (props.answer as number) >= props.choices.length) {
+    fail(file, "knowledge-check answer must be a valid zero-based choice index.");
+  }
+}
+
+function validateInvariantTrace(file: string, props: Record<string, unknown>) {
+  if (props.values !== undefined && (!Array.isArray(props.values) || props.values.some((value) => typeof value !== "number"))) {
+    fail(file, "invariant-trace values must be an array of numbers when provided.");
+  }
+  if (props.target !== undefined && typeof props.target !== "number") {
+    fail(file, "invariant-trace target must be a number when provided.");
+  }
+}
+
 function validateVizBlocks(file: string, content: string) {
   for (const match of content.matchAll(/```viz\s*\n([\s\S]*?)```/g)) {
     try {
-      const parsed = JSON.parse(match[1]);
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || typeof parsed.type !== "string") {
+      const parsed = JSON.parse(match[1]) as VizConfig;
+      if (!isRecord(parsed) || typeof parsed.type !== "string") {
         fail(file, "a viz block must contain an object with a string 'type'.");
+        continue;
       }
+      if (!VIZ_TYPES.has(parsed.type)) {
+        fail(file, `uses unknown viz type '${parsed.type}'.`);
+        continue;
+      }
+      if (parsed.props !== undefined && !isRecord(parsed.props)) {
+        fail(file, "viz props must be an object when provided.");
+        continue;
+      }
+      const props = (parsed.props ?? {}) as Record<string, unknown>;
+      if (parsed.type === "knowledge-check") validateKnowledgeCheck(file, props);
+      if (parsed.type === "invariant-trace") validateInvariantTrace(file, props);
     } catch {
       fail(file, "contains invalid JSON in a viz block.");
     }
