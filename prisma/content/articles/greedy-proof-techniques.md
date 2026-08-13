@@ -207,4 +207,15 @@ The correctness proof and the complexity analysis are separate exercises.
 gives heap-based amortized analyses for several classical greedies including
 Kruskal and Prim.
 
+## Practice
+
+- For interval scheduling, write the exchange step that turns an optimal
+  schedule into one that begins with the earliest-finishing compatible
+  interval.
+- For the problem "minimize the number of coins," find a coin system where
+  the largest-first greedy choice fails. Explain which exchange claim breaks.
+- In a shortest-path problem with non-negative edges, decide whether a
+  stay-ahead argument or an exchange argument better matches Dijkstra's next
+  settled vertex, and state the measure you would compare.
+
 ## References

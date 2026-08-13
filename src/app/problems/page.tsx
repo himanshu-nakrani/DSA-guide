@@ -24,6 +24,10 @@ const sortOptions = [
 
 type SortOption = (typeof sortOptions)[number]["value"];
 
+const MAX_QUERY_LENGTH = 120;
+const MAX_TOPIC_SLUG_LENGTH = 120;
+const MAX_RESULTS = 100;
+
 function parseDifficulty(value?: string): Difficulty | undefined {
   return value && Object.values(Difficulty).includes(value as Difficulty)
     ? (value as Difficulty)
@@ -64,8 +68,8 @@ export default async function ProblemsPage({
 
   const difficulty = parseDifficulty(params.difficulty);
   const status = parseStatus(params.status);
-  const topicSlug = params.topic?.trim() || undefined;
-  const query = params.q?.trim() || "";
+  const topicSlug = params.topic?.trim().slice(0, MAX_TOPIC_SLUG_LENGTH) || undefined;
+  const query = params.q?.trim().slice(0, MAX_QUERY_LENGTH) || "";
   const sort = parseSort(params.sort);
 
   const topics = await prisma.topic.findMany({
@@ -131,6 +135,7 @@ export default async function ProblemsPage({
       ...(progressFilter ?? {}),
     },
     orderBy: buildOrderBy(sort),
+    take: MAX_RESULTS,
     select: {
       id: true,
       slug: true,
@@ -241,6 +246,7 @@ export default async function ProblemsPage({
               <input
                 type="text"
                 name="q"
+                maxLength={MAX_QUERY_LENGTH}
                 defaultValue={query}
                 placeholder="Search title, statement, topic, module…"
                 className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background pl-9 pr-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"

@@ -120,7 +120,7 @@ export default async function DashboardPage() {
     getModuleIndex(),
     getBookmarkProblemIds(user.id),
     prisma.userProblemProgress.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id, problem: { status: "PUBLISHED" } },
       orderBy: [{ updatedAt: "desc" }],
       select: {
         id: true,

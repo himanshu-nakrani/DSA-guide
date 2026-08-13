@@ -196,4 +196,14 @@ tree. Anything slower is usually a sign that the state isn't small enough.
 } }
 ```
 
+## Practice
+
+- For maximum independent set on a tree, define an `include[u]` and an
+  `exclude[u]` state. Write the transition in one line before writing any DFS.
+- Given a rooted tree, compute the number of descendants for every node. Then
+  change the state to the sum of distances from each node to its subtree.
+- For each node, find the sum of distances to every other node. First state
+  the answer for one chosen root, then identify exactly what changes when the
+  root crosses a parent–child edge.
+
 ## References

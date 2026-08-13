@@ -1,19 +1,8 @@
 import "server-only";
 
-/**
- * In-memory token-bucket rate limiter.
- *
- * The Next.js server runtime is single-process in dev and in many prod
- * deployments, so a Map-backed limiter is appropriate. For multi-instance
- * prod deployments, swap `buckets` for an external store (Redis / Upstash)
- * — the public API is the only thing the rest of the app should depend on.
- *
- * Buckets are keyed by a caller-supplied identifier (e.g. action name) and
- * a per-caller discriminator (typically a form-supplied identifier, since
- * the action runs server-side and the IP is not always meaningful behind
- * a proxy or in serverless contexts). This keeps a single attacker from
- * using a flood of unauthenticated actions to exhaust other users' quota.
- */
+import { createHash } from "node:crypto";
+import { Prisma } from "@/generated/prisma";
+import { prisma } from "@/lib/prisma";
 
 export type RateLimitResult = {
   limited: boolean;
@@ -22,148 +11,149 @@ export type RateLimitResult = {
   retryAfterSeconds: number;
 };
 
-type Bucket = {
-  tokens: number;
-  lastRefillMs: number;
+export type RateLimitPolicy = {
+  capacity: number;
+  refillPerSecond: number;
 };
 
-export type RateLimitPolicy = {
-  // Max tokens the bucket can hold (= max burst).
-  capacity: number;
-  // Tokens added per second.
-  refillPerSecond: number;
+export type RateLimitOptions = {
+  /**
+   * Use a server-derived stable identifier (for example a user ID or trusted
+   * client address). Form fields are only a backwards-compatible fallback.
+   */
+  identifier?: string;
 };
 
 const DEFAULT_POLICY: RateLimitPolicy = {
   capacity: 5,
-  refillPerSecond: 0.2, // 1 token every 5s → ~12/min sustained
+  refillPerSecond: 1 / 60,
 };
 
 const POLICIES: Record<string, RateLimitPolicy> = {
-  // Login: more permissive on burst, but still bounded.
-  login: { capacity: 10, refillPerSecond: 0.1 },
-  // Register: a real user should only need 1-2 attempts.
-  register: { capacity: 3, refillPerSecond: 0.05 },
-  // Progress endpoints are called frequently from the client.
-  progress: { capacity: 30, refillPerSecond: 5 },
-  // Bookmark toggles fire on click.
-  bookmark: { capacity: 30, refillPerSecond: 2 },
-  // List mutations (create, add, remove)
-  list_mutate: { capacity: 20, refillPerSecond: 1 },
+  // Auth operations receive a stricter IP bucket plus, for existing accounts,
+  // a second stable account bucket from the action caller.
+  login: { capacity: 5, refillPerSecond: 1 / 600 },
+  login_account: { capacity: 5, refillPerSecond: 1 / 900 },
+  register: { capacity: 3, refillPerSecond: 1 / 3600 },
+  progress: { capacity: 30, refillPerSecond: 1 / 5 },
+  bookmark: { capacity: 15, refillPerSecond: 1 / 10 },
+  list_mutate: { capacity: 10, refillPerSecond: 1 / 30 },
 };
 
-const buckets = new Map<string, Bucket>();
+const RETRY_COUNT = 3;
+const STALE_BUCKET_MS = 24 * 60 * 60 * 1000;
+let lastCleanupMs = 0;
 
-// Crude bound to avoid memory growth from one-shot keys.
-const MAX_BUCKETS = 10_000;
-let lastSweepMs = 0;
-
-function sweep(now: number) {
-  // Cheap, time-throttled sweep: drop buckets that have been full for >1h.
-  if (now - lastSweepMs < 60_000) return;
-  lastSweepMs = now;
-  for (const [key, bucket] of buckets) {
-    const elapsedSec = (now - bucket.lastRefillMs) / 1000;
-    const refilled = bucket.tokens + elapsedSec * 0; // policy-agnostic check below
-    // A bucket is "stale" if it's already at full capacity and has been idle
-    // long enough to be fully refilled multiple times.
-    const policy = DEFAULT_POLICY;
-    if (refilled >= policy.capacity && now - bucket.lastRefillMs > 60 * 60 * 1000) {
-      buckets.delete(key);
-    }
-    void refilled;
-  }
-  if (buckets.size <= MAX_BUCKETS) return;
-  // Hard cap: drop the oldest entries.
-  const overflow = buckets.size - MAX_BUCKETS;
-  let dropped = 0;
-  for (const key of buckets.keys()) {
-    buckets.delete(key);
-    if (++dropped >= overflow) break;
-  }
+function normalizeIdentifier(value: string | undefined) {
+  const normalized = value?.trim().slice(0, 255);
+  return normalized || "anonymous";
 }
 
-function consume(key: string, policy: RateLimitPolicy, cost = 1): RateLimitResult {
-  const now = Date.now();
-  sweep(now);
-  let bucket = buckets.get(key);
-  if (!bucket) {
-    bucket = { tokens: policy.capacity, lastRefillMs: now };
-    buckets.set(key, bucket);
-  } else {
-    const elapsedSec = (now - bucket.lastRefillMs) / 1000;
-    bucket.tokens = Math.min(
-      policy.capacity,
-      bucket.tokens + elapsedSec * policy.refillPerSecond,
-    );
-    bucket.lastRefillMs = now;
+function identifierFor(name: string, formData: FormData | null, options?: RateLimitOptions) {
+  if (options?.identifier) return normalizeIdentifier(options.identifier);
+
+  const userId = formData?.get("userId");
+  if (typeof userId === "string") return normalizeIdentifier(userId);
+
+  // Form-derived values are retained only for older callers. Auth actions now
+  // pass a server-derived address explicitly and never depend on email alone.
+  const email = formData?.get("email");
+  if (typeof email === "string" && (name === "login" || name === "register")) {
+    return normalizeIdentifier(email.toLowerCase());
   }
 
-  if (bucket.tokens < cost) {
-    const deficit = cost - bucket.tokens;
-    const retryAfter = Math.max(1, Math.ceil(deficit / policy.refillPerSecond));
+  return "anonymous";
+}
+
+function bucketKey(name: string, identifier: string) {
+  const digest = createHash("sha256").update(`${name}\u0000${identifier}`).digest("hex");
+  return `${name}:${digest}`;
+}
+
+function toResult(tokens: number, policy: RateLimitPolicy, now: Date, cost: number): RateLimitResult {
+  if (tokens < cost) {
+    const deficit = cost - tokens;
     return {
       limited: true,
-      remaining: Math.floor(bucket.tokens),
-      resetMs: now + deficit * (1000 / policy.refillPerSecond),
-      retryAfterSeconds: retryAfter,
+      remaining: Math.max(0, Math.floor(tokens)),
+      resetMs: now.getTime() + deficit * (1000 / policy.refillPerSecond),
+      retryAfterSeconds: Math.max(1, Math.ceil(deficit / policy.refillPerSecond)),
     };
   }
 
-  bucket.tokens -= cost;
   return {
     limited: false,
-    remaining: Math.floor(bucket.tokens),
-    resetMs: now,
+    remaining: Math.max(0, Math.floor(tokens - cost)),
+    resetMs: now.getTime(),
     retryAfterSeconds: 0,
   };
 }
 
-/**
- * Look up the caller identifier for a FormData request. We deliberately use
- * the supplied email (if any) for login/register so that a single attacker
- * can't burn the global bucket, and an opaque per-form "target" key for
- * progress endpoints (typically the article/problem slug). When no
- * identifier is present, fall back to a coarse bucket keyed on action name.
- */
-function identifierFor(name: string, formData: FormData | null): string {
-  if (name === "login" || name === "register") {
-    const email = formData?.get("email");
-    if (typeof email === "string") {
-      const val = email.slice(0, 255).trim();
-      if (val) return val.toLowerCase();
+async function cleanupStaleBuckets(now: Date) {
+  if (now.getTime() - lastCleanupMs < 60 * 60 * 1000) return;
+  lastCleanupMs = now.getTime();
+  await prisma.rateLimitBucket.deleteMany({
+    where: { updatedAt: { lt: new Date(now.getTime() - STALE_BUCKET_MS) } },
+  });
+}
+
+async function consume(key: string, policy: RateLimitPolicy, cost: number): Promise<RateLimitResult> {
+  const now = new Date();
+  await cleanupStaleBuckets(now);
+
+  for (let attempt = 0; attempt < RETRY_COUNT; attempt += 1) {
+    try {
+      return await prisma.$transaction(
+        async (tx) => {
+          const current = await tx.rateLimitBucket.findUnique({ where: { key } });
+          const elapsedSeconds = current ? Math.max(0, (now.getTime() - current.updatedAt.getTime()) / 1000) : 0;
+          const available = current
+            ? Math.min(policy.capacity, current.tokens + elapsedSeconds * policy.refillPerSecond)
+            : policy.capacity;
+          const result = toResult(available, policy, now, cost);
+          const nextTokens = result.limited ? available : available - cost;
+
+          if (current) {
+            await tx.rateLimitBucket.update({
+              where: { key },
+              data: { tokens: nextTokens },
+            });
+          } else {
+            await tx.rateLimitBucket.create({ data: { key, tokens: nextTokens } });
+          }
+
+          return result;
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
+    } catch (error) {
+      const retryable = error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
+      if (!retryable || attempt === RETRY_COUNT - 1) throw error;
     }
-    return "anonymous";
   }
 
-  if (name === "progress" || name === "bookmark" || name === "list_mutate") {
-    const userId = formData?.get("userId");
-    if (typeof userId === "string") {
-      const val = userId.slice(0, 255).trim();
-      if (val) return val;
-    }
-    return "anonymous";
-  }
-
-  return "anonymous";
+  throw new Error("Rate-limit transaction retry limit reached.");
 }
 
 export async function checkRateLimit(
   name: string,
   formData: FormData | null = null,
   cost = 1,
+  options?: RateLimitOptions,
 ): Promise<RateLimitResult> {
+  if (!Number.isFinite(cost) || cost <= 0) throw new Error("Rate-limit cost must be positive.");
   const policy = POLICIES[name] ?? DEFAULT_POLICY;
-  const key = `${name}:${identifierFor(name, formData)}`;
-  return consume(key, policy, cost);
+  const identifier = identifierFor(name, formData, options);
+  return consume(bucketKey(name, identifier), policy, cost);
 }
 
 export async function enforceRateLimit(
   name: string,
   formData: FormData | null = null,
   cost = 1,
+  options?: RateLimitOptions,
 ): Promise<RateLimitResult> {
-  return checkRateLimit(name, formData, cost);
+  return checkRateLimit(name, formData, cost, options);
 }
 
 export function rateLimitedResponse(result: RateLimitResult): { error: string } {
@@ -172,10 +162,4 @@ export function rateLimitedResponse(result: RateLimitResult): { error: string } 
       result.retryAfterSeconds === 1 ? "" : "s"
     } before trying again.`,
   };
-}
-
-// Test-only: reset bucket state.
-export function __resetRateLimitBuckets() {
-  buckets.clear();
-  lastSweepMs = 0;
 }

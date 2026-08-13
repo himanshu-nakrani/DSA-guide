@@ -40,6 +40,7 @@ export async function getBookmarkProblemIds(userId: string) {
     },
     select: {
       items: {
+        where: { problem: { status: "PUBLISHED" } },
         select: { problemId: true },
       },
     },

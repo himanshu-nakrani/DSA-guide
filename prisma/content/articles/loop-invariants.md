@@ -87,6 +87,26 @@ Trivial example, deliberately. The point is that you write it out *once*
 and now never have to wonder again whether `i` should have started at $0$ or
 $1$, or whether the loop body's termination clause was off-by-one.
 
+### Trace the claim, not just the code
+
+The useful habit is to read a loop state as a claim about the data, rather
+than as a collection of changing variables. Step through the prefix below:
+the blue cells are the part you have already justified, while the ochre cell
+is the only new fact the next iteration must establish.
+
+```viz
+{ "type": "invariant-trace", "props": {
+  "values": [8, 3, 11, 6, 14, 2],
+  "target": 14,
+  "caption": "Linear search proof trace: grow the checked prefix one element at a time"
+} }
+```
+
+At every **inspect** step, the target may still appear at `i`; the invariant
+says only that it cannot be in the prefix to the left. Once the comparison
+fails, advancing `i` turns that one new fact into part of the preserved
+prefix. This is the maintenance proof in operational form.
+
 > [!MARGIN] Off-by-one bugs as invariant violations
 > An off-by-one bug is, almost always, an invariant that holds for the
 > wrong half-open interval. Writing the invariant exposes the boundary
@@ -124,6 +144,25 @@ def bsearch(a, target):
 > midway through a function is the single most common source of binary
 > search bugs. Pick one convention per function and write the invariant
 > using its bracket style. The half-open `[L, R)` is usually cleaner.
+
+## Check Your Proof
+
+Before moving on, answer this without looking back at the code. A correct
+answer names both the invariant and the loop condition; neither is sufficient
+on its own.
+
+```viz
+{ "type": "knowledge-check", "props": {
+  "question": "For the half-open binary search above, which fact lets an empty window justify returning -1?",
+  "answer": 1,
+  "choices": [
+    { "label": "The midpoint always moves left or right by exactly one." },
+    { "label": "The invariant says any target that exists must be in A[L..R), and termination gives L = R, so that range is empty.", "explanation": "The conclusion comes from combining the preserved candidate-range claim with the precise exit condition. Progress alone does not prove absence." },
+    { "label": "The array is sorted, so an unsuccessful comparison proves the target is absent." },
+    { "label": "L and R start at the first and last valid indices." }
+  ]
+} }
+```
 
 ## Termination Functions ("Variants")
 
@@ -168,5 +207,15 @@ probably don't fully understand why it works.[^dijkstra]
 [^dijkstra]: Edsger Dijkstra's pithy version: "If you cannot derive a program from
 its specification, you have not understood the specification." The
 invariant *is* the specification of the loop.
+
+## Practice
+
+- Write a one-sentence invariant for a loop that reverses an array in place.
+  Name exactly which prefix and suffix are already in their final positions.
+- Prove that the two-pointer `while left < right` loop for checking a
+  palindrome never compares characters outside the remaining undecided range.
+- Take a loop you wrote recently and add a termination variant. If the variant
+  does not strictly decrease on every non-returning path, find the path that
+  can stall.
 
 ## References

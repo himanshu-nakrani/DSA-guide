@@ -7,7 +7,8 @@ export default defineConfig({
     globals: true,
     coverage: {
       provider: 'v8',
-      include: ['src/lib/problem-progress.ts'],
+      include: ['src/lib/**/*.ts'],
+      exclude: ['src/lib/**/*.test.ts', 'src/lib/**/__tests__/**'],
     },
     server: {
       deps: {
