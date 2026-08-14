@@ -69,9 +69,23 @@ def kahn(n, adj):
 ```
 
 The frontier is a queue of "currently free" vertices — those with no
-unresolved dependencies. Removing one might free others; add them to
-the queue. When the queue is empty, you have either a complete
+unresolved dependencies. Removing one might free others; add them to the
+queue. When the queue is empty, you have either a complete
 ordering or a non-empty residual that must contain a cycle.
+
+### Schedule the dependencies one choice at a time
+
+Choose the next vertex from the zero-in-degree frontier. The graph includes a
+DAG mode with multiple valid answers and a cycle mode that leaves a residual
+subgraph when the frontier empties too early.
+
+```viz
+{ "type": "dag-scheduler", "props": {
+  "caption": "Kahn's algorithm: choose from the zero-in-degree frontier",
+  "mode": "acyclic"
+} }
+```
+
 
 ```viz
 { "type": "architecture", "props": {

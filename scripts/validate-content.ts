@@ -26,6 +26,9 @@ const VIZ_TYPES = new Set([
   "knowledge-check",
   "proof-builder",
   "tree-dp",
+  "dag-scheduler",
+  "bellman-ford-pass",
+  "dp-decision-trace",
 ]);
 const errors: string[] = [];
 
@@ -94,6 +97,30 @@ function validateTreeDPExplorer(file: string, props: Record<string, unknown>) {
   validateOptionalCaption(file, "tree-dp", props);
 }
 
+function validateDAGScheduler(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "dag-scheduler", props);
+  if (props.mode !== undefined && props.mode !== "acyclic" && props.mode !== "cycle") {
+    fail(file, "dag-scheduler mode must be acyclic or cycle when provided.");
+  }
+}
+
+function validateBellmanFord(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "bellman-ford-pass", props);
+  if (props.variant !== undefined && props.variant !== "negative-edge" && props.variant !== "negative-cycle") {
+    fail(file, "bellman-ford-pass variant must be negative-edge or negative-cycle when provided.");
+  }
+}
+
+function validateDPDecisionTrace(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "dp-decision-trace", props);
+  if (props.mode !== undefined && props.mode !== "house-robber" && props.mode !== "kadane") {
+    fail(file, "dp-decision-trace mode must be house-robber or kadane when provided.");
+  }
+  if (props.values !== undefined && (!Array.isArray(props.values) || props.values.length < 1 || props.values.length > 12 || props.values.some((value) => typeof value !== "number" || !Number.isFinite(value)))) {
+    fail(file, "dp-decision-trace values must contain 1–12 finite numbers when provided.");
+  }
+}
+
 function validateVizBlocks(file: string, content: string) {
   for (const match of content.matchAll(/```viz\s*\n([\s\S]*?)```/g)) {
     try {
@@ -115,6 +142,9 @@ function validateVizBlocks(file: string, content: string) {
       if (parsed.type === "invariant-trace") validateInvariantTrace(file, props);
       if (parsed.type === "proof-builder") validateProofBuilder(file, props);
       if (parsed.type === "tree-dp") validateTreeDPExplorer(file, props);
+      if (parsed.type === "dag-scheduler") validateDAGScheduler(file, props);
+      if (parsed.type === "bellman-ford-pass") validateBellmanFord(file, props);
+      if (parsed.type === "dp-decision-trace") validateDPDecisionTrace(file, props);
     } catch {
       fail(file, "contains invalid JSON in a viz block.");
     }

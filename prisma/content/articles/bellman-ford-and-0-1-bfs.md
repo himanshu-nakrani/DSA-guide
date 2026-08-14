@@ -60,12 +60,27 @@ def bellman_ford(n, edges, src):
 Two passes' worth of insight in that code:
 
 - The early-exit (`if not updated: break`) is the standard
-  optimization. If no edge relaxed during a full pass, no further pass
-  will change anything.
+optimization. If no edge relaxed during a full pass, no further pass will
+change anything.
 - The post-loop check is the *negative cycle detector*. Any edge that
-  still relaxes after $V - 1$ passes means a path of length $V$ is
-  shorter than a path of length $V - 1$ — only possible if a negative
-  cycle exists on the way.
+still relaxes after $V - 1$ passes means a path of length $V$ is
+shorter than a path of length $V - 1$ — only possible if a negative
+cycle exists on the way.
+
+### Watch a relaxation propagate
+
+Step through the edges one at a time, then jump to the next full pass. The
+negative-edge mode stabilizes at a finite answer; the negative-cycle mode
+keeps improving on the extra detection pass and changes the correct answer
+from a number to “undefined.”
+
+```viz
+{ "type": "bellman-ford-pass", "props": {
+  "caption": "Bellman–Ford: pass invariant and negative-cycle detection",
+  "variant": "negative-edge"
+} }
+```
+
 
 ```viz
 { "type": "callout", "props": {

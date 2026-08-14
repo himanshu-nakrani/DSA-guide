@@ -83,6 +83,21 @@ def rob(A):
     return prev1
 ```
 
+### Predict the include-or-skip decision
+
+At each index, the recurrence compares two legal futures. Choose the branch
+first, then reveal how the rolling variables preserve the two states needed by
+the next index. Switch to Kadane mode to see the same interaction pattern
+with the different “extend or restart” decision.
+
+```viz
+{ "type": "dp-decision-trace", "props": {
+  "caption": "House Robber: predict the include-or-skip branch",
+  "mode": "house-robber",
+  "values": [2, 7, 9, 3, 1]
+} }
+```
+
 - *House Robber I* — straight array.
 - *House Robber II* — circular; run twice, once excluding the first
   item and once excluding the last, take the maximum.
