@@ -97,6 +97,17 @@ def dijkstra(n, adj, src):
 The stale-entry filter is the line that turns a slow $O(V^2)$ implementation
 into an efficient one. Without it, vertices can be processed multiple times.
 
+### Watch stale entries get rejected
+
+The lazy heap keeps old distance pairs instead of mutating them in place. Step through the trace to see a fresh entry settle a vertex, then watch its older pair become stale and get skipped safely.
+
+```viz
+{ "type": "dijkstra-lazy-heap", "props": {
+  "caption": "Dijkstra's lazy heap: fresh entries versus stale entries",
+  "source": "A"
+} }
+```
+
 To reconstruct a path from $s$ to $t$, walk `parent[]` back from $t$ until
 you reach $s$, then reverse.
 
