@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { advanceDAGState, buildInitialState } from "./DAGScheduler";
 import { simulateBellmanFord, type BellmanFordEdge } from "./BellmanFordPass";
 import { buildDPDecisionFrames } from "./DPDecisionTrace";
+import { buildEditPathFrames } from "./EditPathReconstructor";
 
 describe("DAG Scheduler frame transitions", () => {
   const edges = [
@@ -57,6 +58,32 @@ describe("Bellman–Ford frame generation", () => {
     ];
     const frames = simulateBellmanFord(edges);
     expect(frames.some((frame) => frame.status === "negative-cycle")).toBe(true);
+  });
+});
+
+describe("Edit-distance path reconstruction", () => {
+  it("recovers an optimal operation path from the completed table", () => {
+    const frames = buildEditPathFrames("kitten", "sitting");
+    const finalFrame = frames.at(-1);
+    expect(finalFrame?.distance).toBe(3);
+    expect(finalFrame?.current).toEqual({ i: 0, j: 0 });
+    expect(finalFrame?.operations.map((operation) => operation.kind)).toEqual([
+      "replace",
+      "match",
+      "match",
+      "match",
+      "replace",
+      "match",
+      "insert",
+    ]);
+    expect(finalFrame?.operations.filter((operation) => operation.kind !== "match")).toHaveLength(3);
+  });
+
+  it("handles empty-prefix insertion while walking to the origin", () => {
+    const finalFrame = buildEditPathFrames("", "abc").at(-1);
+    expect(finalFrame?.distance).toBe(3);
+    expect(finalFrame?.operations.map((operation) => operation.kind)).toEqual(["insert", "insert", "insert"]);
+    expect(finalFrame?.operations.map((operation) => operation.target)).toEqual(["a", "b", "c"]);
   });
 });
 
