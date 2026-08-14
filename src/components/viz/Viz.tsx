@@ -71,6 +71,12 @@ const REGISTRY: Record<string, LazyViz> = {
   "knowledge-check": React.lazy(() =>
     import("./KnowledgeCheck").then((m) => ({ default: m.KnowledgeCheck as React.ComponentType<Record<string, unknown>> })),
   ),
+  "proof-builder": React.lazy(() =>
+    import("./ProofBuilder").then((m) => ({ default: m.ProofBuilder as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "tree-dp": React.lazy(() =>
+    import("./TreeDPExplorer").then((m) => ({ default: m.TreeDPExplorer as React.ComponentType<Record<string, unknown>> })),
+  ),
 };
 
 export function Viz({ raw }: { raw: string }) {

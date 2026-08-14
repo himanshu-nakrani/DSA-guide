@@ -91,6 +91,19 @@ The exchange argument works whenever you can locally compare greedy's first
 choice to any other first choice and show that swapping in greedy's leaves
 the rest of the problem at least as solvable.
 
+### Build the exchange before you invoke induction
+
+The proof has a dependency order: you cannot reduce to a smaller instance
+until the swap has produced an equally good feasible solution that already
+contains the greedy choice. Reorder the claims below to reconstruct that
+logic rather than memorizing a finished proof.
+
+```viz
+{ "type": "proof-builder", "props": {
+  "caption": "Exchange argument builder: activity selection"
+} }
+```
+
 ```viz
 { "type": "callout", "props": {
   "tone": "insight",
