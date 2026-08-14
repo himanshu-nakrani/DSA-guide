@@ -125,6 +125,13 @@ total work is $\sum_{h \ge 0} h \cdot n / 2^{h+1} = O(n)$ by the
 geometric-series argument.
 
 ```viz
+{ "type": "heap-operation-trace", "props": {
+  "caption": "Heap operations: preserve the parent-child invariant",
+  "mode": "heapify"
+} }
+```
+
+```viz
 { "type": "callout", "props": {
   "tone": "intuition",
   "title": "Build is faster than n inserts",
