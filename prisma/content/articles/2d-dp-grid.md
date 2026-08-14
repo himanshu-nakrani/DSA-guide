@@ -46,6 +46,18 @@ def unique_paths(m, n):
     return dp[m-1][n-1]
 ```
 
+### Count paths around obstacles
+
+Toggle obstacles before stepping through the grid. The interaction makes the
+counting recurrence concrete: an obstacle contributes zero, while every open
+cell sums the paths arriving from above and from the left.
+
+```viz
+{ "type": "unique-paths-grid", "props": {
+  "caption": "Unique Paths: toggle obstacles and fill the count recurrence"
+} }
+```
+
 Variants:
 
 - *Unique Paths II* — obstacles. $dp[r][c] = 0$ at obstacles.
@@ -199,6 +211,20 @@ def knapsack_rolled(weights, values, C):
 
 The backward iteration is crucial — going forward would let the same
 item contribute twice.
+
+### Trace the one-dimensional buffer
+
+Step through one capacity update at a time. Compare the safe backward
+iteration with the forward challenge: forward order can read a capacity that
+was already updated for the current item, silently turning 0/1 knapsack into
+an unbounded variant.
+
+```viz
+{ "type": "rolling-buffer-trace", "props": {
+  "caption": "Rolling buffer: why 0/1 knapsack iterates capacity backward",
+  "direction": "backward"
+} }
+```
 
 ```viz
 { "type": "callout", "props": {

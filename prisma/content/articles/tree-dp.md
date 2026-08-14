@@ -170,6 +170,18 @@ $f(r)$ for the chosen root $r$. To move the root from $u$ to its child $v$:
 Apply recursively from the root down. Total work is $\Theta(n)$ because
 each edge is touched a constant number of times in each direction.
 
+### Watch the answer propagate
+
+The explorer first computes subtree sizes and the distance sum for root A,
+then crosses each edge with the transfer rule
+$answer(child) = answer(parent) + n - 2 \cdot size(child)$.
+
+```viz
+{ "type": "rerooting-propagation", "props": {
+  "caption": "Tree DP rerooting: propagate the answer across every edge"
+} }
+```
+
 ```viz
 { "type": "callout", "props": {
   "tone": "pitfall",
