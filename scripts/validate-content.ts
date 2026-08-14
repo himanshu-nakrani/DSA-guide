@@ -30,6 +30,7 @@ const VIZ_TYPES = new Set([
   "bellman-ford-pass",
   "dp-decision-trace",
   "edit-path-reconstructor",
+  "zero-one-deque",
 ]);
 const errors: string[] = [];
 
@@ -131,6 +132,13 @@ function validateEditPathReconstructor(file: string, props: Record<string, unkno
   }
 }
 
+function validateZeroOneDeque(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "zero-one-deque", props);
+  if (props.variant !== undefined && props.variant !== "valid" && props.variant !== "invalid-weight") {
+    fail(file, "zero-one-deque variant must be valid or invalid-weight when provided.");
+  }
+}
+
 function validateVizBlocks(file: string, content: string) {
   for (const match of content.matchAll(/```viz\s*\n([\s\S]*?)```/g)) {
     try {
@@ -156,6 +164,7 @@ function validateVizBlocks(file: string, content: string) {
       if (parsed.type === "bellman-ford-pass") validateBellmanFord(file, props);
       if (parsed.type === "dp-decision-trace") validateDPDecisionTrace(file, props);
       if (parsed.type === "edit-path-reconstructor") validateEditPathReconstructor(file, props);
+      if (parsed.type === "zero-one-deque") validateZeroOneDeque(file, props);
     } catch {
       fail(file, "contains invalid JSON in a viz block.");
     }

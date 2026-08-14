@@ -3,6 +3,7 @@ import { advanceDAGState, buildInitialState } from "./DAGScheduler";
 import { simulateBellmanFord, type BellmanFordEdge } from "./BellmanFordPass";
 import { buildDPDecisionFrames } from "./DPDecisionTrace";
 import { buildEditPathFrames } from "./EditPathReconstructor";
+import { buildZeroOneDequeFrames } from "./ZeroOneDeque";
 
 describe("DAG Scheduler frame transitions", () => {
   const edges = [
@@ -84,6 +85,39 @@ describe("Edit-distance path reconstruction", () => {
     expect(finalFrame?.distance).toBe(3);
     expect(finalFrame?.operations.map((operation) => operation.kind)).toEqual(["insert", "insert", "insert"]);
     expect(finalFrame?.operations.map((operation) => operation.target)).toEqual(["a", "b", "c"]);
+  });
+});
+
+describe("0–1 BFS deque frames", () => {
+  it("puts weight-1 work at the back and weight-0 work at the front", () => {
+    const frames = buildZeroOneDequeFrames([
+      { from: "A", to: "B", weight: 1 },
+      { from: "A", to: "C", weight: 0 },
+    ]);
+    const weightOne = frames.find((frame) => frame.edge?.to === "B");
+    const weightZero = frames.find((frame) => frame.edge?.to === "C");
+    expect(weightOne?.correctAction).toBe("back");
+    expect(weightZero?.correctAction).toBe("front");
+    expect(weightZero?.nextDeque).toEqual([
+      { id: "C", distance: 0 },
+      { id: "B", distance: 1 },
+    ]);
+  });
+
+  it("completes valid inputs and rejects a weight-2 edge", () => {
+    const validFrames = buildZeroOneDequeFrames([
+      { from: "A", to: "B", weight: 1 },
+      { from: "A", to: "C", weight: 0 },
+      { from: "C", to: "D", weight: 1 },
+    ]);
+    expect(validFrames.at(-1)?.status).toBe("complete");
+    expect(validFrames.at(-1)?.dist.D).toBe(1);
+
+    const invalidFrames = buildZeroOneDequeFrames([
+      { from: "A", to: "B", weight: 2 },
+    ]);
+    expect(invalidFrames.at(-1)?.status).toBe("invalid");
+    expect(invalidFrames.at(-1)?.correctAction).toBe("invalid");
   });
 });
 

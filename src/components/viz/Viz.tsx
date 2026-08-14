@@ -89,6 +89,9 @@ const REGISTRY: Record<string, LazyViz> = {
   "edit-path-reconstructor": React.lazy(() =>
     import("./EditPathReconstructor").then((m) => ({ default: m.EditPathReconstructor as React.ComponentType<Record<string, unknown>> })),
   ),
+  "zero-one-deque": React.lazy(() =>
+    import("./ZeroOneDeque").then((m) => ({ default: m.ZeroOneDeque as React.ComponentType<Record<string, unknown>> })),
+  ),
 };
 
 export function Viz({ raw }: { raw: string }) {

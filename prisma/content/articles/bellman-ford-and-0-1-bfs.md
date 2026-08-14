@@ -154,6 +154,20 @@ Total time: $O(V + E)$. Each vertex is processed at most a constant
 number of times because the deque's invariant ensures vertices come
 out in non-decreasing distance order.
 
+### Predict the deque insertion side
+
+At each relaxation, decide whether an improved vertex belongs at the
+front, at the back, or nowhere. The challenge variant deliberately adds a
+weight-2 edge so you can see the boundary of the 0–1 BFS proof rather than
+silently applying the algorithm outside its contract.
+
+```viz
+{ "type": "zero-one-deque", "props": {
+  "caption": "0–1 BFS: predict front or back insertion in the deque",
+  "variant": "valid"
+} }
+```
+
 ```viz
 { "type": "architecture", "props": {
   "caption": "0-1 BFS — deque preserves sorted-by-distance order",
