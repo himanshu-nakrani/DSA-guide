@@ -76,6 +76,19 @@ $$
 The answer is $\max(f(r, 0), f(r, 1))$ at the root $r$. Time:
 $\Theta(n)$ — each edge contributes one summand to one parent.
 
+### Compute the states from leaves to root
+
+Step through a small tree below. Each node exposes its `IN / OUT` pair only
+after the child pairs required by its recurrence are known. Notice that the
+same two-line rule handles every shape in the tree; only the child list
+changes.
+
+```viz
+{ "type": "tree-dp", "props": {
+  "caption": "Maximum independent set: combine child states bottom-up"
+} }
+```
+
 ```viz
 { "type": "callout", "props": {
   "tone": "insight",

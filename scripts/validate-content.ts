@@ -24,6 +24,8 @@ const VIZ_TYPES = new Set([
   "architecture",
   "invariant-trace",
   "knowledge-check",
+  "proof-builder",
+  "tree-dp",
 ]);
 const errors: string[] = [];
 
@@ -65,6 +67,33 @@ function validateInvariantTrace(file: string, props: Record<string, unknown>) {
   }
 }
 
+function validateOptionalCaption(file: string, type: string, props: Record<string, unknown>) {
+  if (props.caption !== undefined && (typeof props.caption !== "string" || !props.caption.trim())) {
+    fail(file, `${type} caption must be a non-empty string when provided.`);
+  }
+}
+
+function validateProofBuilder(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "proof-builder", props);
+  if (props.question !== undefined && (typeof props.question !== "string" || !props.question.trim())) {
+    fail(file, "proof-builder question must be a non-empty string when provided.");
+  }
+  if (props.steps !== undefined) {
+    if (!Array.isArray(props.steps) || props.steps.length < 2) {
+      fail(file, "proof-builder steps must contain at least two entries when provided.");
+    } else if (props.steps.some((step) => !isRecord(step) || typeof step.label !== "string" || !step.label.trim())) {
+      fail(file, "every proof-builder step requires a non-empty string label.");
+    }
+  }
+  if (props.initialOrder !== undefined && (!Array.isArray(props.initialOrder) || props.initialOrder.some((index) => !Number.isInteger(index)))) {
+    fail(file, "proof-builder initialOrder must be an array of integer indices when provided.");
+  }
+}
+
+function validateTreeDPExplorer(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "tree-dp", props);
+}
+
 function validateVizBlocks(file: string, content: string) {
   for (const match of content.matchAll(/```viz\s*\n([\s\S]*?)```/g)) {
     try {
@@ -84,6 +113,8 @@ function validateVizBlocks(file: string, content: string) {
       const props = (parsed.props ?? {}) as Record<string, unknown>;
       if (parsed.type === "knowledge-check") validateKnowledgeCheck(file, props);
       if (parsed.type === "invariant-trace") validateInvariantTrace(file, props);
+      if (parsed.type === "proof-builder") validateProofBuilder(file, props);
+      if (parsed.type === "tree-dp") validateTreeDPExplorer(file, props);
     } catch {
       fail(file, "contains invalid JSON in a viz block.");
     }
