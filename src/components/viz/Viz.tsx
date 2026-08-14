@@ -77,6 +77,15 @@ const REGISTRY: Record<string, LazyViz> = {
   "tree-dp": React.lazy(() =>
     import("./TreeDPExplorer").then((m) => ({ default: m.TreeDPExplorer as React.ComponentType<Record<string, unknown>> })),
   ),
+  "dag-scheduler": React.lazy(() =>
+    import("./DAGScheduler").then((m) => ({ default: m.DAGScheduler as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "bellman-ford-pass": React.lazy(() =>
+    import("./BellmanFordPass").then((m) => ({ default: m.BellmanFordPass as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "dp-decision-trace": React.lazy(() =>
+    import("./DPDecisionTrace").then((m) => ({ default: m.DPDecisionTrace as React.ComponentType<Record<string, unknown>> })),
+  ),
 };
 
 export function Viz({ raw }: { raw: string }) {
