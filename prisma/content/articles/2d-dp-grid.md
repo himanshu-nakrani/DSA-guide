@@ -129,6 +129,18 @@ def edit_distance(a, b):
     return dp[m][n]
 ```
 
+### Reconstruct the edit sequence
+
+The distance is only the score. To recover the actual sequence of
+matches, insertions, deletions, and replacements, keep the completed table
+and walk backward from `dp[m][n]`. At each cell, choose a predecessor that
+satisfies the recurrence; the interaction below makes that backtracking
+path explicit and lists the recovered operations in forward order.
+
+```viz
+{ "type": "edit-path-reconstructor", "props": { "a": "kitten", "b": "sitting" } }
+```
+
 For long strings with small expected edit distance, the *banded* DP
 restricts $|i - j| \le k$ for a known bound $k$, giving $O(nk)$
 instead of $O(n^2)$.

@@ -29,6 +29,8 @@ const VIZ_TYPES = new Set([
   "dag-scheduler",
   "bellman-ford-pass",
   "dp-decision-trace",
+  "edit-path-reconstructor",
+  "zero-one-deque",
 ]);
 const errors: string[] = [];
 
@@ -121,6 +123,22 @@ function validateDPDecisionTrace(file: string, props: Record<string, unknown>) {
   }
 }
 
+function validateEditPathReconstructor(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "edit-path-reconstructor", props);
+  for (const key of ["a", "b"]) {
+    if (props[key] !== undefined && (typeof props[key] !== "string" || (props[key] as string).length > 12)) {
+      fail(file, `edit-path-reconstructor ${key} must be a string of at most 12 characters when provided.`);
+    }
+  }
+}
+
+function validateZeroOneDeque(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "zero-one-deque", props);
+  if (props.variant !== undefined && props.variant !== "valid" && props.variant !== "invalid-weight") {
+    fail(file, "zero-one-deque variant must be valid or invalid-weight when provided.");
+  }
+}
+
 function validateVizBlocks(file: string, content: string) {
   for (const match of content.matchAll(/```viz\s*\n([\s\S]*?)```/g)) {
     try {
@@ -145,6 +163,8 @@ function validateVizBlocks(file: string, content: string) {
       if (parsed.type === "dag-scheduler") validateDAGScheduler(file, props);
       if (parsed.type === "bellman-ford-pass") validateBellmanFord(file, props);
       if (parsed.type === "dp-decision-trace") validateDPDecisionTrace(file, props);
+      if (parsed.type === "edit-path-reconstructor") validateEditPathReconstructor(file, props);
+      if (parsed.type === "zero-one-deque") validateZeroOneDeque(file, props);
     } catch {
       fail(file, "contains invalid JSON in a viz block.");
     }
