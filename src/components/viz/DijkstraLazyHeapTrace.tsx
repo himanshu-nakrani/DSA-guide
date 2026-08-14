@@ -119,10 +119,10 @@ export function DijkstraLazyHeapTrace({
       caption={caption}
       controls={
         <>
-          <VizButton onClick={() => setStep(0)}>reset</VizButton>
-          <VizButton disabled={step === 0} onClick={() => setStep((current) => current - 1)}>← prev</VizButton>
-          <VizButton disabled={step === frames.length - 1} onClick={() => setStep((current) => current + 1)}>next →</VizButton>
-          <VizButton onClick={() => setStep(frames.length - 1)}>finish</VizButton>
+          <VizButton ariaLabel="Reset Dijkstra lazy-heap trace" onClick={() => setStep(0)}>reset</VizButton>
+          <VizButton ariaLabel="Previous Dijkstra lazy-heap frame" disabled={step === 0} onClick={() => setStep((current) => current - 1)}>← prev</VizButton>
+          <VizButton ariaLabel="Next Dijkstra lazy-heap frame" disabled={step === frames.length - 1} onClick={() => setStep((current) => current + 1)}>next →</VizButton>
+          <VizButton ariaLabel="Finish Dijkstra lazy-heap trace" onClick={() => setStep(frames.length - 1)}>finish</VizButton>
         </>
       }
     >

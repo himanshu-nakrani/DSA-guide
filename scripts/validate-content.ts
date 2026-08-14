@@ -111,6 +111,26 @@ function validateDijkstraLazyHeap(file: string, props: Record<string, unknown>) 
   if (props.source !== undefined && (typeof props.source !== "string" || !/^[A-Z]$/.test(props.source))) {
     fail(file, "dijkstra-lazy-heap source must be a single uppercase letter when provided.");
   }
+  if (props.edges !== undefined) {
+    if (!Array.isArray(props.edges) || props.edges.length > 40) {
+      fail(file, "dijkstra-lazy-heap edges must be an array with at most 40 entries when provided.");
+    }
+    for (const edge of props.edges as unknown[]) {
+      if (
+        !edge ||
+        typeof edge !== "object" ||
+        typeof (edge as Record<string, unknown>).from !== "string" ||
+        typeof (edge as Record<string, unknown>).to !== "string" ||
+        !/^[A-Z]$/.test((edge as Record<string, unknown>).from as string) ||
+        !/^[A-Z]$/.test((edge as Record<string, unknown>).to as string) ||
+        typeof (edge as Record<string, unknown>).weight !== "number" ||
+        !Number.isFinite((edge as Record<string, unknown>).weight as number) ||
+        ((edge as Record<string, unknown>).weight as number) < 0
+      ) {
+        fail(file, "dijkstra-lazy-heap edges must use uppercase endpoints and finite non-negative weights.");
+      }
+    }
+  }
 }
 
 function validateDAGScheduler(file: string, props: Record<string, unknown>) {
