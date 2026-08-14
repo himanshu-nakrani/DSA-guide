@@ -66,7 +66,12 @@ export function SlidingWindow({
   const PAD = { l: 16, r: 16, t: 12, b: 18 };
   const plotW = W - PAD.l - PAD.r;
   const plotH = H - PAD.t - PAD.b;
-  const maxY = Math.max(...frames.map((fr) => fr.sum), 1);
+
+  // ⚡ Bolt: Prevent hidden O(N) array allocation (.map) and large spread stack risks
+  let maxY = 1;
+  for (const fr of frames) {
+    if (fr.sum > maxY) maxY = fr.sum;
+  }
 
   return (
     <VizFrame

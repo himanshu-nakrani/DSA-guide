@@ -22,11 +22,15 @@ export function RecursionTree({
   const H = 320;
   const PAD = 24;
   const nodesByDepth: Map<number, Node[]> = new Map();
+
+  // ⚡ Bolt: Prevent hidden O(N) array allocation (.map) and large spread stack risks
+  let maxDepth = 0;
   for (const node of tree.nodes) {
+    if (node.depth > maxDepth) maxDepth = node.depth;
     if (!nodesByDepth.has(node.depth)) nodesByDepth.set(node.depth, []);
     nodesByDepth.get(node.depth)!.push(node);
   }
-  const maxDepth = Math.max(...tree.nodes.map((n) => n.depth));
+
   // Assign x positions by inorder index per depth
   const xByDepth: Map<number, number[]> = new Map();
   for (let d = 0; d <= maxDepth; d++) {

@@ -48,7 +48,16 @@ export function ComplexityChart({
 
   // log-y so 1 → 2ⁿ all fit. y in operation count.
   const minLog = 0;
-  const maxLog = Math.log10(Math.max(...ALL_CURVES.filter((c) => active.has(c.key)).map((c) => c.fn(maxN))) || 1);
+
+  // ⚡ Bolt: Prevent chained array allocations (.filter.map) and large spreads
+  let maxCurveVal = 0;
+  for (const c of ALL_CURVES) {
+    if (active.has(c.key)) {
+      const val = c.fn(maxN);
+      if (val > maxCurveVal) maxCurveVal = val;
+    }
+  }
+  const maxLog = Math.log10(maxCurveVal || 1);
 
   // Round to 2 decimal places so the SVG `points` string is bit-identical
   // between the SSR pass (Node's libm) and the client (V8). Math.log2/log10

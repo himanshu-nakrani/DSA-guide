@@ -55,11 +55,20 @@ export function TreeTraversal({
   const positions = React.useMemo(() => layout(tree), [tree]);
   const W = 640;
   const H = 280;
-  const xs = positions.map((p) => p.x);
-  const ys = positions.map((p) => p.y);
-  const xMin = Math.min(...xs);
-  const xMax = Math.max(...xs);
-  const yMax = Math.max(...ys);
+
+  // ⚡ Bolt: Prevent hidden O(N) array allocations (.map) and V8 stack limits from large array spreads
+  let xMin = Infinity;
+  let xMax = -Infinity;
+  let yMax = -Infinity;
+  for (const p of positions) {
+    if (p.x < xMin) xMin = p.x;
+    if (p.x > xMax) xMax = p.x;
+    if (p.y > yMax) yMax = p.y;
+  }
+  if (xMin === Infinity) xMin = 0;
+  if (xMax === -Infinity) xMax = 0;
+  if (yMax === -Infinity) yMax = 0;
+
   const xScale = (x: number) =>
     40 + ((x - xMin) / Math.max(1, xMax - xMin)) * (W - 80);
   const yScale = (y: number) => 40 + (y / Math.max(1, yMax)) * (H - 80);
