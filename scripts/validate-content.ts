@@ -31,6 +31,9 @@ const VIZ_TYPES = new Set([
   "dp-decision-trace",
   "edit-path-reconstructor",
   "zero-one-deque",
+  "unique-paths-grid",
+  "rolling-buffer-trace",
+  "rerooting-propagation",
 ]);
 const errors: string[] = [];
 
@@ -139,6 +142,24 @@ function validateZeroOneDeque(file: string, props: Record<string, unknown>) {
   }
 }
 
+function validateUniquePathsGrid(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "unique-paths-grid", props);
+  if (props.obstacles !== undefined && (!Array.isArray(props.obstacles) || props.obstacles.length > 12 || props.obstacles.some((item) => typeof item !== "string" || !/^\d+,\d+$/.test(item)))) {
+    fail(file, "unique-paths-grid obstacles must be at most 12 row,col strings when provided.");
+  }
+}
+
+function validateRollingBufferTrace(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "rolling-buffer-trace", props);
+  if (props.direction !== undefined && props.direction !== "backward" && props.direction !== "forward") {
+    fail(file, "rolling-buffer-trace direction must be backward or forward when provided.");
+  }
+}
+
+function validateRerootingPropagation(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "rerooting-propagation", props);
+}
+
 function validateVizBlocks(file: string, content: string) {
   for (const match of content.matchAll(/```viz\s*\n([\s\S]*?)```/g)) {
     try {
@@ -165,6 +186,9 @@ function validateVizBlocks(file: string, content: string) {
       if (parsed.type === "dp-decision-trace") validateDPDecisionTrace(file, props);
       if (parsed.type === "edit-path-reconstructor") validateEditPathReconstructor(file, props);
       if (parsed.type === "zero-one-deque") validateZeroOneDeque(file, props);
+      if (parsed.type === "unique-paths-grid") validateUniquePathsGrid(file, props);
+      if (parsed.type === "rolling-buffer-trace") validateRollingBufferTrace(file, props);
+      if (parsed.type === "rerooting-propagation") validateRerootingPropagation(file, props);
     } catch {
       fail(file, "contains invalid JSON in a viz block.");
     }

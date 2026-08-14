@@ -92,6 +92,15 @@ const REGISTRY: Record<string, LazyViz> = {
   "zero-one-deque": React.lazy(() =>
     import("./ZeroOneDeque").then((m) => ({ default: m.ZeroOneDeque as React.ComponentType<Record<string, unknown>> })),
   ),
+  "unique-paths-grid": React.lazy(() =>
+    import("./UniquePathsGrid").then((m) => ({ default: m.UniquePathsGrid as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "rolling-buffer-trace": React.lazy(() =>
+    import("./RollingBufferTrace").then((m) => ({ default: m.RollingBufferTrace as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "rerooting-propagation": React.lazy(() =>
+    import("./RerootingPropagation").then((m) => ({ default: m.RerootingPropagation as React.ComponentType<Record<string, unknown>> })),
+  ),
 };
 
 export function Viz({ raw }: { raw: string }) {

@@ -4,6 +4,9 @@ import { simulateBellmanFord, type BellmanFordEdge } from "./BellmanFordPass";
 import { buildDPDecisionFrames } from "./DPDecisionTrace";
 import { buildEditPathFrames } from "./EditPathReconstructor";
 import { buildZeroOneDequeFrames } from "./ZeroOneDeque";
+import { buildUniquePathsFrames } from "./UniquePathsGrid";
+import { buildRollingBufferFrames } from "./RollingBufferTrace";
+import { buildRerootingFrames } from "./RerootingPropagation";
 
 describe("DAG Scheduler frame transitions", () => {
   const edges = [
@@ -118,6 +121,30 @@ describe("0–1 BFS deque frames", () => {
     ]);
     expect(invalidFrames.at(-1)?.status).toBe("invalid");
     expect(invalidFrames.at(-1)?.correctAction).toBe("invalid");
+  });
+});
+
+describe("Priority 2 DP frame generation", () => {
+  it("counts paths while treating obstacle cells as zero", () => {
+    const frames = buildUniquePathsFrames(["1,2", "2,2"]);
+    expect(frames.find((frame) => frame.current?.row === 1 && frame.current.col === 2)?.status).toBe("obstacle");
+    expect(frames.at(-1)?.answer).toBe(8);
+    expect(buildUniquePathsFrames([]).at(-1)?.answer).toBe(35);
+  });
+
+  it("preserves 0/1 knapsack semantics backward and exposes forward reuse", () => {
+    const backward = buildRollingBufferFrames("backward");
+    const forward = buildRollingBufferFrames("forward");
+    expect(backward.at(-1)?.dp[6]).toBe(8);
+    expect(backward.some((frame) => frame.reusesCurrentItem)).toBe(false);
+    expect(forward.some((frame) => frame.reusesCurrentItem)).toBe(true);
+    expect(forward.at(-1)?.dp[6]).toBe(9);
+  });
+
+  it("propagates every-root distance sums from one root answer", () => {
+    const finalFrame = buildRerootingFrames().at(-1);
+    expect(finalFrame?.answers).toEqual({ A: 6, B: 7, C: 7, D: 10, E: 10 });
+    expect(finalFrame?.phase).toBe("complete");
   });
 });
 
