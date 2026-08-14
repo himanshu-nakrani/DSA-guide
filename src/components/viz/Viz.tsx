@@ -101,6 +101,15 @@ const REGISTRY: Record<string, LazyViz> = {
   "rerooting-propagation": React.lazy(() =>
     import("./RerootingPropagation").then((m) => ({ default: m.RerootingPropagation as React.ComponentType<Record<string, unknown>> })),
   ),
+  "heap-operation-trace": React.lazy(() =>
+    import("./HeapOperationTrace").then((m) => ({ default: m.HeapOperationTrace as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "dsu-forest-trace": React.lazy(() =>
+    import("./DSUForestTrace").then((m) => ({ default: m.DSUForestTrace as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "monotonic-deque-window": React.lazy(() =>
+    import("./MonotonicDequeWindow").then((m) => ({ default: m.MonotonicDequeWindow as React.ComponentType<Record<string, unknown>> })),
+  ),
 };
 
 export function Viz({ raw }: { raw: string }) {

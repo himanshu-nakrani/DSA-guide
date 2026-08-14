@@ -135,6 +135,18 @@ def window_max(A, k):
     return out
 ```
 
+### Watch the deque maintain the maximum
+
+Step through the two-ended discipline: remove dominated values from the back, expire indices from the front, and read the current maximum at the front.
+
+```viz
+{ "type": "monotonic-deque-window", "props": {
+  "caption": "Monotonic deque: keep the window maximum at the front",
+  "windowSize": 3,
+  "values": [1, 3, -1, -3, 5, 3, 6, 7]
+} }
+```
+
 Two flavors of monotonic discipline at once:
 
 - *Push* from the back: drop any back element that the new value

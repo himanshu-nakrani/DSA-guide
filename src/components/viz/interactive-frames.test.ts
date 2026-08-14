@@ -7,6 +7,9 @@ import { buildZeroOneDequeFrames } from "./ZeroOneDeque";
 import { buildUniquePathsFrames } from "./UniquePathsGrid";
 import { buildRollingBufferFrames } from "./RollingBufferTrace";
 import { buildRerootingFrames } from "./RerootingPropagation";
+import { buildHeapFrames } from "./HeapOperationTrace";
+import { buildDSUFrames } from "./DSUForestTrace";
+import { buildMonotonicDequeFrames } from "./MonotonicDequeWindow";
 
 describe("DAG Scheduler frame transitions", () => {
   const edges = [
@@ -145,6 +148,34 @@ describe("Priority 2 DP frame generation", () => {
     const finalFrame = buildRerootingFrames().at(-1);
     expect(finalFrame?.answers).toEqual({ A: 6, B: 7, C: 7, D: 10, E: 10 });
     expect(finalFrame?.phase).toBe("complete");
+  });
+});
+
+describe("Priority 3 algorithm-invariant frames", () => {
+  it("heapifies into a valid max-heap and exposes sift swaps", () => {
+    const frames = buildHeapFrames("heapify");
+    const finalValues = frames.at(-1)?.values ?? [];
+    for (let index = 1; index < finalValues.length; index += 1) {
+      expect(finalValues[Math.floor((index - 1) / 2)]).toBeGreaterThanOrEqual(finalValues[index]);
+    }
+    expect(frames.some((frame) => frame.action === "swap-down")).toBe(true);
+    expect(frames.at(-1)?.status).toBe("complete");
+  });
+
+  it("compresses the DSU path and finishes with one component", () => {
+    const frames = buildDSUFrames();
+    const compression = frames.find((frame) => frame.operation === "find(3)");
+    expect(compression?.parent).toEqual([0, 0, 0, 0, 4]);
+    expect(compression?.path).toEqual([3, 2, 0]);
+    expect(frames.at(-1)?.parent).toEqual([0, 0, 0, 0, 0]);
+    expect(frames.at(-1)?.components).toBe(1);
+  });
+
+  it("keeps window maxima at the deque front while expiring and dominating indices", () => {
+    const frames = buildMonotonicDequeFrames();
+    expect(frames.some((frame) => frame.action === "pop-back")).toBe(true);
+    expect(frames.some((frame) => frame.action === "expire-front")).toBe(true);
+    expect(frames.at(-1)?.outputs).toEqual([3, 3, 5, 5, 6, 7]);
   });
 });
 

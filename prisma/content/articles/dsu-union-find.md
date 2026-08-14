@@ -100,6 +100,16 @@ The path from 3 to the root used to be two hops; after the `find(3)`
 call, it is one. Path compression *amortizes* every subsequent
 `find(3)` to $O(1)$.
 
+### Watch the forest flatten
+
+The explorer below replays the unions, keeps the component count visible, and then makes the path-compression rewrite explicit.
+
+```viz
+{ "type": "dsu-forest-trace", "props": {
+  "caption": "Disjoint-set union: rank, roots, and path compression"
+} }
+```
+
 ## Why Inverse Ackermann
 
 The proof is one of the deepest in algorithms (Tarjan 1975, simplified

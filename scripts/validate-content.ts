@@ -34,6 +34,9 @@ const VIZ_TYPES = new Set([
   "unique-paths-grid",
   "rolling-buffer-trace",
   "rerooting-propagation",
+  "heap-operation-trace",
+  "dsu-forest-trace",
+  "monotonic-deque-window",
 ]);
 const errors: string[] = [];
 
@@ -160,6 +163,27 @@ function validateRerootingPropagation(file: string, props: Record<string, unknow
   validateOptionalCaption(file, "rerooting-propagation", props);
 }
 
+function validateHeapOperationTrace(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "heap-operation-trace", props);
+  if (props.mode !== undefined && props.mode !== "heapify" && props.mode !== "sift-up" && props.mode !== "sift-down") {
+    fail(file, "heap-operation-trace mode must be heapify, sift-up, or sift-down when provided.");
+  }
+}
+
+function validateDSUForestTrace(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "dsu-forest-trace", props);
+}
+
+function validateMonotonicDequeWindow(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "monotonic-deque-window", props);
+  if (props.values !== undefined && (!Array.isArray(props.values) || props.values.length < 1 || props.values.length > 20 || props.values.some((value) => typeof value !== "number" || !Number.isFinite(value)))) {
+    fail(file, "monotonic-deque-window values must contain 1–20 finite numbers when provided.");
+  }
+  if (props.windowSize !== undefined && (!Number.isInteger(props.windowSize) || (props.windowSize as number) < 1 || (props.windowSize as number) > 10)) {
+    fail(file, "monotonic-deque-window windowSize must be an integer from 1 to 10 when provided.");
+  }
+}
+
 function validateVizBlocks(file: string, content: string) {
   for (const match of content.matchAll(/```viz\s*\n([\s\S]*?)```/g)) {
     try {
@@ -189,6 +213,9 @@ function validateVizBlocks(file: string, content: string) {
       if (parsed.type === "unique-paths-grid") validateUniquePathsGrid(file, props);
       if (parsed.type === "rolling-buffer-trace") validateRollingBufferTrace(file, props);
       if (parsed.type === "rerooting-propagation") validateRerootingPropagation(file, props);
+      if (parsed.type === "heap-operation-trace") validateHeapOperationTrace(file, props);
+      if (parsed.type === "dsu-forest-trace") validateDSUForestTrace(file, props);
+      if (parsed.type === "monotonic-deque-window") validateMonotonicDequeWindow(file, props);
     } catch {
       fail(file, "contains invalid JSON in a viz block.");
     }
