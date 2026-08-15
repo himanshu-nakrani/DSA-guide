@@ -17,8 +17,11 @@ export function VizFrame({
   controls?: React.ReactNode;
   height?: number | string;
 }) {
+  const frameLabel = caption ?? "Interactive visualization";
   return (
     <div
+      role="group"
+      aria-label={frameLabel}
       className="border border-[color:var(--rule-strong)] overflow-hidden"
       style={{
         background: "var(--surface-1)",
@@ -33,7 +36,11 @@ export function VizFrame({
         <span className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--pencil)]">
           {caption ?? "Figure"}
         </span>
-        {controls ? <span className="flex items-center gap-2">{controls}</span> : null}
+        {controls ? (
+          <div role="group" aria-label="Visualization controls" className="flex flex-wrap items-center gap-2">
+            {controls}
+          </div>
+        ) : null}
       </div>
       <div
         className="px-5 py-5"
@@ -51,20 +58,23 @@ export function VizButton({
   children,
   title,
   active,
+  ariaLabel,
 }: {
   onClick?: () => void;
   disabled?: boolean;
   children: React.ReactNode;
   title?: string;
   active?: boolean;
+  ariaLabel?: string;
 }) {
   return (
     <button
       type="button"
       title={title}
+      aria-label={ariaLabel ?? title}
       onClick={onClick}
       disabled={disabled}
-      aria-pressed={active}
+      aria-pressed={active === undefined ? undefined : active}
       className={`font-mono text-[0.66rem] uppercase tracking-[0.1em] px-2 py-1 rounded-[2px] border outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] transition-colors ${
         active
           ? "border-[color:var(--ink-blue)] bg-[color:var(--ink-blue)] text-[color:var(--primary-foreground)]"
