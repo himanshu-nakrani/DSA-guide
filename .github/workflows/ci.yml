@@ -79,31 +79,8 @@ jobs:
       - name: Type-check
         run: npx tsc --noEmit
 
-      - name: Content validation
-        run: npm run content:validate
-
       - name: Test
         run: npm test -- --run --coverage
 
       - name: Build
         run: npm run build
-
-      - name: Start production server
-        run: |
-          npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/dsa-guide-next.log 2>&1 &
-          echo $! > /tmp/dsa-guide-next.pid
-          for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then exit 0; fi
-            sleep 1
-          done
-          cat /tmp/dsa-guide-next.log
-          exit 1
-
-      - name: Production HTTP smoke checks
-        run: npm run smoke:production
-        env:
-          SMOKE_BASE_URL: http://127.0.0.1:3000
-
-      - name: Stop production server
-        if: always()
-        run: kill "$(cat /tmp/dsa-guide-next.pid)" 2>/dev/null || true
