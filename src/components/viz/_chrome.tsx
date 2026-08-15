@@ -17,7 +17,8 @@ export function VizFrame({
   controls?: React.ReactNode;
   height?: number | string;
 }) {
-  const frameLabel = caption ?? "Interactive visualization";
+  const frameLabel = caption?.trim() || "Interactive visualization";
+  const displayCaption = caption?.trim() || "Figure";
   return (
     <div
       role="group"
@@ -34,7 +35,7 @@ export function VizFrame({
         style={{ background: "var(--surface-2)" }}
       >
         <span className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--pencil)]">
-          {caption ?? "Figure"}
+          {displayCaption}
         </span>
         {controls ? (
           <div role="group" aria-label="Visualization controls" className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
