@@ -10,6 +10,8 @@ import { buildRerootingFrames } from "./RerootingPropagation";
 import { buildHeapFrames } from "./HeapOperationTrace";
 import { buildDSUFrames } from "./DSUForestTrace";
 import { buildKruskalFrames } from "./KruskalMSTTrace";
+import { buildNextGreaterFrames } from "./NextGreaterStackTrace";
+import { buildBinaryInvariantFrames } from "./BinarySearchInvariantTrace";
 import { buildMonotonicDequeFrames } from "./MonotonicDequeWindow";
 import { buildLazyHeapFrames } from "./DijkstraLazyHeapTrace";
 
@@ -160,6 +162,27 @@ describe("Dijkstra lazy-heap frames", () => {
     expect(frames.some((frame) => frame.action === "push" && frame.activeNode === "B")).toBe(true);
     expect(frames.at(-1)?.dist).toEqual({ A: 0, B: 4, C: 3, D: 6, E: 8 });
     expect(frames.at(-1)?.status).toBe("complete");
+  });
+});
+
+describe("Next-greater stack frames", () => {
+  it("resolves smaller values when a larger value arrives and flushes the remainder", () => {
+    const frames = buildNextGreaterFrames([2, 1, 2, 4, 3, 5]);
+    expect(frames.some((frame) => frame.action === "pop")).toBe(true);
+    expect(frames.at(-1)?.answers).toEqual([4, 2, 4, 5, 5, -1]);
+  });
+});
+
+describe("Binary-search invariant frames", () => {
+  it("preserves the half-open interval and finds the target", () => {
+    const frames = buildBinaryInvariantFrames([2, 4, 7, 9, 12, 17, 23, 31, 42], 23);
+    expect(frames.some((frame) => frame.update === "right")).toBe(true);
+    expect(frames.at(-1)?.update).toBe("found");
+    expect(frames.at(-1)?.mid).toBe(6);
+  });
+
+  it("reports a miss when the interval becomes empty", () => {
+    expect(buildBinaryInvariantFrames([1, 3, 5], 4).at(-1)?.update).toBe("miss");
   });
 });
 

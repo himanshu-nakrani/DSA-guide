@@ -51,6 +51,14 @@ the stack that it exceeds — so we pop them, recording $i$ as their
 answer, and then push $i$.
 
 ```viz
+{ "type": "next-greater-stack", "props": {
+  "caption": "Next-greater stack: pop smaller unresolved values",
+  "values": [2, 1, 2, 4, 3, 5]
+} }
+```
+
+```viz
+
 { "type": "callout", "props": {
   "tone": "intuition",
   "title": "Why this is O(n)",

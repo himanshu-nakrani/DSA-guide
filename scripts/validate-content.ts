@@ -10,6 +10,7 @@ const VIZ_TYPES = new Set([
   "growth-table",
   "array-memory",
   "binary-search",
+  "binary-search-invariant",
   "linear-vs-binary",
   "two-pointers",
   "sliding-window",
@@ -39,6 +40,7 @@ const VIZ_TYPES = new Set([
   "dsu-forest-trace",
   "kruskal-mst-trace",
   "monotonic-deque-window",
+  "next-greater-stack",
 ]);
 const errors: string[] = [];
 
@@ -203,6 +205,23 @@ function validateDSUForestTrace(file: string, props: Record<string, unknown>) {
   validateOptionalCaption(file, "dsu-forest-trace", props);
 }
 
+function validateBinarySearchInvariant(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "binary-search-invariant", props);
+  if (props.values !== undefined && (!Array.isArray(props.values) || props.values.length < 1 || props.values.length > 32 || props.values.some((value) => typeof value !== "number" || !Number.isFinite(value)))) {
+    fail(file, "binary-search-invariant values must contain 1–32 finite numbers when provided.");
+  }
+  if (props.target !== undefined && (typeof props.target !== "number" || !Number.isFinite(props.target))) {
+    fail(file, "binary-search-invariant target must be a finite number when provided.");
+  }
+}
+
+function validateNextGreaterStack(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "next-greater-stack", props);
+  if (props.values !== undefined && (!Array.isArray(props.values) || props.values.length < 1 || props.values.length > 32 || props.values.some((value) => typeof value !== "number" || !Number.isFinite(value)))) {
+    fail(file, "next-greater-stack values must contain 1–32 finite numbers when provided.");
+  }
+}
+
 function validateKruskalMST(file: string, props: Record<string, unknown>) {
   validateOptionalCaption(file, "kruskal-mst-trace", props);
   if (props.edges !== undefined) {
@@ -247,6 +266,8 @@ function validateVizBlocks(file: string, content: string) {
       }
       const props = (parsed.props ?? {}) as Record<string, unknown>;
       if (parsed.type === "knowledge-check") validateKnowledgeCheck(file, props);
+      if (parsed.type === "binary-search-invariant") validateBinarySearchInvariant(file, props);
+      if (parsed.type === "next-greater-stack") validateNextGreaterStack(file, props);
       if (parsed.type === "invariant-trace") validateInvariantTrace(file, props);
       if (parsed.type === "proof-builder") validateProofBuilder(file, props);
       if (parsed.type === "tree-dp") validateTreeDPExplorer(file, props);

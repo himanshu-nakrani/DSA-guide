@@ -100,6 +100,16 @@ Four invariants to keep in mind:
    64-bit signed integers near `INT_MAX`, the latter overflows.
 4. Termination: `L > R` means the window is empty.
 
+The next trace uses a half-open window to make the boundary updates visible. Compare each midpoint with the target and preserve the invariant `[lo, hi)` at every step.
+
+```viz
+{ "type": "binary-search-invariant", "props": {
+  "caption": "Binary-search invariant: maintain the half-open window",
+  "values": [2, 4, 7, 9, 12, 17, 23, 31, 42],
+  "target": 23
+} }
+```
+
 ```viz
 { "type": "callout", "props": {
   "tone": "pitfall",
