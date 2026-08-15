@@ -59,6 +59,9 @@ const REGISTRY: Record<string, LazyViz> = {
   "dijkstra": React.lazy(() =>
     import("./DijkstraViz").then((m) => ({ default: m.DijkstraViz as React.ComponentType<Record<string, unknown>> })),
   ),
+  "dijkstra-lazy-heap": React.lazy(() =>
+    import("./DijkstraLazyHeapTrace").then((m) => ({ default: m.DijkstraLazyHeapTrace as React.ComponentType<Record<string, unknown>> })),
+  ),
   "recursion-tree": React.lazy(() =>
     import("./RecursionTree").then((m) => ({ default: m.RecursionTree as React.ComponentType<Record<string, unknown>> })),
   ),

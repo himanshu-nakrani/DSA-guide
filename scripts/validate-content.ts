@@ -20,6 +20,7 @@ const VIZ_TYPES = new Set([
   "graph-traversal",
   "dp-grid",
   "dijkstra",
+  "dijkstra-lazy-heap",
   "recursion-tree",
   "architecture",
   "invariant-trace",
@@ -103,6 +104,13 @@ function validateProofBuilder(file: string, props: Record<string, unknown>) {
 
 function validateTreeDPExplorer(file: string, props: Record<string, unknown>) {
   validateOptionalCaption(file, "tree-dp", props);
+}
+
+function validateDijkstraLazyHeap(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "dijkstra-lazy-heap", props);
+  if (props.source !== undefined && (typeof props.source !== "string" || !/^[A-Z]$/.test(props.source))) {
+    fail(file, "dijkstra-lazy-heap source must be a single uppercase letter when provided.");
+  }
 }
 
 function validateDAGScheduler(file: string, props: Record<string, unknown>) {
@@ -205,6 +213,7 @@ function validateVizBlocks(file: string, content: string) {
       if (parsed.type === "invariant-trace") validateInvariantTrace(file, props);
       if (parsed.type === "proof-builder") validateProofBuilder(file, props);
       if (parsed.type === "tree-dp") validateTreeDPExplorer(file, props);
+      if (parsed.type === "dijkstra-lazy-heap") validateDijkstraLazyHeap(file, props);
       if (parsed.type === "dag-scheduler") validateDAGScheduler(file, props);
       if (parsed.type === "bellman-ford-pass") validateBellmanFord(file, props);
       if (parsed.type === "dp-decision-trace") validateDPDecisionTrace(file, props);

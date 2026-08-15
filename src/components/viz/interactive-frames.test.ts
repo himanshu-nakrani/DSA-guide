@@ -10,6 +10,7 @@ import { buildRerootingFrames } from "./RerootingPropagation";
 import { buildHeapFrames } from "./HeapOperationTrace";
 import { buildDSUFrames } from "./DSUForestTrace";
 import { buildMonotonicDequeFrames } from "./MonotonicDequeWindow";
+import { buildLazyHeapFrames } from "./DijkstraLazyHeapTrace";
 
 describe("DAG Scheduler frame transitions", () => {
   const edges = [
@@ -148,6 +149,16 @@ describe("Priority 2 DP frame generation", () => {
     const finalFrame = buildRerootingFrames().at(-1);
     expect(finalFrame?.answers).toEqual({ A: 6, B: 7, C: 7, D: 10, E: 10 });
     expect(finalFrame?.phase).toBe("complete");
+  });
+});
+
+describe("Dijkstra lazy-heap frames", () => {
+  it("pushes improved distances and skips stale entries", () => {
+    const frames = buildLazyHeapFrames();
+    expect(frames.some((frame) => frame.action === "stale")).toBe(true);
+    expect(frames.some((frame) => frame.action === "push" && frame.activeNode === "B")).toBe(true);
+    expect(frames.at(-1)?.dist).toEqual({ A: 0, B: 4, C: 3, D: 6, E: 8 });
+    expect(frames.at(-1)?.status).toBe("complete");
   });
 });
 
