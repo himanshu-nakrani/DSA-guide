@@ -110,6 +110,16 @@ The explorer below replays the unions, keeps the component count visible, and th
 } }
 ```
 
+### Watch Kruskal reject a cycle
+
+Kruskal's minimum-spanning-tree algorithm uses the same representative query before it accepts an edge. The next trace makes the cycle gate explicit: an edge is accepted only when its endpoints belong to different components.
+
+```viz
+{ "type": "kruskal-mst-trace", "props": {
+  "caption": "Kruskal MST: accept safe edges, reject cycles"
+} }
+```
+
 ## Why Inverse Ackermann
 
 The proof is one of the deepest in algorithms (Tarjan 1975, simplified

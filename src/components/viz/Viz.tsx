@@ -110,6 +110,9 @@ const REGISTRY: Record<string, LazyViz> = {
   "dsu-forest-trace": React.lazy(() =>
     import("./DSUForestTrace").then((m) => ({ default: m.DSUForestTrace as React.ComponentType<Record<string, unknown>> })),
   ),
+  "kruskal-mst-trace": React.lazy(() =>
+    import("./KruskalMSTTrace").then((m) => ({ default: m.KruskalMSTTrace as React.ComponentType<Record<string, unknown>> })),
+  ),
   "monotonic-deque-window": React.lazy(() =>
     import("./MonotonicDequeWindow").then((m) => ({ default: m.MonotonicDequeWindow as React.ComponentType<Record<string, unknown>> })),
   ),

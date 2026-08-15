@@ -30,20 +30,20 @@ export function VizFrame({
       }}
     >
       <div
-        className="px-4 py-2 border-b border-[color:var(--rule)] flex items-center justify-between gap-3"
+        className="flex flex-col items-start gap-2 border-b border-[color:var(--rule)] px-4 py-2 sm:flex-row sm:items-center sm:justify-between"
         style={{ background: "var(--surface-2)" }}
       >
         <span className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--pencil)]">
           {caption ?? "Figure"}
         </span>
         {controls ? (
-          <div role="group" aria-label="Visualization controls" className="flex flex-wrap items-center gap-2">
+          <div role="group" aria-label="Visualization controls" className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
             {controls}
           </div>
         ) : null}
       </div>
       <div
-        className="px-5 py-5"
+        className="min-w-0 overflow-x-auto px-5 py-5"
         style={{ minHeight: typeof height === "number" ? `${height}px` : height }}
       >
         {children}
@@ -75,7 +75,7 @@ export function VizButton({
       onClick={onClick}
       disabled={disabled}
       aria-pressed={active === undefined ? undefined : active}
-      className={`font-mono text-[0.66rem] uppercase tracking-[0.1em] px-2 py-1 rounded-[2px] border outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] transition-colors ${
+      className={`min-h-8 whitespace-nowrap rounded-[2px] border px-2 py-1 font-mono text-[0.66rem] uppercase tracking-[0.1em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] ${
         active
           ? "border-[color:var(--ink-blue)] bg-[color:var(--ink-blue)] text-[color:var(--primary-foreground)]"
           : "border-[color:var(--rule-strong)] bg-transparent text-[color:var(--ink)] hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)]"

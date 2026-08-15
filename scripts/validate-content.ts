@@ -37,6 +37,7 @@ const VIZ_TYPES = new Set([
   "rerooting-propagation",
   "heap-operation-trace",
   "dsu-forest-trace",
+  "kruskal-mst-trace",
   "monotonic-deque-window",
 ]);
 const errors: string[] = [];
@@ -202,6 +203,22 @@ function validateDSUForestTrace(file: string, props: Record<string, unknown>) {
   validateOptionalCaption(file, "dsu-forest-trace", props);
 }
 
+function validateKruskalMST(file: string, props: Record<string, unknown>) {
+  validateOptionalCaption(file, "kruskal-mst-trace", props);
+  if (props.edges !== undefined) {
+    if (!Array.isArray(props.edges) || props.edges.length < 1 || props.edges.length > 40) {
+      fail(file, "kruskal-mst-trace edges must contain 1–40 entries when provided.");
+      return;
+    }
+    for (const edge of props.edges) {
+      if (!isRecord(edge) || typeof edge.from !== "string" || typeof edge.to !== "string" || !/^[A-Z]$/.test(edge.from) || !/^[A-Z]$/.test(edge.to) || typeof edge.weight !== "number" || !Number.isFinite(edge.weight) || edge.weight < 0) {
+        fail(file, "kruskal-mst-trace edges must use uppercase endpoints and finite non-negative weights.");
+        break;
+      }
+    }
+  }
+}
+
 function validateMonotonicDequeWindow(file: string, props: Record<string, unknown>) {
   validateOptionalCaption(file, "monotonic-deque-window", props);
   if (props.values !== undefined && (!Array.isArray(props.values) || props.values.length < 1 || props.values.length > 20 || props.values.some((value) => typeof value !== "number" || !Number.isFinite(value)))) {
@@ -244,6 +261,7 @@ function validateVizBlocks(file: string, content: string) {
       if (parsed.type === "rerooting-propagation") validateRerootingPropagation(file, props);
       if (parsed.type === "heap-operation-trace") validateHeapOperationTrace(file, props);
       if (parsed.type === "dsu-forest-trace") validateDSUForestTrace(file, props);
+      if (parsed.type === "kruskal-mst-trace") validateKruskalMST(file, props);
       if (parsed.type === "monotonic-deque-window") validateMonotonicDequeWindow(file, props);
     } catch {
       fail(file, "contains invalid JSON in a viz block.");

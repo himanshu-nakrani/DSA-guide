@@ -9,6 +9,7 @@ import { buildRollingBufferFrames } from "./RollingBufferTrace";
 import { buildRerootingFrames } from "./RerootingPropagation";
 import { buildHeapFrames } from "./HeapOperationTrace";
 import { buildDSUFrames } from "./DSUForestTrace";
+import { buildKruskalFrames } from "./KruskalMSTTrace";
 import { buildMonotonicDequeFrames } from "./MonotonicDequeWindow";
 import { buildLazyHeapFrames } from "./DijkstraLazyHeapTrace";
 
@@ -159,6 +160,25 @@ describe("Dijkstra lazy-heap frames", () => {
     expect(frames.some((frame) => frame.action === "push" && frame.activeNode === "B")).toBe(true);
     expect(frames.at(-1)?.dist).toEqual({ A: 0, B: 4, C: 3, D: 6, E: 8 });
     expect(frames.at(-1)?.status).toBe("complete");
+  });
+});
+
+describe("Kruskal MST cycle-gate frames", () => {
+  it("accepts safe edges, rejects cycle-forming edges, and completes the MST", () => {
+    const frames = buildKruskalFrames();
+    expect(frames.some((frame) => frame.action === "reject")).toBe(true);
+    expect(frames.filter((frame) => frame.action === "accept").map((frame) => frame.edge?.weight)).toEqual([1, 1, 2, 2]);
+    expect(frames.at(-1)?.components).toBe(1);
+    expect(frames.at(-1)?.totalWeight).toBe(6);
+  });
+
+  it("orders equal-weight edges deterministically and starts with one component per node", () => {
+    const frames = buildKruskalFrames([
+      { from: "B", to: "C", weight: 1 },
+      { from: "A", to: "B", weight: 1 },
+    ]);
+    expect(frames[0]?.components).toBe(3);
+    expect(frames[1]?.edge).toEqual({ from: "A", to: "B", weight: 1 });
   });
 });
 
