@@ -10,10 +10,16 @@ import { useScrollFraction } from "@/hooks/useScrollFraction";
 export function ReadingProgress({ targetSelector }: { targetSelector: string }) {
   const fraction = useScrollFraction(targetSelector);
 
+  const percentage = Math.round(fraction * 100);
+
   return (
     <div
-      aria-hidden
-      className="fixed top-0 left-0 right-0 z-50 h-[2px] bg-transparent"
+      role="progressbar"
+      aria-label="Article reading progress"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percentage}
+      className="fixed left-0 right-0 top-0 z-50 h-[2px] bg-transparent"
     >
       <div
         className="h-full will-change-[transform] origin-left"
