@@ -63,11 +63,11 @@ export function DijkstraViz({
       caption={caption}
       controls={
         <>
-          <VizButton onClick={() => setStep(0)}>⏮</VizButton>
-          <VizButton onClick={() => setPlaying((p) => !p)} active={playing}>
+          <VizButton ariaLabel="Reset Dijkstra trace" onClick={() => setStep(0)}>⏮</VizButton>
+          <VizButton ariaLabel={playing ? "Pause Dijkstra trace" : "Play Dijkstra trace"} onClick={() => setPlaying((p) => !p)} active={playing}>
             {playing ? "pause" : "play"}
           </VizButton>
-          <VizButton onClick={() => setStep((s) => Math.min(frames.length - 1, s + 1))}>step</VizButton>
+          <VizButton ariaLabel="Advance Dijkstra trace one step" onClick={() => setStep((s) => Math.min(frames.length - 1, s + 1))}>step</VizButton>
         </>
       }
     >
@@ -154,7 +154,7 @@ export function DijkstraViz({
           <div className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground mb-2">
             tentative distances
           </div>
-          <table className="font-mono text-[0.78rem] w-full">
+          <table className="w-full font-mono text-[0.78rem]" aria-label="Dijkstra tentative distances">
             <tbody>
               {nodes.map((n) => (
                 <tr key={n.id}>
