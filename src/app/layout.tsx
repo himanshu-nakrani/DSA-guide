@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { InlineScript } from "@/components/layout/InlineScript";
 import { getSearchIndex } from "@/lib/searchIndex";
+import { getSiteUrl } from "@/lib/site-url";
 
 const iaWriter = localFont({
   variable: "--font",
@@ -35,7 +36,7 @@ const lilex = localFont({
   src: [{ path: "../../public/fonts/Lilex-Regular.woff2", weight: "400" }],
 });
 
-const SITE_URL = process.env.SITE_URL?.replace(/\/$/, "") || "https://dsa.guide";
+const SITE_URL = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

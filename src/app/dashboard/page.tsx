@@ -470,21 +470,31 @@ function StatCard({
   );
 }
 
+// `toISOString().slice(0, 10)` reads the date in UTC, but `setHours(0,0,0,0)`
+// writes midnight in the server's local time. The two are not the same
+// day for any non-zero UTC offset (e.g. UTC+9: local midnight on Jun 15 is
+// 15:00 UTC on Jun 14). Using `getFullYear`/`getMonth`/`getDate` keeps the
+// bucket assignment in local time, which matches the user's wall clock.
+function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 function buildActivityDays(dates: Date[]) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const counts = new Map<string, number>();
   for (const date of dates) {
-    const normalized = new Date(date);
-    normalized.setHours(0, 0, 0, 0);
-    const key = normalized.toISOString().slice(0, 10);
+    const key = localDateKey(new Date(date));
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
   return Array.from({ length: 7 }, (_, index) => {
     const day = new Date(today);
     day.setDate(today.getDate() - (6 - index));
-    const dateKey = day.toISOString().slice(0, 10);
+    const dateKey = localDateKey(day);
     return {
       dateKey,
       count: counts.get(dateKey) ?? 0,
@@ -501,7 +511,7 @@ function computeCurrentStreak(dateKeys: string[]) {
   cursor.setHours(0, 0, 0, 0);
 
   while (true) {
-    const key = cursor.toISOString().slice(0, 10);
+    const key = localDateKey(cursor);
     if (!unique.has(key)) break;
     streak += 1;
     cursor.setDate(cursor.getDate() - 1);

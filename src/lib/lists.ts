@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
 export const BOOKMARK_LIST_NAME = "Bookmarks";
@@ -30,7 +31,12 @@ export async function getOrCreateBookmarkList(userId: string) {
   });
 }
 
-export async function getBookmarkProblemIds(userId: string) {
+/**
+ * Per-request memoization: dashboard, problems page, and the problem card
+ * bookmark indicator all call this in the same render. Sharing one query
+ * keeps a hot page render down to a single round-trip.
+ */
+export const getBookmarkProblemIds = cache(async (userId: string) => {
   const list = await prisma.customList.findUnique({
     where: {
       userId_name: {
@@ -47,4 +53,4 @@ export async function getBookmarkProblemIds(userId: string) {
   });
 
   return new Set(list?.items.map((item) => item.problemId) ?? []);
-}
+});

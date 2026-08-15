@@ -3,6 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { createHmac, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
 const scryptAsync = promisify(scrypt);
@@ -119,7 +120,13 @@ export async function clearSession() {
   jar.delete(SESSION_COOKIE);
 }
 
-export async function getCurrentUser() {
+/**
+ * Per-request memoization: the layout, dashboard, learn page, problems page,
+ * and lists page all read the current user in the same render. Wrapping with
+ * React's `cache()` collapses those into a single cookie read + Prisma
+ * `findUnique` per request.
+ */
+export const getCurrentUser = cache(async () => {
   const jar = await cookies();
   const parsed = parseSessionValue(jar.get(SESSION_COOKIE)?.value);
   if (!parsed) return null;
@@ -145,7 +152,7 @@ export async function getCurrentUser() {
   }
 
   return user;
-}
+});
 
 export async function requireCurrentUser() {
   const user = await getCurrentUser();

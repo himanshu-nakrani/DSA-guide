@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ArticleStatus } from "@/generated/prisma";
-
-const SITE = process.env.SITE_URL?.replace(/\/$/, "") || "https://dsa.guide";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 3600;
 
@@ -11,6 +10,8 @@ export const revalidate = 3600;
  * articles ordered by updatedAt desc.
  */
 export async function GET() {
+  const SITE = getSiteUrl();
+
   const articles = await prisma.article.findMany({
     where: { status: ArticleStatus.PUBLISHED },
     select: {
