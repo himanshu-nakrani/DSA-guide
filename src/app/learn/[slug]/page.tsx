@@ -23,6 +23,7 @@ import type { ArticlePreviewMap } from "@/components/article/ArticleBody";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export const revalidate = 3600;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const articles = await prisma.article.findMany({
@@ -42,7 +43,7 @@ export async function generateMetadata({
     where: { slug, status: ArticleStatus.PUBLISHED },
     select: { title: true, summary: true },
   });
-  if (!article) return { title: "DSA Guide" };
+  if (!article) notFound();
   const canonical = `/learn/${slug}`;
   return {
     title: `${article.title} — DSA Guide`,
@@ -89,7 +90,6 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const user = await getCurrentUser();
 
   const article = await prisma.article.findFirst({
     where: { slug, status: ArticleStatus.PUBLISHED },
@@ -97,6 +97,8 @@ export default async function ArticlePage({
   });
 
   if (!article) notFound();
+
+  const user = await getCurrentUser();
 
   const siblings = await prisma.article.findMany({
     where: { topicId: article.topicId, status: ArticleStatus.PUBLISHED },
