@@ -312,6 +312,14 @@ function validateArticle(file: string, knownSlugs: Set<string>) {
   if (data.estimatedMins !== undefined && (!Number.isInteger(data.estimatedMins) || data.estimatedMins < 1 || data.estimatedMins > 240)) {
     fail(file, "estimatedMins must be an integer between 1 and 240.");
   }
+  if (!content.replace(/```[\s\S]*?```/g, "").trim()) {
+    fail(file, "article body must contain prose outside fenced code or visualization blocks.");
+  }
+  const headings = [...content.matchAll(/^#{2,6}\s+(.+)$/gm)].map((match) => match[1].trim().toLowerCase());
+  const duplicateHeadings = headings.filter((heading, index) => headings.indexOf(heading) !== index);
+  if (duplicateHeadings.length > 0) {
+    fail(file, `duplicate section heading '${duplicateHeadings[0]}'.`);
+  }
   for (const key of ["references", "prerequisites"]) {
     if (data[key] !== undefined && !Array.isArray(data[key])) fail(file, `${key} must be an array when provided.`);
   }
