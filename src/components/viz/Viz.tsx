@@ -29,6 +29,9 @@ const REGISTRY: Record<string, LazyViz> = {
   "binary-search": React.lazy(() =>
     import("./BinarySearchPlayer").then((m) => ({ default: m.BinarySearchPlayer as React.ComponentType<Record<string, unknown>> })),
   ),
+  "binary-search-invariant": React.lazy(() =>
+    import("./BinarySearchInvariantTrace").then((m) => ({ default: m.BinarySearchInvariantTrace as React.ComponentType<Record<string, unknown>> })),
+  ),
   "linear-vs-binary": React.lazy(() =>
     import("./LinearVsBinary").then((m) => ({ default: m.LinearVsBinary as React.ComponentType<Record<string, unknown>> })),
   ),
@@ -115,6 +118,9 @@ const REGISTRY: Record<string, LazyViz> = {
   ),
   "monotonic-deque-window": React.lazy(() =>
     import("./MonotonicDequeWindow").then((m) => ({ default: m.MonotonicDequeWindow as React.ComponentType<Record<string, unknown>> })),
+  ),
+  "next-greater-stack": React.lazy(() =>
+    import("./NextGreaterStackTrace").then((m) => ({ default: m.NextGreaterStackTrace as React.ComponentType<Record<string, unknown>> })),
   ),
 };
 
