@@ -18,6 +18,7 @@ npm run dev
 
 - Run `npm run lint` — CI will fail without it.
 - For content changes, make sure the article renders at `http://localhost:3000/learn`.
+- For interactive figures, follow the [visualization authoring guide](../docs/visualization-authoring.md) and include frame tests plus a narrow-viewport smoke check.
 - Link the issue your PR addresses in the PR description (`Closes #123`).
 
 ## Commit style

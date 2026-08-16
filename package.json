@@ -10,6 +10,7 @@
     "pretest": "npm run prisma:generate",
     "test": "vitest",
     "content:validate": "tsx scripts/validate-content.ts",
+    "smoke:production": "tsx scripts/smoke-production.ts",
     "verify": "npm run lint && npm run typecheck && npm test -- --run && npm run content:validate",
     "build": "npm run prisma:generate && next build",
     "start": "next start",
