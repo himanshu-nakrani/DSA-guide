@@ -54,3 +54,7 @@
 ## 2024-08-01 - Missing accessible labels on inline form inputs
 **Learning:** Inline forms (like the "Create List" form, command palette, and visualization inputs) that omit visual `<label>` elements for layout purposes leave screen reader users without proper context, as `placeholder` text is not a reliable or compliant substitute for an explicit label.
 **Action:** Always provide an `aria-label` (or visually hidden `<label>`) for form inputs when a visible label is omitted from the design to ensure the input's purpose is exposed to assistive technologies.
+
+## 2024-08-02 - Missing aria-pressed on interactive diagram toggle buttons
+**Learning:** Interactive diagram buttons that toggle state (like placing obstacles on a grid) often lack `aria-pressed` attributes. While they might dynamically update their `aria-label` or visually indicate state via color, screen readers still need `aria-pressed` to correctly announce them as toggle buttons with a distinct on/off state.
+**Action:** Ensure custom toggle buttons within complex visualizations always include the `aria-pressed` attribute reflecting their active state, in addition to descriptive labels.
