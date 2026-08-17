@@ -95,8 +95,15 @@ export default async function LearnPage() {
       });
   }
 
-  const totalArticles = topics.reduce((s, t) => s + t.articles.length, 0);
-  const allSlugs = topics.flatMap((t) => t.articles.map((a) => a.slug));
+  // ⚡ Bolt: Prevent chained array allocations using explicit single-pass iteration
+  let totalArticles = 0;
+  const allSlugs: string[] = [];
+  for (const topic of topics) {
+    totalArticles += topic.articles.length;
+    for (const article of topic.articles) {
+      allSlugs.push(article.slug);
+    }
+  }
   const readSlugs = user ? await getUserReadArticleSlugs(user.id) : [];
 
   return (
