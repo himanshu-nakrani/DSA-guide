@@ -45,7 +45,7 @@ const STALE_BUCKET_MS = 24 * 60 * 60 * 1000;
 let lastCleanupMs = 0;
 
 function normalizeIdentifier(value: string | undefined) {
-  const normalized = value?.trim().slice(0, 255);
+  const normalized = value?.slice(0, 255).trim();
   return normalized || "anonymous";
 }
 
@@ -59,7 +59,7 @@ function identifierFor(name: string, formData: FormData | null, options?: RateLi
   // pass a server-derived address explicitly and never depend on email alone.
   const email = formData?.get("email");
   if (typeof email === "string" && (name === "login" || name === "register")) {
-    return normalizeIdentifier(email.toLowerCase());
+    return normalizeIdentifier(email.slice(0, 255).toLowerCase());
   }
 
   return "anonymous";
