@@ -96,6 +96,7 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
 
   return (
     <aside
+      id="dsa-sidebar"
       data-sidebar
       className="dsa-sidebar w-full shrink-0 border-b md:border-b-0 md:border-r border-sidebar-border md:h-screen md:sticky md:top-0 flex flex-col bg-sidebar transition-[width] duration-300"
       style={{ transitionTimingFunction: "var(--ease-out)" }}
@@ -119,6 +120,8 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
         <button
           type="button"
           onClick={toggle}
+          aria-expanded={!collapsed}
+          aria-controls="dsa-sidebar"
           aria-label="Collapse sidebar (⌘\\)"
           aria-expanded={!collapsed}
           title="Collapse sidebar (⌘\\)"
@@ -214,6 +217,8 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
           <button
             type="button"
             onClick={toggle}
+            aria-expanded={!collapsed}
+            aria-controls="dsa-sidebar"
             aria-label="Expand sidebar (⌘\\)"
             aria-expanded={!collapsed}
             title="Expand sidebar (⌘\\)"

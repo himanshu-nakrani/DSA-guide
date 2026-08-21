@@ -45,7 +45,7 @@ const STALE_BUCKET_MS = 24 * 60 * 60 * 1000;
 let lastCleanupMs = 0;
 
 function normalizeIdentifier(value: string | undefined) {
-  const normalized = value?.trim().slice(0, 255);
+  const normalized = value?.slice(0, 4096).trim().slice(0, 255);
   return normalized || "anonymous";
 }
 
