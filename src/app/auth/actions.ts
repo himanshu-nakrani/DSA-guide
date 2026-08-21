@@ -70,12 +70,6 @@ export async function registerAction(
     return { error: "Input exceeds the maximum allowed length." };
   }
 
-  // Do not disclose whether the address is already registered.
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-  if (existing) {
-    return { error: "Unable to create an account with those details." };
-  }
-
   try {
     const passwordHash = await hashPassword(password);
     const user = await prisma.user.create({
