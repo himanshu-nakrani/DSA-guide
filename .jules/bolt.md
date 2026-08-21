@@ -49,3 +49,7 @@
 ## 2026-08-05 - Prevent Hidden O(N) Array Allocations in Aggregations
 **Learning:** Chaining array methods like `.map().map()` and spreading large arrays (e.g. `Math.max(...array)`) in performance-sensitive views creates hidden O(N) intermediate array allocations and redundant O(N) traversals. Large spreads also risk exceeding call stack limits (e.g., in `Math.max(...)`).
 **Action:** Use explicit single-pass iteration (like `for...of`) when aggregating over collections (like extracting deeply nested fields or generating keys and maximums) to prevent unnecessary allocations, redundant passes, and V8 call stack size exceptions.
+
+## 2025-02-18 - Prevent Hidden O(N) Array Allocations in Data Aggregation
+**Learning:** Chaining array methods like `.flatMap().map()` (e.g. `topics.flatMap(t => t.articles.map(a => a.slug))`) alongside `.reduce()` in data aggregation tasks creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread when traversing deeply nested data.
+**Action:** Use explicit single-pass iteration (like `for...of`) and inline computation when aggregating deeply nested data structures to prevent unnecessary array allocations and redundant passes.
