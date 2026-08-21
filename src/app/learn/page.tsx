@@ -81,6 +81,11 @@ export default async function LearnPage() {
       topics: TopicWithArticles[];
     }
   >();
+
+  // ⚡ Bolt: Prevent hidden O(N) array allocations (.reduce() and .flatMap().map()) using explicit single-pass iteration
+  let totalArticles = 0;
+  const allSlugs: string[] = [];
+
   for (const topic of topics) {
     const m = modulesMap.get(topic.module.id);
     if (m) m.topics.push(topic);
@@ -93,10 +98,13 @@ export default async function LearnPage() {
         description: topic.module.description,
         topics: [topic],
       });
+
+    totalArticles += topic.articles.length;
+    for (const article of topic.articles) {
+      allSlugs.push(article.slug);
+    }
   }
 
-  const totalArticles = topics.reduce((s, t) => s + t.articles.length, 0);
-  const allSlugs = topics.flatMap((t) => t.articles.map((a) => a.slug));
   const readSlugs = user ? await getUserReadArticleSlugs(user.id) : [];
 
   return (
