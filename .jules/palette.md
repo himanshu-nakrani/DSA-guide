@@ -43,7 +43,7 @@
 **Learning:** Next.js Server Actions executed via native HTML forms (`<form action={logoutAction}>`) do not provide default loading indicators. Without explicit `useFormStatus` hooks, users receive no visual feedback that their sign out is processing.
 **Action:** Always extract submit buttons inside Server Action forms (like `LogoutButton`) into a separate Client Component that uses `useFormStatus()` to provide immediate visual feedback (e.g., a spinner and disabled state).
 
-## $(date +%Y-%m-%d) - Adding loading states to Server Action forms
+## 2026-08-21 - Adding loading states to Server Action forms
 **Learning:** Next.js Server Actions executed via native HTML `<form action={...}>` do not provide automatic loading states. This causes a poor user experience as the user might click the submit button multiple times before the server responds, without any visual feedback.
 **Action:** Always extract submit buttons for Server Action forms into a separate Client Component that uses `useFormStatus()` from `react-dom` to read the `pending` state, allowing for a disabled state and a loading spinner to provide immediate feedback to users during network requests.
 
@@ -54,3 +54,7 @@
 ## 2024-08-01 - Missing accessible labels on inline form inputs
 **Learning:** Inline forms (like the "Create List" form, command palette, and visualization inputs) that omit visual `<label>` elements for layout purposes leave screen reader users without proper context, as `placeholder` text is not a reliable or compliant substitute for an explicit label.
 **Action:** Always provide an `aria-label` (or visually hidden `<label>`) for form inputs when a visible label is omitted from the design to ensure the input's purpose is exposed to assistive technologies.
+
+## 2026-08-21 - aria-expanded on toggle buttons for collapsible regions
+**Learning:** UI controls that toggle the visibility or layout of regions (like sidebar collapse/expand buttons) need to explicitly communicate the state of that region to assistive technologies. Using `aria-expanded` combined with `aria-controls` achieves this by linking the toggle to the region and conveying whether the region is currently expanded or collapsed.
+**Action:** Always use the `aria-expanded` attribute on buttons that expand or collapse regions, and explicitly associate them with the region using `aria-controls`. This applies even when separate buttons handle the expanding and collapsing actions.
