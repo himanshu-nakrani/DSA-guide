@@ -55,6 +55,9 @@
 **Learning:** Inline forms (like the "Create List" form, command palette, and visualization inputs) that omit visual `<label>` elements for layout purposes leave screen reader users without proper context, as `placeholder` text is not a reliable or compliant substitute for an explicit label.
 **Action:** Always provide an `aria-label` (or visually hidden `<label>`) for form inputs when a visible label is omitted from the design to ensure the input's purpose is exposed to assistive technologies.
 
+## 2025-07-29 - Missing accessible state for region expand/collapse controls
+**Learning:** Controls that expand or collapse regions of the UI (like sidebar toggles) must accurately communicate the state of that region. Even when separate buttons are used for expanding and collapsing, both should use the `aria-expanded` attribute reflecting the actual state of the region. Otherwise, screen reader users miss crucial layout context.
+**Action:** Always include `aria-expanded` on any toggle button that controls the visibility of a region (e.g. `aria-expanded={!collapsed}` for a sidebar toggle) so screen readers can accurately interpret the layout change.
 ## 2026-08-21 - aria-expanded on toggle buttons for collapsible regions
 **Learning:** UI controls that toggle the visibility or layout of regions (like sidebar collapse/expand buttons) need to explicitly communicate the state of that region to assistive technologies. Using `aria-expanded` combined with `aria-controls` achieves this by linking the toggle to the region and conveying whether the region is currently expanded or collapsed.
 **Action:** Always use the `aria-expanded` attribute on buttons that expand or collapse regions, and explicitly associate them with the region using `aria-controls`. This applies even when separate buttons handle the expanding and collapsing actions.
