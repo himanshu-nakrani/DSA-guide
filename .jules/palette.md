@@ -43,7 +43,7 @@
 **Learning:** Next.js Server Actions executed via native HTML forms (`<form action={logoutAction}>`) do not provide default loading indicators. Without explicit `useFormStatus` hooks, users receive no visual feedback that their sign out is processing.
 **Action:** Always extract submit buttons inside Server Action forms (like `LogoutButton`) into a separate Client Component that uses `useFormStatus()` to provide immediate visual feedback (e.g., a spinner and disabled state).
 
-## $(date +%Y-%m-%d) - Adding loading states to Server Action forms
+## 2026-08-21 - Adding loading states to Server Action forms
 **Learning:** Next.js Server Actions executed via native HTML `<form action={...}>` do not provide automatic loading states. This causes a poor user experience as the user might click the submit button multiple times before the server responds, without any visual feedback.
 **Action:** Always extract submit buttons for Server Action forms into a separate Client Component that uses `useFormStatus()` from `react-dom` to read the `pending` state, allowing for a disabled state and a loading spinner to provide immediate feedback to users during network requests.
 
@@ -55,6 +55,9 @@
 **Learning:** Inline forms (like the "Create List" form, command palette, and visualization inputs) that omit visual `<label>` elements for layout purposes leave screen reader users without proper context, as `placeholder` text is not a reliable or compliant substitute for an explicit label.
 **Action:** Always provide an `aria-label` (or visually hidden `<label>`) for form inputs when a visible label is omitted from the design to ensure the input's purpose is exposed to assistive technologies.
 
-## 2024-08-02 - Missing aria-pressed on interactive diagram toggle buttons
-**Learning:** Interactive diagram buttons that toggle state (like placing obstacles on a grid) often lack `aria-pressed` attributes. While they might dynamically update their `aria-label` or visually indicate state via color, screen readers still need `aria-pressed` to correctly announce them as toggle buttons with a distinct on/off state.
-**Action:** Ensure custom toggle buttons within complex visualizations always include the `aria-pressed` attribute reflecting their active state, in addition to descriptive labels.
+## 2025-07-29 - Missing accessible state for region expand/collapse controls
+**Learning:** Controls that expand or collapse regions of the UI (like sidebar toggles) must accurately communicate the state of that region. Even when separate buttons are used for expanding and collapsing, both should use the `aria-expanded` attribute reflecting the actual state of the region. Otherwise, screen reader users miss crucial layout context.
+**Action:** Always include `aria-expanded` on any toggle button that controls the visibility of a region (e.g. `aria-expanded={!collapsed}` for a sidebar toggle) so screen readers can accurately interpret the layout change.
+## 2026-08-21 - aria-expanded on toggle buttons for collapsible regions
+**Learning:** UI controls that toggle the visibility or layout of regions (like sidebar collapse/expand buttons) need to explicitly communicate the state of that region to assistive technologies. Using `aria-expanded` combined with `aria-controls` achieves this by linking the toggle to the region and conveying whether the region is currently expanded or collapsed.
+**Action:** Always use the `aria-expanded` attribute on buttons that expand or collapse regions, and explicitly associate them with the region using `aria-controls`. This applies even when separate buttons handle the expanding and collapsing actions.
