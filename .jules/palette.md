@@ -61,3 +61,6 @@
 ## 2026-08-21 - aria-expanded on toggle buttons for collapsible regions
 **Learning:** UI controls that toggle the visibility or layout of regions (like sidebar collapse/expand buttons) need to explicitly communicate the state of that region to assistive technologies. Using `aria-expanded` combined with `aria-controls` achieves this by linking the toggle to the region and conveying whether the region is currently expanded or collapsed.
 **Action:** Always use the `aria-expanded` attribute on buttons that expand or collapse regions, and explicitly associate them with the region using `aria-controls`. This applies even when separate buttons handle the expanding and collapsing actions.
+## 2026-08-22 - Adding loading states to Server Action forms for search/filters
+**Learning:** Standard form submissions for filtering or searching (like the problems filter form) can take time to process and return the new page. Without a visual loading state on the submit button, users might assume the form didn't submit or click it multiple times.
+**Action:** When creating forms for searching or filtering that act as Server Actions or standard form submissions triggering navigation, ensure the submit button includes a visual loading indicator using `useFormStatus()` from `react-dom` to provide immediate feedback to users.

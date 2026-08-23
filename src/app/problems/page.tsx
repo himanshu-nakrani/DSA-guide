@@ -6,6 +6,7 @@ import { difficultyLabel, progressLabel } from "@/components/problems/problem-ui
 import { getCurrentUser } from "@/lib/auth";
 import { getBookmarkProblemIds } from "@/lib/lists";
 import { prisma } from "@/lib/prisma";
+import { ApplyFiltersButton } from "./_components/ApplyFiltersButton";
 
 const statusOptions = [
   ProgressStatus.NEW,
@@ -312,7 +313,7 @@ export default async function ProblemsPage({
           </label>
 
           <div className="flex items-end gap-3 xl:col-span-5 xl:justify-end">
-            <button type="submit" className="btn-ink min-w-40 justify-center">Apply filters</button>
+            <ApplyFiltersButton />
           </div>
         </form>
       </section>
