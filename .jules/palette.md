@@ -61,3 +61,6 @@
 ## 2026-08-21 - aria-expanded on toggle buttons for collapsible regions
 **Learning:** UI controls that toggle the visibility or layout of regions (like sidebar collapse/expand buttons) need to explicitly communicate the state of that region to assistive technologies. Using `aria-expanded` combined with `aria-controls` achieves this by linking the toggle to the region and conveying whether the region is currently expanded or collapsed.
 **Action:** Always use the `aria-expanded` attribute on buttons that expand or collapse regions, and explicitly associate them with the region using `aria-controls`. This applies even when separate buttons handle the expanding and collapsing actions.
+## 2024-08-24 - Duplicate ARIA Attributes
+**Learning:** Duplicate ARIA attributes on an element (such as `aria-expanded`) are invalid React syntax and cause linter errors. Moreover, multiple identical attributes might cause unpredictable parsing behavior for assistive technologies.
+**Action:** Always verify that React components only declare each ARIA attribute once on an element to ensure both codebase health and predictable accessibility behavior.
