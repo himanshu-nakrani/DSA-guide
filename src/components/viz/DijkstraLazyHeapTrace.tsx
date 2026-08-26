@@ -47,6 +47,8 @@ export function buildLazyHeapFrames(edges: LazyHeapEdge[] = DEFAULT_EDGES, sourc
   const dist: Record<string, number> = Object.fromEntries(NODES.map((node) => [node, Infinity]));
   dist[source] = 0;
   const settled: string[] = [];
+  // ⚡ Bolt: Precompute Set for O(1) loop lookups to prevent O(N²) scaling bottleneck during Dijkstra trace generation
+  const settledSet = new Set<string>();
   const heap: LazyHeapEntry[] = [{ node: source, distance: 0 }];
   const frames: LazyHeapFrame[] = [];
   const push = (
@@ -77,15 +79,18 @@ export function buildLazyHeapFrames(edges: LazyHeapEdge[] = DEFAULT_EDGES, sourc
       push("stale", entry.node, null, `This entry is stale: dist[${entry.node}] is already ${dist[entry.node]}, which is smaller than ${entry.distance}. Skip it.`);
       continue;
     }
-    if (settled.includes(entry.node)) {
+    // ⚡ Bolt: O(1) Set lookup instead of O(N) array .includes() prevents theoretical O((E + V) * V) degradation
+    if (settledSet.has(entry.node)) {
       push("stale", entry.node, null, `${entry.node} is already settled, so this duplicate heap entry cannot improve the answer. Skip it.`);
       continue;
     }
     settled.push(entry.node);
+    settledSet.add(entry.node);
     push("settle", entry.node, null, `The fresh minimum is safe to settle because all edge weights are non-negative.`);
 
     for (const edge of adjacency.get(entry.node) ?? []) {
-      if (settled.includes(edge.to)) continue;
+      // ⚡ Bolt: O(1) Set lookup instead of O(N) array .includes() prevents bottleneck
+      if (settledSet.has(edge.to)) continue;
       push("relax", edge.from, edge, `Test ${dist[edge.from]} + ${edge.weight} < ${dist[edge.to] === Infinity ? "∞" : dist[edge.to]}.`);
       const candidate = dist[edge.from] + edge.weight;
       if (candidate < dist[edge.to]) {
