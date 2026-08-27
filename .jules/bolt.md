@@ -53,3 +53,6 @@
 ## 2025-02-18 - Prevent Hidden O(N) Array Allocations in Data Aggregation
 **Learning:** Chaining array methods like `.flatMap().map()` (e.g. `topics.flatMap(t => t.articles.map(a => a.slug))`) alongside `.reduce()` in data aggregation tasks creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread when traversing deeply nested data.
 **Action:** Use explicit single-pass iteration (like `for...of`) and inline computation when aggregating deeply nested data structures to prevent unnecessary array allocations and redundant passes.
+## 2026-08-06 - Hidden O(N) Array Lookups in Graph Algorithms
+**Learning:** Using `array.includes()` for tracking visited or settled nodes inside complex algorithm generators (like Dijkstra or BFS) inherently degrades their theoretical runtime complexity. For instance, a Dijkstra generator meant to be O(E log V) becomes O(V² + E) if it relies on O(N) array scans instead of O(1) hash lookups during execution.
+**Action:** When building algorithm visualization generators or traversing large graphs, preserve the theoretical runtime complexity by using `Set`s for visited/settled checks inside the generation and rendering loops, replacing `.includes()` with `.has()`.

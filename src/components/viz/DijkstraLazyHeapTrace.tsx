@@ -47,6 +47,8 @@ export function buildLazyHeapFrames(edges: LazyHeapEdge[] = DEFAULT_EDGES, sourc
   const dist: Record<string, number> = Object.fromEntries(NODES.map((node) => [node, Infinity]));
   dist[source] = 0;
   const settled: string[] = [];
+  // ⚡ Bolt: Maintain a parallel Set for O(1) lookups to preserve O(E log V) complexity
+  const settledSet = new Set<string>();
   const heap: LazyHeapEntry[] = [{ node: source, distance: 0 }];
   const frames: LazyHeapFrame[] = [];
   const push = (
@@ -77,15 +79,18 @@ export function buildLazyHeapFrames(edges: LazyHeapEdge[] = DEFAULT_EDGES, sourc
       push("stale", entry.node, null, `This entry is stale: dist[${entry.node}] is already ${dist[entry.node]}, which is smaller than ${entry.distance}. Skip it.`);
       continue;
     }
-    if (settled.includes(entry.node)) {
+    // ⚡ Bolt: Replace O(N) array .includes() with O(1) Set .has()
+    if (settledSet.has(entry.node)) {
       push("stale", entry.node, null, `${entry.node} is already settled, so this duplicate heap entry cannot improve the answer. Skip it.`);
       continue;
     }
     settled.push(entry.node);
+    settledSet.add(entry.node);
     push("settle", entry.node, null, `The fresh minimum is safe to settle because all edge weights are non-negative.`);
 
     for (const edge of adjacency.get(entry.node) ?? []) {
-      if (settled.includes(edge.to)) continue;
+      // ⚡ Bolt: Replace O(N) array .includes() with O(1) Set .has()
+      if (settledSet.has(edge.to)) continue;
       push("relax", edge.from, edge, `Test ${dist[edge.from]} + ${edge.weight} < ${dist[edge.to] === Infinity ? "∞" : dist[edge.to]}.`);
       const candidate = dist[edge.from] + edge.weight;
       if (candidate < dist[edge.to]) {
@@ -156,13 +161,17 @@ export function DijkstraLazyHeapTrace({
             </tr>
           </thead>
           <tbody>
-            {nodes.map((node) => (
-              <tr key={node} className="border-b border-border/60">
-                <td className="py-1" style={{ color: frame.activeNode === node ? PALETTE.primary : undefined }}>{node}</td>
-                <td className="py-1">{frame.dist[node] === Infinity ? "∞" : frame.dist[node]}</td>
-                <td className="py-1 text-muted-foreground">{frame.settled.includes(node) ? "settled" : frame.activeNode === node ? frame.action : "tentative"}</td>
-              </tr>
-            ))}
+            {(() => {
+              // ⚡ Bolt: Replace O(N) array .includes() in React render cycle with O(1) Set lookup
+              const settledSet = new Set(frame.settled);
+              return nodes.map((node) => (
+                <tr key={node} className="border-b border-border/60">
+                  <td className="py-1" style={{ color: frame.activeNode === node ? PALETTE.primary : undefined }}>{node}</td>
+                  <td className="py-1">{frame.dist[node] === Infinity ? "∞" : frame.dist[node]}</td>
+                  <td className="py-1 text-muted-foreground">{settledSet.has(node) ? "settled" : frame.activeNode === node ? frame.action : "tentative"}</td>
+                </tr>
+              ));
+            })()}
           </tbody>
         </table>
         <div className="font-mono text-xs text-muted-foreground">
