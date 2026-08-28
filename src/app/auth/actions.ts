@@ -38,7 +38,9 @@ async function clientAddress() {
     requestHeaders.get("x-real-ip") ??
     requestHeaders.get("x-forwarded-for") ??
     "unknown";
-  return raw.split(",")[0]?.trim().slice(0, 255) || "unknown";
+  // Enforce a maximum length constraint on raw HTTP headers before computationally expensive operations
+  // like `.split()` to prevent DoS attacks via event loop blocking.
+  return raw.slice(0, 1024).split(",")[0]?.trim().slice(0, 255) || "unknown";
 }
 
 async function enforceNetworkLimit(name: "login" | "register") {
