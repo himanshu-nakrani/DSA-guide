@@ -139,6 +139,7 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
           }
           title="Search (⌘K)"
           aria-label="Search"
+          aria-haspopup="dialog"
           className="group w-full inline-flex items-center justify-between gap-2 px-3 py-1.5 rounded-sm border border-[color:var(--rule-strong)] bg-transparent text-foreground/70 hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
         >
           <span className="inline-flex items-center gap-2 text-[0.85rem]">

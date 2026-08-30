@@ -61,3 +61,7 @@
 ## 2026-08-21 - aria-expanded on toggle buttons for collapsible regions
 **Learning:** UI controls that toggle the visibility or layout of regions (like sidebar collapse/expand buttons) need to explicitly communicate the state of that region to assistive technologies. Using `aria-expanded` combined with `aria-controls` achieves this by linking the toggle to the region and conveying whether the region is currently expanded or collapsed.
 **Action:** Always use the `aria-expanded` attribute on buttons that expand or collapse regions, and explicitly associate them with the region using `aria-controls`. This applies even when separate buttons handle the expanding and collapsing actions.
+
+## 2026-08-21 - Using aria-haspopup on buttons triggering modal overlays
+**Learning:** Search triggers and command palette buttons often lack context for screen reader users, who might expect a standard navigation event rather than a modal dialog overlay. Using `aria-haspopup="dialog"` explicitly communicates the interaction model before the user activates the control.
+**Action:** Always add `aria-haspopup="dialog"` to buttons that trigger modal dialogs, search palettes, or other popups so users know what to expect when they interact with the element.
