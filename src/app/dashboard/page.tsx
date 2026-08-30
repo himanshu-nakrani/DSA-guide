@@ -202,6 +202,20 @@ export default async function DashboardPage() {
     return false;
   });
 
+  // ⚡ Bolt: Prevent redundant O(N) traversals from chained .map().filter() by explicitly binning items in a single pass
+  const statusItemsMap: Record<string, DashboardProblem[]> = {
+    [ProgressStatus.ATTEMPTED]: [],
+    [ProgressStatus.NEEDS_REVISION]: [],
+    [ProgressStatus.SOLVED]: [],
+    [ProgressStatus.MASTERED]: [],
+  };
+
+  for (const entry of allProblems) {
+    if (statusItemsMap[entry.status]) {
+      statusItemsMap[entry.status].push(entry);
+    }
+  }
+
   const statusBuckets = [
     ProgressStatus.ATTEMPTED,
     ProgressStatus.NEEDS_REVISION,
@@ -209,7 +223,7 @@ export default async function DashboardPage() {
     ProgressStatus.MASTERED,
   ].map((status) => ({
     status,
-    items: allProblems.filter((entry) => entry.status === status),
+    items: statusItemsMap[status],
   }));
 
   // ⚡ Bolt: Prevent hidden O(N) array allocations (.map().map()) using explicit single-pass iteration

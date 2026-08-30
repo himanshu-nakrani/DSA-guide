@@ -53,3 +53,6 @@
 ## 2025-02-18 - Prevent Hidden O(N) Array Allocations in Data Aggregation
 **Learning:** Chaining array methods like `.flatMap().map()` (e.g. `topics.flatMap(t => t.articles.map(a => a.slug))`) alongside `.reduce()` in data aggregation tasks creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread when traversing deeply nested data.
 **Action:** Use explicit single-pass iteration (like `for...of`) and inline computation when aggregating deeply nested data structures to prevent unnecessary array allocations and redundant passes.
+## 2025-02-18 - Replacing Chained `.map().filter()` with Explicit Single-Pass Binning
+**Learning:** In list and dashboard views (like `src/app/dashboard/page.tsx`), organizing a collection of items into multiple buckets based on a property (like `ProgressStatus`) by mapping over the target statuses and calling `.filter()` on the whole collection for each status causes redundant O(N) traversals. This O(N * M) approach (N = items, M = buckets) degrades performance as user state scales.
+**Action:** When grouping or binning items by a property, pre-allocate an object mapping or specific arrays for the expected bins and explicitly iterate over the items collection exactly once in a `for...of` loop, pushing each item into its corresponding bin. This reduces the complexity to strict O(N + M).
