@@ -120,7 +120,6 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
         <button
           type="button"
           onClick={toggle}
-          aria-expanded={!collapsed}
           aria-controls="dsa-sidebar"
           aria-label="Collapse sidebar (⌘\\)"
           aria-expanded={!collapsed}
@@ -217,7 +216,6 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
           <button
             type="button"
             onClick={toggle}
-            aria-expanded={!collapsed}
             aria-controls="dsa-sidebar"
             aria-label="Expand sidebar (⌘\\)"
             aria-expanded={!collapsed}
