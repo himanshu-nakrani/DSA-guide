@@ -202,15 +202,26 @@ export default async function DashboardPage() {
     return false;
   });
 
+  // ⚡ Bolt: Prevent O(N*M) redundant traversals by pre-allocating bins and using a single pass
+  const statusBucketsMap: Record<string, typeof allProblems> = {
+    [ProgressStatus.ATTEMPTED]: [],
+    [ProgressStatus.NEEDS_REVISION]: [],
+    [ProgressStatus.SOLVED]: [],
+    [ProgressStatus.MASTERED]: [],
+  };
+
+  for (const entry of allProblems) {
+    if (statusBucketsMap[entry.status]) {
+      statusBucketsMap[entry.status].push(entry);
+    }
+  }
+
   const statusBuckets = [
-    ProgressStatus.ATTEMPTED,
-    ProgressStatus.NEEDS_REVISION,
-    ProgressStatus.SOLVED,
-    ProgressStatus.MASTERED,
-  ].map((status) => ({
-    status,
-    items: allProblems.filter((entry) => entry.status === status),
-  }));
+    { status: ProgressStatus.ATTEMPTED, items: statusBucketsMap[ProgressStatus.ATTEMPTED] },
+    { status: ProgressStatus.NEEDS_REVISION, items: statusBucketsMap[ProgressStatus.NEEDS_REVISION] },
+    { status: ProgressStatus.SOLVED, items: statusBucketsMap[ProgressStatus.SOLVED] },
+    { status: ProgressStatus.MASTERED, items: statusBucketsMap[ProgressStatus.MASTERED] },
+  ];
 
   // ⚡ Bolt: Prevent hidden O(N) array allocations (.map().map()) using explicit single-pass iteration
   const activityDates: Date[] = [];
