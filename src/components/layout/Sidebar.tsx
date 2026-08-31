@@ -123,7 +123,6 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
           aria-expanded={!collapsed}
           aria-controls="dsa-sidebar"
           aria-label="Collapse sidebar (⌘\\)"
-          aria-expanded={!collapsed}
           title="Collapse sidebar (⌘\\)"
           className="dsa-collapse-hide hidden md:grid h-8 w-8 place-items-center rounded-sm text-muted-foreground hover:text-[color:var(--ink-blue)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
         >
@@ -139,6 +138,7 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
           }
           title="Search (⌘K)"
           aria-label="Search"
+          aria-haspopup="dialog"
           className="group w-full inline-flex items-center justify-between gap-2 px-3 py-1.5 rounded-sm border border-[color:var(--rule-strong)] bg-transparent text-foreground/70 hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
         >
           <span className="inline-flex items-center gap-2 text-[0.85rem]">
@@ -220,7 +220,6 @@ export function Sidebar({ searchIndex = [] }: { searchIndex?: SearchItem[] }) {
             aria-expanded={!collapsed}
             aria-controls="dsa-sidebar"
             aria-label="Expand sidebar (⌘\\)"
-            aria-expanded={!collapsed}
             title="Expand sidebar (⌘\\)"
             className="dsa-expand-show h-9 w-9 grid place-items-center rounded-sm text-muted-foreground hover:text-[color:var(--ink-blue)] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
           >
