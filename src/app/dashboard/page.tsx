@@ -209,7 +209,7 @@ export default async function DashboardPage() {
     { status: ProgressStatus.SOLVED, items: [] as typeof allProblems },
     { status: ProgressStatus.MASTERED, items: [] as typeof allProblems },
   ];
-  const bucketMap = new Map(statusBuckets.map(b => [b.status, b.items]));
+  const bucketMap = new Map<ProgressStatus, typeof allProblems>(statusBuckets.map(b => [b.status, b.items]));
 
   for (const entry of allProblems) {
     const bucket = bucketMap.get(entry.status);
