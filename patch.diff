@@ -1,0 +1,32 @@
+--- src/app/dashboard/page.tsx
++++ src/app/dashboard/page.tsx
+@@ -202,14 +202,20 @@
+     return false;
+   });
+
+-  const statusBuckets = [
+-    ProgressStatus.ATTEMPTED,
+-    ProgressStatus.NEEDS_REVISION,
+-    ProgressStatus.SOLVED,
+-    ProgressStatus.MASTERED,
+-  ].map((status) => ({
+-    status,
+-    items: allProblems.filter((entry) => entry.status === status),
+-  }));
++  // ⚡ Bolt: Use pre-allocated bins and explicit single-pass iteration to avoid O(N*M) redundant traversals
++  const statusBuckets = [
++    { status: ProgressStatus.ATTEMPTED, items: [] as typeof allProblems },
++    { status: ProgressStatus.NEEDS_REVISION, items: [] as typeof allProblems },
++    { status: ProgressStatus.SOLVED, items: [] as typeof allProblems },
++    { status: ProgressStatus.MASTERED, items: [] as typeof allProblems },
++  ];
++  const bucketMap = new Map(statusBuckets.map(b => [b.status, b.items]));
++
++  for (const entry of allProblems) {
++    const bucket = bucketMap.get(entry.status);
++    if (bucket) {
++      bucket.push(entry);
++    }
++  }
+
+   // ⚡ Bolt: Prevent hidden O(N) array allocations (.map().map()) using explicit single-pass iteration
