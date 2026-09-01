@@ -14,6 +14,7 @@ export function SearchTrigger() {
       type="button"
       title="Search (⌘K)"
       aria-label="Open search"
+      aria-haspopup="dialog"
       onClick={() => window.dispatchEvent(new CustomEvent("dsa:open-palette"))}
       className="inline-flex items-center gap-1.5 text-[0.7rem] font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-[color:var(--ink-blue)] transition-colors rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
     >
