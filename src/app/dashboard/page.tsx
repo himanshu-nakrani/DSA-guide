@@ -202,6 +202,18 @@ export default async function DashboardPage() {
     return false;
   });
 
+  // ⚡ Bolt: Avoid O(N*M) redundant traversals by grouping statuses in a single explicit pass
+  const statusItems: Record<string, DashboardProblem[]> = {
+    [ProgressStatus.ATTEMPTED]: [],
+    [ProgressStatus.NEEDS_REVISION]: [],
+    [ProgressStatus.SOLVED]: [],
+    [ProgressStatus.MASTERED]: [],
+  };
+  for (const entry of allProblems) {
+    if (statusItems[entry.status]) {
+      statusItems[entry.status].push(entry);
+    }
+  }
   const statusBuckets = [
     ProgressStatus.ATTEMPTED,
     ProgressStatus.NEEDS_REVISION,
@@ -209,7 +221,7 @@ export default async function DashboardPage() {
     ProgressStatus.MASTERED,
   ].map((status) => ({
     status,
-    items: allProblems.filter((entry) => entry.status === status),
+    items: statusItems[status],
   }));
 
   // ⚡ Bolt: Prevent hidden O(N) array allocations (.map().map()) using explicit single-pass iteration

@@ -53,3 +53,7 @@
 ## 2025-02-18 - Prevent Hidden O(N) Array Allocations in Data Aggregation
 **Learning:** Chaining array methods like `.flatMap().map()` (e.g. `topics.flatMap(t => t.articles.map(a => a.slug))`) alongside `.reduce()` in data aggregation tasks creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread when traversing deeply nested data.
 **Action:** Use explicit single-pass iteration (like `for...of`) and inline computation when aggregating deeply nested data structures to prevent unnecessary array allocations and redundant passes.
+
+## 2025-10-23 - Optimizing Binning / Status Grouping in React Components
+**Learning:** When grouping or binning items by a property (e.g., mapping over an array of statuses to create filtered buckets), using `mappedArray.map(key => data.filter(...))` causes O(N*M) redundant traversals of the data array. This is especially problematic in data-heavy list views or dashboards where main thread blocking can occur.
+**Action:** Avoid redundant `filter()` calls inside `.map()`. Instead, pre-allocate the bins and use a single explicit pass (`for...of`) over the data to populate them, achieving an O(N) runtime.
