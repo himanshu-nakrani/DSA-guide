@@ -205,11 +205,11 @@ export default async function DashboardPage() {
   // ⚡ Bolt: Prevent O(N*M) redundant traversals and intermediate array allocations
   // by using explicit single-pass iteration into pre-allocated bins.
   const statusItems: Record<ProgressStatus, DashboardProblem[]> = {
+    [ProgressStatus.NEW]: [],
     [ProgressStatus.ATTEMPTED]: [],
     [ProgressStatus.NEEDS_REVISION]: [],
     [ProgressStatus.SOLVED]: [],
     [ProgressStatus.MASTERED]: [],
-    [ProgressStatus.UNATTEMPTED]: [],
   };
 
   for (const entry of allProblems) {
