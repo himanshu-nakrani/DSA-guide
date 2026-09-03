@@ -53,3 +53,7 @@
 ## 2025-02-18 - Prevent Hidden O(N) Array Allocations in Data Aggregation
 **Learning:** Chaining array methods like `.flatMap().map()` (e.g. `topics.flatMap(t => t.articles.map(a => a.slug))`) alongside `.reduce()` in data aggregation tasks creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread when traversing deeply nested data.
 **Action:** Use explicit single-pass iteration (like `for...of`) and inline computation when aggregating deeply nested data structures to prevent unnecessary array allocations and redundant passes.
+
+## 2026-08-06 - Prevent Hidden O(N*M) Traversals in Data Bucketing
+**Learning:** Mapping over keys and using `.filter()` to group items (e.g. `statuses.map(status => data.filter(item => item.status === status))`) creates an O(N*M) redundant traversal and multiple hidden intermediate array allocations, noticeably degrading performance on large sets.
+**Action:** Replace `statuses.map(status => data.filter(...))` bucketing patterns with pre-allocated arrays mapped to statuses, populated by a single explicit pass (`for...of`) over the data.

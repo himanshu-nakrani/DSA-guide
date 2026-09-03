@@ -202,6 +202,22 @@ export default async function DashboardPage() {
     return false;
   });
 
+  // ⚡ Bolt: Prevent O(N*M) redundant traversals and intermediate array allocations
+  // by using explicit single-pass iteration into pre-allocated bins.
+  const statusItems: Record<ProgressStatus, DashboardProblem[]> = {
+    [ProgressStatus.ATTEMPTED]: [],
+    [ProgressStatus.NEEDS_REVISION]: [],
+    [ProgressStatus.SOLVED]: [],
+    [ProgressStatus.MASTERED]: [],
+    [ProgressStatus.UNATTEMPTED]: [],
+  };
+
+  for (const entry of allProblems) {
+    if (statusItems[entry.status]) {
+      statusItems[entry.status].push(entry);
+    }
+  }
+
   const statusBuckets = [
     ProgressStatus.ATTEMPTED,
     ProgressStatus.NEEDS_REVISION,
@@ -209,7 +225,7 @@ export default async function DashboardPage() {
     ProgressStatus.MASTERED,
   ].map((status) => ({
     status,
-    items: allProblems.filter((entry) => entry.status === status),
+    items: statusItems[status],
   }));
 
   // ⚡ Bolt: Prevent hidden O(N) array allocations (.map().map()) using explicit single-pass iteration
