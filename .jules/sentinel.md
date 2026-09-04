@@ -72,3 +72,8 @@
 **Vulnerability:** In `registerAction`, checking if a user exists with `findUnique` and returning early before the computationally expensive `hashPassword` function allowed attackers to measure response times to enumerate existing accounts. Fast responses meant the email was already taken; slow responses meant it was available.
 **Learning:** Performing existence checks before computationally heavy security operations creates a reliable timing oracle. The execution time of registration must be roughly constant regardless of whether the identifier already exists in the system.
 **Prevention:** Remove early returns based on existence checks when the subsequent operations are slow. Always execute the slow operation (e.g. hashing) first, attempt the database creation, and rely on the database's unique constraint violation (e.g. Prisma's `P2002` error) to return the error safely and in constant time.
+
+## 2025-03-09 - DoS via Unbounded Header Parsing
+**Vulnerability:** HTTP headers (e.g., `x-forwarded-for`) were being parsed using `.split(",")` and `.trim()` before any length constraint was applied.
+**Learning:** Attacker-controlled request headers can be arbitrarily large. Processing them with string manipulation methods like `.split()` without a prior length bound can block the Node.js event loop and cause a Denial of Service (DoS).
+**Prevention:** Apply a reasonable maximum length constraint (e.g., `.slice(0, 1024)`) on raw header strings *before* performing any computationally expensive string processing or parsing operations.
