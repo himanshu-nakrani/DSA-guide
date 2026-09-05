@@ -53,3 +53,7 @@
 ## 2025-02-18 - Prevent Hidden O(N) Array Allocations in Data Aggregation
 **Learning:** Chaining array methods like `.flatMap().map()` (e.g. `topics.flatMap(t => t.articles.map(a => a.slug))`) alongside `.reduce()` in data aggregation tasks creates hidden O(N) array allocations and redundant O(N) traversals, blocking the main thread when traversing deeply nested data.
 **Action:** Use explicit single-pass iteration (like `for...of`) and inline computation when aggregating deeply nested data structures to prevent unnecessary array allocations and redundant passes.
+
+## 2026-09-05 - Binning into a complete record in the existing loop
+**Learning:** `.map(status => data.filter(...))` over a tiny fixed enum is not a real bottleneck, but a second dedicated binning loop is wasted work if the page already walks the same array.
+**Action:** Pre-allocate a complete `Record` of the displayed keys (not `Partial` + `!`) and fill buckets in the existing aggregation loop. Do not claim main-thread DoS for an async Server Component.
