@@ -81,6 +81,8 @@ export function UniquePathsGrid({ caption = "Unique Paths: toggle obstacles and 
   const frame = frames[step];
   const editing = step === 0;
 
+  const obstacleSet = React.useMemo(() => new Set(obstacles), [obstacles]);
+
   const reset = () => setStep(0);
   const setPreset = (next: string[]) => { setObstacles(next); setStep(0); };
   const toggleObstacle = (row: number, col: number) => {
@@ -116,7 +118,7 @@ export function UniquePathsGrid({ caption = "Unique Paths: toggle obstacles and 
                 {Array.from({ length: ROWS }, (_, row) => (
                   <tr key={row}>
                     {Array.from({ length: COLS }, (_, col) => {
-                      const blocked = obstacles.includes(keyOf(row, col));
+                      const blocked = obstacleSet.has(keyOf(row, col));
                       const value = frame.values[row][col];
                       const active = frame.current?.row === row && frame.current.col === col;
                       const isStart = row === 0 && col === 0;
