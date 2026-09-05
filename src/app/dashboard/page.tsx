@@ -182,7 +182,20 @@ export default async function DashboardPage() {
     0,
   );
   const articlePct = totalArticles === 0 ? 0 : Math.round((readSlugs.length / totalArticles) * 100);
-  // ⚡ Bolt: Prevent chained array allocations using explicit single-pass iteration
+  const displayedStatuses = [
+    ProgressStatus.ATTEMPTED,
+    ProgressStatus.NEEDS_REVISION,
+    ProgressStatus.SOLVED,
+    ProgressStatus.MASTERED,
+  ] as const;
+  type DisplayedStatus = (typeof displayedStatuses)[number];
+  const bucketMap: Record<DisplayedStatus, DashboardProblem[]> = {
+    [ProgressStatus.ATTEMPTED]: [],
+    [ProgressStatus.NEEDS_REVISION]: [],
+    [ProgressStatus.SOLVED]: [],
+    [ProgressStatus.MASTERED]: [],
+  };
+
   let solvedCount = 0;
   let attemptedCount = 0;
   for (const entry of allProblems) {
@@ -191,6 +204,8 @@ export default async function DashboardPage() {
     } else if (entry.status === ProgressStatus.ATTEMPTED || entry.status === ProgressStatus.NEEDS_REVISION) {
       attemptedCount++;
     }
+    const bucket = bucketMap[entry.status as DisplayedStatus];
+    if (bucket) bucket.push(entry);
   }
 
   const nextModule = modules.find((module) => {
@@ -202,14 +217,9 @@ export default async function DashboardPage() {
     return false;
   });
 
-  const statusBuckets = [
-    ProgressStatus.ATTEMPTED,
-    ProgressStatus.NEEDS_REVISION,
-    ProgressStatus.SOLVED,
-    ProgressStatus.MASTERED,
-  ].map((status) => ({
+  const statusBuckets = displayedStatuses.map((status) => ({
     status,
-    items: allProblems.filter((entry) => entry.status === status),
+    items: bucketMap[status],
   }));
 
   // ⚡ Bolt: Prevent hidden O(N) array allocations (.map().map()) using explicit single-pass iteration
