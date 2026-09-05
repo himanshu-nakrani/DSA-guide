@@ -72,3 +72,8 @@
 **Vulnerability:** In `registerAction`, checking if a user exists with `findUnique` and returning early before the computationally expensive `hashPassword` function allowed attackers to measure response times to enumerate existing accounts. Fast responses meant the email was already taken; slow responses meant it was available.
 **Learning:** Performing existence checks before computationally heavy security operations creates a reliable timing oracle. The execution time of registration must be roughly constant regardless of whether the identifier already exists in the system.
 **Prevention:** Remove early returns based on existence checks when the subsequent operations are slow. Always execute the slow operation (e.g. hashing) first, attempt the database creation, and rely on the database's unique constraint violation (e.g. Prisma's `P2002` error) to return the error safely and in constant time.
+
+## 2026-09-05 - Bound forwarded headers before split
+**Note:** HTTP parsers already cap header size (Node `maxHeaderSize` is 16 KiB), so this is defense-in-depth, not an unbounded DoS.
+**Learning:** Cap untrusted strings before `split`/`trim` even when the transport has a size limit.
+**Prevention:** Slice the raw forwarded-for header (e.g. 1024 chars) before `split(",")`, then keep the existing 255-char identifier cap.
