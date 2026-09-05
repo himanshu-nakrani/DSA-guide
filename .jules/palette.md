@@ -65,3 +65,7 @@
 ## 2026-08-25 - Missing accessible interaction context on palette triggers
 **Learning:** Buttons that trigger modal overlays, dialogs, or search palettes (e.g., Command Palette triggers) often lack the `aria-haspopup` attribute. Without it, screen reader users expect standard navigation or button behavior, rather than being prepared for a modal context change (like a dialog opening).
 **Action:** Always include `aria-haspopup="dialog"` on buttons that trigger command palettes or modal search dialogs to explicitly communicate the interaction model to assistive technologies before they activate the control.
+
+## 2026-09-05 - Pending feedback on GET filter forms
+**Learning:** `useFormStatus().pending` only flips when submit runs inside a React transition. A native `<form action="/problems">` does a full document GET, so a spinner child never shows pending. These filters are search-param navigation, not Server Actions.
+**Action:** Use `import Form from "next/form"` with a string `action`, plus a client submit child that reads `useFormStatus`. Mention Server Actions only for mutation forms.

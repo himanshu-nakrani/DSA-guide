@@ -1,8 +1,10 @@
+import Form from "next/form";
 import Link from "next/link";
 import { ArrowDownAZ, ArrowRight, ArrowUpDown, Clock3, Search, Trophy } from "lucide-react";
 import { Difficulty, ProgressStatus, type Prisma } from "@/generated/prisma";
 import { ProblemCard } from "@/components/problems/ProblemCard";
 import { difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
+import { FilterSubmitButton } from "./FilterSubmitButton";
 import { getCurrentUser } from "@/lib/auth";
 import { getBookmarkProblemIds } from "@/lib/lists";
 import { prisma } from "@/lib/prisma";
@@ -238,7 +240,7 @@ export default async function ProblemsPage({
           )}
         </div>
 
-        <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-5" action="/problems">
+        <Form className="grid gap-4 md:grid-cols-2 xl:grid-cols-5" action="/problems">
           <label className="space-y-1.5 xl:col-span-2">
             <span className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Search</span>
             <div className="relative">
@@ -312,9 +314,9 @@ export default async function ProblemsPage({
           </label>
 
           <div className="flex items-end gap-3 xl:col-span-5 xl:justify-end">
-            <button type="submit" className="btn-ink min-w-40 justify-center">Apply filters</button>
+            <FilterSubmitButton />
           </div>
-        </form>
+        </Form>
       </section>
 
       {problems.length === 0 ? (
