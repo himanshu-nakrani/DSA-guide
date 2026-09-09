@@ -77,3 +77,8 @@
 **Note:** HTTP parsers already cap header size (Node `maxHeaderSize` is 16 KiB), so this is defense-in-depth, not an unbounded DoS.
 **Learning:** Cap untrusted strings before `split`/`trim` even when the transport has a size limit.
 **Prevention:** Slice the raw forwarded-for header (e.g. 1024 chars) before `split(",")`, then keep the existing 255-char identifier cap.
+
+## 2026-10-06 - Missing HTTP Security Headers
+**Vulnerability:** The application was missing critical HTTP security headers (e.g., Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options), which exposed users to various attacks like clickjacking, MIME-type sniffing, and downgrade attacks.
+**Learning:** Modern web applications must employ defense-in-depth by enforcing security at the HTTP header level. Relying solely on application logic leaves users exposed to browser-level exploits.
+**Prevention:** Always configure Next.js (`next.config.ts`) to return an array of strict security headers (`Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `X-DNS-Prefetch-Control`, `Referrer-Policy`, etc.) applied to all paths (`/(.*)`).
