@@ -57,3 +57,7 @@
 ## 2026-09-05 - Binning into a complete record in the existing loop
 **Learning:** `.map(status => data.filter(...))` over a tiny fixed enum is not a real bottleneck, but a second dedicated binning loop is wasted work if the page already walks the same array.
 **Action:** Pre-allocate a complete `Record` of the displayed keys (not `Partial` + `!`) and fill buckets in the existing aggregation loop. Do not claim main-thread DoS for an async Server Component.
+
+## 2026-10-25 - Prevent Hidden O(N) Array Allocation in List View Aggregations
+**Learning:** Using chained array methods like `.filter(condition).length` to count matching items in large fetched lists (such as the problem library view) creates unnecessary O(N) intermediate array allocations in memory.
+**Action:** When counting or aggregating items from a large list, use explicit single-pass iteration (like `for...of` loops) and standard variables to track counts instead of array filtering methods to minimize memory pressure.
