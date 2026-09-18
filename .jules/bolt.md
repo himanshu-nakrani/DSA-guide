@@ -57,3 +57,7 @@
 ## 2026-09-05 - Binning into a complete record in the existing loop
 **Learning:** `.map(status => data.filter(...))` over a tiny fixed enum is not a real bottleneck, but a second dedicated binning loop is wasted work if the page already walks the same array.
 **Action:** Pre-allocate a complete `Record` of the displayed keys (not `Partial` + `!`) and fill buckets in the existing aggregation loop. Do not claim main-thread DoS for an async Server Component.
+
+## 2026-10-01 - Avoid .filter().length in Prisma query results
+**Learning:** Using array inclusion methods like `.filter().length` on large fetched data lists (like Prisma query results) creates an unnecessary O(N) intermediate array allocation which blocks the main thread.
+**Action:** When counting matching items in large lists, use explicit single-pass iteration (e.g., a `for...of` loop) with a counter variable instead. DO NOT replace concise statements like `.filter(Boolean).length` on tiny, constant-sized arrays.
