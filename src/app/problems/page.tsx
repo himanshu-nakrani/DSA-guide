@@ -181,7 +181,11 @@ export default async function ProblemsPage({
   if (sort !== "difficulty") currentParams.set("sort", sort);
   const returnTo = currentParams.size > 0 ? `/problems?${currentParams.toString()}` : "/problems";
 
-  const withEditorialCount = problems.filter((p) => p.editorial).length;
+  // ⚡ Bolt: Prevent hidden O(N) array allocation (.filter().length) using explicit single-pass iteration
+  let withEditorialCount = 0;
+  for (const p of problems) {
+    if (p.editorial) withEditorialCount++;
+  }
   const activeFilters = [difficulty, topicSlug, user && status ? status : undefined, query || undefined, sort !== "difficulty" ? sort : undefined].filter(Boolean).length;
 
   return (
