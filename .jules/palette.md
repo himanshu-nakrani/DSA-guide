@@ -69,3 +69,7 @@
 ## 2026-09-05 - Pending feedback on GET filter forms
 **Learning:** `useFormStatus().pending` only flips when submit runs inside a React transition. A native `<form action="/problems">` does a full document GET, so a spinner child never shows pending. These filters are search-param navigation, not Server Actions.
 **Action:** Use `import Form from "next/form"` with a string `action`, plus a client submit child that reads `useFormStatus`. Mention Server Actions only for mutation forms.
+
+## 2026-09-20 - Missing aria-modal on dialog elements
+**Learning:** When using `role="dialog"` on modal components (like the Command Palette), it is crucial to also include the `aria-modal="true"` attribute. This explicitly signals to assistive technologies that content outside the dialog should be ignored while it is open, preventing screen reader users from accidentally navigating to background content and losing context.
+**Action:** Always include `aria-modal="true"` alongside `role="dialog"` for true modal overlays to ensure a robust and accessible experience for screen reader users.

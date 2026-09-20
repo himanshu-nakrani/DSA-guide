@@ -138,6 +138,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
   return (
     <div
       role="dialog"
+      aria-modal="true"
       aria-label="Command palette"
       className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] px-4"
       onMouseDown={(e) => {
