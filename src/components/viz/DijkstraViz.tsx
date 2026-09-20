@@ -151,10 +151,10 @@ export function DijkstraViz({
         </svg>
 
         <div className="border border-border bg-background/60 p-3 min-w-44">
-          <div className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground mb-2">
+          <div className="font-mono text-caption uppercase tracking-[0.14em] text-muted-foreground mb-2">
             tentative distances
           </div>
-          <table className="w-full font-mono text-[0.78rem]" aria-label="Dijkstra tentative distances">
+          <table className="w-full font-mono text-small" aria-label="Dijkstra tentative distances">
             <tbody>
               {nodes.map((n) => (
                 <tr key={n.id}>

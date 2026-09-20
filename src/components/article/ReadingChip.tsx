@@ -33,13 +33,12 @@ export function ReadingChip({
 
   return (
     <span
-      className="hidden md:inline-flex items-center gap-1 text-[0.7rem] font-mono text-muted-foreground tabular-nums transition-opacity"
-      style={{ opacity: started ? 1 : 0.45 }}
+      className="hidden md:inline-flex items-center gap-1 text-note font-mono text-muted-foreground tabular-nums"
       aria-live="polite"
       aria-label={`Reading progress: ${elapsed} of ${totalMins} minutes`}
     >
       <Clock className="h-3 w-3" />
-      <span className="text-[color:var(--ink-blue)]">{elapsed}</span>
+      <span className="text-ink-blue">{elapsed}</span>
       <span className="text-muted-foreground/60">/</span>
       <span>{totalMins}m</span>
     </span>

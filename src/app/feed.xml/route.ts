@@ -46,7 +46,7 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-  <title>DSA Guide — Manuscript Edition</title>
+  <title>DSA Guide</title>
   <link>${esc(SITE)}</link>
   <atom:link href="${esc(SITE)}/feed.xml" rel="self" type="application/rss+xml"/>
   <description>A structured curriculum of data structures and algorithms — drawn from CLRS, Sedgewick &amp; Wayne, and Laaksonen.</description>

@@ -97,7 +97,7 @@ export function SlidingWindow({
             const inWindow = i >= f.L && i <= f.R;
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <div className="font-mono text-[0.6rem] uppercase tracking-[0.1em] text-muted-foreground">
+                <div className="font-mono text-micro uppercase tracking-[0.1em] text-muted-foreground">
                   [{i}]
                 </div>
                 <div
@@ -115,7 +115,7 @@ export function SlidingWindow({
             );
           })}
         </div>
-        <div className="grid grid-cols-3 gap-3 font-mono text-[0.72rem]">
+        <div className="grid grid-cols-3 gap-3 font-mono text-note">
           <Stat label="window" value={`[${f.L}, ${f.R}]`} />
           <Stat label="size" value={`${f.R - f.L + 1}`} />
           <Stat label="sum" value={`${f.sum}`} />
@@ -169,7 +169,7 @@ export function SlidingWindow({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-border bg-background/60 px-3 py-2">
-      <div className="uppercase tracking-[0.12em] text-[0.62rem] text-muted-foreground">
+      <div className="uppercase tracking-[0.12em] text-caption text-muted-foreground">
         {label}
       </div>
       <div className="tabular-nums text-foreground">{value}</div>

@@ -1,10 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { InlineScript } from "@/components/layout/InlineScript";
+import { Footer } from "@/components/layout/Footer";
+import { Toaster } from "@/components/ui/toast";
 import { getSearchIndex } from "@/lib/searchIndex";
+import { getCurrentUser } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/site-url";
 
 const iaWriter = localFont({
@@ -22,12 +25,6 @@ const iaWriter = localFont({
       style: "italic",
     },
   ],
-});
-
-const ibmPlex = localFont({
-  variable: "--title-font",
-  display: "swap",
-  src: [{ path: "../../public/fonts/IBMPlexSerif-Var.woff2", weight: "400 700" }],
 });
 
 const lilex = localFont({
@@ -52,15 +49,20 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
+    { media: "(prefers-color-scheme: dark)", color: "#131316" },
+  ],
+};
+
 // Runs synchronously during HTML parsing — before first paint, before React.
-// Reads persisted UI state out of localStorage and stamps the result onto
-// <html> as data-* attributes so the CSS can drive layout (collapsed sidebar,
-// focus mode) and the colour theme without a flash of unstyled state.
+// Reads the persisted colour theme out of localStorage and stamps it onto
+// <html> so CSS renders the right theme without a flash.
 const themeBootstrap = `(()=>{try{
   var d=document.documentElement;
   var t=localStorage.getItem('dsa.theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   d.setAttribute('data-theme',t);
-  if(localStorage.getItem('dsa.sidebar.collapsed')==='1') d.setAttribute('data-sidebar-collapsed','');
   if(localStorage.getItem('dsa.focus')==='1') d.setAttribute('data-focus-mode','');
 }catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 
@@ -69,28 +71,34 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const searchIndex = await getSearchIndex();
+  const [searchIndex, user] = await Promise.all([getSearchIndex(), getCurrentUser()]);
+  const headerUser = user ? { name: user.name, email: user.email } : null;
 
   return (
     <html
       lang="en"
       data-theme="light"
-      className={`${iaWriter.variable} ${ibmPlex.variable} ${lilex.variable} h-full`}
+      data-scroll-behavior="smooth"
+      className={`${iaWriter.variable} ${lilex.variable} h-full`}
       suppressHydrationWarning
     >
       <head>
         <InlineScript html={themeBootstrap} />
       </head>
-      <body className="min-h-full flex flex-col md:flex-row bg-background text-foreground antialiased">
+      <body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:px-4 focus:py-2 focus:m-2 focus:bg-background focus:text-foreground focus:border focus:border-border focus:rounded-md focus:shadow-md"
         >
           Skip to main content
         </a>
-        <Sidebar searchIndex={searchIndex} />
-        <main id="main-content" className="flex-1 min-w-0 md:overflow-y-auto">{children}</main>
+        <Header user={headerUser} />
+        <main id="main-content" className="flex-1 min-w-0 w-full">
+          {children}
+        </main>
+        <Footer />
         <CommandPalette index={searchIndex} />
+        <Toaster />
       </body>
     </html>
   );

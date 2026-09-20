@@ -100,7 +100,7 @@ export function ProgressNode({
             ? "bg-primary text-primary-foreground border border-primary"
             : inProgress
               ? "bg-[color:color-mix(in_srgb,var(--primary)_12%,transparent)] text-primary border border-[color:color-mix(in_srgb,var(--primary)_30%,transparent)]"
-              : "bg-[color:var(--surface-1,var(--card))] text-muted-foreground border border-border"
+              : "bg-surface-1 text-muted-foreground border border-border"
         }`}
       >
         {complete ? (

@@ -30,7 +30,7 @@ function subscribe(cb: () => void) {
 }
 
 /**
- * "X of Y essays read" tally for the Learn listing header. Server snapshot
+ * "X of Y articles read" tally for the Learn listing header. Server snapshot
  * is 0 (no localStorage on the server); the count populates after hydration.
  */
 export function ReadTally({ slugs }: { slugs: string[] }) {
@@ -43,12 +43,12 @@ export function ReadTally({ slugs }: { slugs: string[] }) {
   const pct = Math.round((count / Math.max(1, slugs.length)) * 100);
   return (
     <span
-      className="inline-flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-[color:var(--pencil)]"
+      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums"
       suppressHydrationWarning
     >
-      <span className="text-[color:var(--ink-blue)] tabular-nums">{count}</span>
-      <span className="text-[color:var(--rule-strong)]">/</span>
-      <span className="tabular-nums">{slugs.length}</span>
+      <span className="font-semibold text-foreground">{count}</span>
+      <span className="text-border-hover">/</span>
+      <span>{slugs.length}</span>
       <span>read · {pct}%</span>
     </span>
   );

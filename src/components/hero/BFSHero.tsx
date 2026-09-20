@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/components/viz/_chrome";
 
 type Node = { id: number; x: number; y: number };
@@ -81,13 +81,29 @@ const TOTAL_MS = FRAMES[FRAMES.length - 1].finishedAt + 1800;
 
 export function BFSHero() {
   const [tick, setTick] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [offscreen, setOffscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const paused = hidden || offscreen;
 
   useEffect(() => {
-    const onVis = () => setPaused(document.hidden);
+    const onVis = () => setHidden(document.hidden);
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
+  // Pause the animation loop while the figure is scrolled out of view so it
+  // isn't burning frames the reader can't see.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setOffscreen(!entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   useEffect(() => {
@@ -113,7 +129,7 @@ export function BFSHero() {
   }, [tick, reducedMotion]);
 
   return (
-    <div className="relative w-full aspect-[4/3] max-w-md select-none">
+    <div ref={containerRef} className="relative w-full aspect-[4/3] max-w-md select-none">
       <div
         aria-hidden
         className="absolute inset-0 -z-10"

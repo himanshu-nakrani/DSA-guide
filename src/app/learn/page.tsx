@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import { ArticleLevel, ArticleStatus, Prisma } from "@/generated/prisma";
 import { ArrowRight } from "lucide-react";
@@ -8,8 +9,16 @@ import { ReadTally } from "@/components/article/ReadTally";
 import { getCurrentUser } from "@/lib/auth";
 import { getUserReadArticleSlugs } from "@/lib/progress";
 import { ReadProgressSync } from "@/components/progress/ReadProgressSync";
+import { PageHeader, PageShell } from "@/components/layout/PageShell";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: "Learn — DSA Guide",
+  description:
+    "Browse the full DSA article library: foundations to advanced topics, every article cited from trusted sources.",
+};
 
 type TopicWithArticles = Prisma.TopicGetPayload<{
   include: {
@@ -64,9 +73,16 @@ export default async function LearnPage() {
 
   if (topics.length === 0) {
     return (
-      <div className="p-16">
-        <p className="text-muted-foreground">No articles published yet.</p>
-      </div>
+      <PageShell width="narrow">
+        <div className="surface-card p-12 text-center space-y-3 mt-8">
+          <h1 className="font-display text-2xl font-medium text-ink">
+            No articles published yet
+          </h1>
+          <p className="text-body text-muted-foreground leading-relaxed">
+            Articles will appear here once published. Check back soon.
+          </p>
+        </div>
+      </PageShell>
     );
   }
 
@@ -85,6 +101,7 @@ export default async function LearnPage() {
   // ⚡ Bolt: Prevent hidden O(N) array allocations (.reduce() and .flatMap().map()) using explicit single-pass iteration
   let totalArticles = 0;
   const allSlugs: string[] = [];
+  const allTitles: { slug: string; title: string }[] = [];
 
   for (const topic of topics) {
     const m = modulesMap.get(topic.module.id);
@@ -102,43 +119,66 @@ export default async function LearnPage() {
     totalArticles += topic.articles.length;
     for (const article of topic.articles) {
       allSlugs.push(article.slug);
+      allTitles.push({ slug: article.slug, title: article.title });
     }
   }
 
   const readSlugs = user ? await getUserReadArticleSlugs(user.id) : [];
 
-  return (
-    <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
-      {readSlugs.length > 0 && <ReadProgressSync slugs={readSlugs} />}
-      <header className="bloom mb-12">
-        <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
-          <span className="text-[color:var(--ink-blue)] mr-2">§</span>
-          Library
-        </div>
-        <h1
-          className="font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
-          style={{ ["--i" as string]: 1 }}
-        >
-          Table of Articles
-        </h1>
-        <p
-          className="text-[1.05rem] mt-3 max-w-2xl text-[color:var(--ink-soft)]"
-          style={{ ["--i" as string]: 2 }}
-        >
-          {totalArticles} articles across {modulesMap.size} modules — from
-          asymptotic notation through shortest paths and dynamic programming.
-        </p>
-        <div
-          className="mt-4 min-h-[1.25rem]"
-          style={{ ["--i" as string]: 3 }}
-        >
-          <ReadTally slugs={allSlugs} />
-        </div>
-        <div aria-hidden className="mt-6 h-px bg-[color:var(--rule-strong)]" />
-      </header>
+  const siteUrl = getSiteUrl();
+  const itemListLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "DSA Guide article library",
+    itemListElement: allTitles.map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: a.title,
+      url: `${siteUrl}/learn/${a.slug}`,
+    })),
+  };
 
-      <div className="space-y-14 bloom">
-        {Array.from(modulesMap.values()).map((moduleData, idx) => (
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }}
+      />
+    <PageShell width="narrow">
+      {readSlugs.length > 0 && <ReadProgressSync slugs={readSlugs} />}
+      <PageHeader
+        eyebrow="Library"
+        title="Table of Articles"
+        lede={
+          <>
+            {totalArticles} articles across {modulesMap.size} modules — from asymptotic
+            notation through shortest paths and dynamic programming.
+          </>
+        }
+      >
+        <ReadTally slugs={allSlugs} />
+      </PageHeader>
+
+      {/* Jump nav — mono chips that scroll-jump to each module */}
+      <nav
+        aria-label="Jump to a module"
+        className="no-scrollbar -mt-2 mb-8 flex items-center gap-2 overflow-x-auto pb-1"
+      >
+        <span className="mr-1 shrink-0 text-xs font-medium uppercase tracking-wider text-muted-foreground">Jump</span>
+        {Array.from(modulesMap.values()).map((moduleData) => (
+          <a
+            key={moduleData.id}
+            href={`#mod-${moduleData.slug}`}
+            className="pill shrink-0 whitespace-nowrap hover:text-ink-blue hover:border-ink-blue transition-colors"
+          >
+            <span className="tabular-nums">{String(moduleData.order).padStart(2, "0")}</span>
+            <span className="max-w-40 truncate">{moduleData.name}</span>
+          </a>
+        ))}
+      </nav>
+
+      <div className="space-y-6">
+        {Array.from(modulesMap.values()).map((moduleData) => (
           <ModuleSection
             key={moduleData.id}
             moduleSlug={moduleData.slug}
@@ -146,11 +186,11 @@ export default async function LearnPage() {
             moduleName={moduleData.name}
             description={moduleData.description}
             topics={moduleData.topics}
-            i={idx}
           />
         ))}
       </div>
-    </div>
+    </PageShell>
+    </>
   );
 }
 
@@ -160,64 +200,72 @@ function ModuleSection({
   moduleName,
   description,
   topics,
-  i,
 }: {
   moduleSlug: string;
   moduleNumber: number;
   moduleName: string;
   description: string | null;
   topics: TopicWithArticles[];
-  i: number;
 }) {
   return (
-    <section id={`mod-${moduleSlug}`} className="scroll-mt-24" style={{ ["--i" as string]: i }}>
-      <div className="flex items-baseline gap-4 mb-4">
-        <span className="font-mono text-[0.85rem] text-[color:var(--ink-blue)] tabular-nums tracking-[0.08em]">
+    <section
+      id={`mod-${moduleSlug}`}
+      className="scroll-mt-32 overflow-hidden rounded-xl border border-border bg-surface-1 shadow-[var(--shadow-card)]"
+    >
+      <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-2 font-mono text-xs font-medium tabular-nums text-muted-foreground">
           {String(moduleNumber).padStart(2, "0")}
         </span>
-        <div>
-          <h2 className="font-display text-[1.5rem] font-medium text-[color:var(--ink)]">
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-lg font-semibold tracking-tight text-foreground">
             {moduleName}
           </h2>
           {description && (
-            <p className="text-[0.9rem] mt-1 text-[color:var(--ink-soft)]">
+            <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
               {description}
             </p>
           )}
         </div>
       </div>
 
-      <div className="border-t border-[color:var(--rule-strong)] border-b border-b-[color:var(--rule-strong)]">
-        {topics.flatMap((topic) =>
-          topic.articles.map((article, idx) => (
-            <Link
-              key={article.id}
-              href={`/learn/${article.slug}`}
-              className={`group flex items-start gap-4 px-1 py-3 transition-colors hover:bg-[color:var(--ink-blue-wash)] ${idx > 0 ? "border-t border-[color:var(--rule)]" : ""}`}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <ViewTransition name={`article-title-${article.slug}`}>
-                    <h3 className="font-display text-[1.05rem] font-medium text-[color:var(--ink)] group-hover:text-[color:var(--ink-blue)] transition-colors">
-                      {article.title}
-                    </h3>
-                  </ViewTransition>
-                  <span className={levelStyle[article.level]}>
-                    {levelLabel[article.level]}
-                  </span>
-                  <span className="text-[0.7rem] font-mono text-muted-foreground tabular-nums">
-                    {article.estimatedMins}m
-                  </span>
-                  <ReadBadge slug={article.slug} />
-                </div>
-                <p className="text-[0.9rem] mt-1 leading-relaxed text-[color:var(--ink-soft)] max-w-2xl">
-                  {article.summary}
-                </p>
+      <div>
+        {topics.map((topic) => (
+          <div key={topic.id}>
+            {topics.length > 1 && (
+              <div className="border-b border-border bg-surface-2/60 px-5 py-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {topic.name}
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground mt-1.5 shrink-0 transition-all group-hover:text-[color:var(--ink-blue)] group-hover:translate-x-0.5" />
-            </Link>
-          )),
-        )}
+            )}
+            {topic.articles.map((article) => (
+              <Link
+                key={article.id}
+                href={`/learn/${article.slug}`}
+                className="group flex items-center gap-4 border-b border-border px-5 py-4 transition-colors last:border-b-0 hover:bg-surface-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ViewTransition name={`article-title-${article.slug}`}>
+                      <h3 className="text-[15px] font-semibold tracking-tight text-foreground group-hover:text-ink-blue">
+                        {article.title}
+                      </h3>
+                    </ViewTransition>
+                    <span className={levelStyle[article.level]}>
+                      {levelLabel[article.level]}
+                    </span>
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      {article.estimatedMins}m
+                    </span>
+                    <ReadBadge slug={article.slug} />
+                  </div>
+                  <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-muted-foreground">
+                    {article.summary}
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-ink-blue" />
+              </Link>
+            ))}
+          </div>
+        ))}
       </div>
     </section>
   );

@@ -126,9 +126,9 @@ export function LinearVsBinary({
         </>
       }
     >
-      <div className="grid grid-cols-2 gap-3 mb-3 font-mono text-[0.72rem]">
+      <div className="grid grid-cols-2 gap-3 mb-3 font-mono text-note">
         <div className="border border-border p-2">
-          <div className="uppercase tracking-[0.12em] text-[0.62rem]" style={{ color: PALETTE.c3 }}>
+          <div className="uppercase tracking-[0.12em] text-caption" style={{ color: PALETTE.c3 }}>
             linear search
           </div>
           <div className="flex justify-between mt-1">
@@ -143,7 +143,7 @@ export function LinearVsBinary({
           </div>
         </div>
         <div className="border border-border p-2">
-          <div className="uppercase tracking-[0.12em] text-[0.62rem]" style={{ color: PALETTE.c1 }}>
+          <div className="uppercase tracking-[0.12em] text-caption" style={{ color: PALETTE.c1 }}>
             binary search
           </div>
           <div className="flex justify-between mt-1">

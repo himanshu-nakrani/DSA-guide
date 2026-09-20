@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
@@ -54,6 +55,10 @@ export async function POST(request: Request) {
       articleId: article.id,
     },
   });
+
+  // Keep the dashboard's activity feed and streak fresh without waiting out
+  // its 60s ISR window.
+  revalidatePath("/dashboard");
 
   return NextResponse.json({ ok: true });
 }

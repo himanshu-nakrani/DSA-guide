@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { ArticleStatus, ProblemStatus, ProgressStatus } from "@/generated/prisma";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { ArticleLink } from "@/components/article/ArticleLink";
 import { ProgressNode } from "@/components/roadmap/ProgressNode";
+import { CollapsibleRoot, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { PageHeader, PageShell } from "@/components/layout/PageShell";
 import { getCurrentUser } from "@/lib/auth";
 import { getBookmarkProblemIds } from "@/lib/lists";
 import { getUserReadArticleSlugs } from "@/lib/progress";
@@ -60,8 +62,11 @@ export default async function RoadmapPage() {
 
   if (!track) {
     return (
-      <div className="p-16">
-        <p className="text-muted-foreground">Roadmap not found.</p>
+      <div className="max-w-4xl mx-auto px-6 md:px-12 py-24 text-center space-y-3">
+        <h1 className="font-display text-3xl font-medium text-ink">No roadmap bound yet</h1>
+        <p className="text-body text-muted-foreground">
+          The curriculum hasn&rsquo;t been published. Check back after the next edition.
+        </p>
       </div>
     );
   }
@@ -93,238 +98,233 @@ export default async function RoadmapPage() {
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
   const readSlugSet = new Set(readSlugs);
 
+  // One stats pass up front so the "current module" (first one not finished)
+  // can be auto-expanded while completed and untouched ones stay folded.
+  const moduleStats = track.modules.map((module) => {
+    const articleCount = module.topics.reduce((s, t) => s + t.articles.length, 0);
+    const problemCount = module.topics.reduce((s, t) => s + t.problems.length, 0);
+    const moduleSlugs = module.topics.flatMap((t) => t.articles.map((a) => a.slug));
+    const readArticleCount = moduleSlugs.filter((slug) => readSlugSet.has(slug)).length;
+    const moduleProblemIds = module.topics.flatMap((topic) =>
+      topic.problems.map((entry) => entry.problemId),
+    );
+    const summary = summarizeProblemProgress(moduleProblemIds, problemProgressMap);
+    const denom = articleCount + summary.total;
+    const percent = denom === 0 ? 0 : Math.round(((readArticleCount + summary.solved) / denom) * 100);
+    return {
+      moduleId: module.id,
+      articleCount,
+      problemCount,
+      readArticleCount,
+      summary,
+      percent,
+    };
+  });
+  const currentModuleId =
+    moduleStats.find((stats) => stats.percent < 100)?.moduleId ??
+    track.modules[track.modules.length - 1]?.id ??
+    null;
+
   return (
-    <div className="max-w-5xl mx-auto px-6 md:px-12 py-16">
+    <PageShell width="default">
       {readSlugs.length > 0 && <ReadProgressSync slugs={readSlugs} />}
-      <header className="bloom mb-12">
-        <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
-          <span className="text-[color:var(--ink-blue)] mr-2">§</span>
-          Curriculum
-        </div>
-        <h1
-          className="font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
-          style={{ ["--i" as string]: 1 }}
-        >
-          The Roadmap
-        </h1>
-        <p
-          className="text-[1.05rem] mt-3 max-w-2xl text-[color:var(--ink-soft)]"
-          style={{ ["--i" as string]: 2 }}
-        >
-          {track.description}
-        </p>
-        <div aria-hidden className="mt-8 h-px bg-[color:var(--rule-strong)]" />
-      </header>
+      <PageHeader
+        eyebrow="Curriculum"
+        title="The Roadmap"
+        lede={track.description}
+      />
 
-      {/* Vertical step timeline */}
-      <ol className="bloom">
+      {/* Module cards */}
+      <ol className="space-y-4">
         {track.modules.map((module, i) => {
-          // ⚡ Bolt: Single-pass iteration to prevent hidden O(N) array allocations
-          // and redundant O(N) traversals across deeply nested relationships.
-          let articleCount = 0;
-          let problemCount = 0;
-          let readArticleCount = 0;
-          const moduleSlugs: string[] = [];
-          const moduleProblems: Array<{
-            id: string;
-            slug: string;
-            title: string;
-            difficulty: import("@/generated/prisma").Difficulty;
-            acceptanceRate: number;
-          }> = [];
-          let firstArticle = null;
-
-          for (const topic of module.topics) {
-            articleCount += topic.articles.length;
-            problemCount += topic.problems.length;
-
-            for (const article of topic.articles) {
-              if (!firstArticle) firstArticle = article;
-              moduleSlugs.push(article.slug);
-              if (readSlugSet.has(article.slug)) readArticleCount++;
-            }
-
-            for (const entry of topic.problems) {
-              moduleProblems.push(entry.problem);
-            }
-          }
-
-          const moduleProblemSummary = summarizeProblemProgress(
-            moduleProblems.map((problem) => problem.id),
-            problemProgressMap,
+          const stats = moduleStats[i];
+          const moduleProblems = module.topics.flatMap((topic) =>
+            topic.problems.map((entry) => entry.problem),
           );
           const nextProblem = pickNextProblem(moduleProblems, problemProgressMap);
-          const isLast = i === track.modules.length - 1;
+          const moduleArticles = module.topics.flatMap((t) => t.articles);
+          const firstArticle = moduleArticles[0] ?? null;
+          const firstUnread =
+            moduleArticles.find((a) => !readSlugSet.has(a.slug)) ?? null;
+          const resumeTarget = firstUnread ?? firstArticle;
+          const isCurrent = module.id === currentModuleId;
 
           return (
-            <li
-              key={module.id}
-              className="relative grid grid-cols-[3rem_1fr] gap-5"
-              style={{ ["--i" as string]: i }}
-            >
-              <div className="flex flex-col items-center">
-                <ProgressNode order={module.order} slugs={moduleSlugs} />
-                {!isLast && <div className="flex-1 w-px bg-border my-1" aria-hidden />}
-              </div>
-
-              <div className={`pt-1 ${isLast ? "pb-0" : "pb-5"}`}>
-                <div className="p-5 border border-[color:var(--rule)] rounded-sm bg-[color:var(--surface-1)] transition-colors hover:border-[color:var(--ink-blue)]">
-
-                  <div className="flex items-baseline justify-between gap-4 flex-wrap mb-2">
-                    <h2 className="font-display text-[1.25rem] font-medium text-[color:var(--ink)]">
-                      {module.name}
-                    </h2>
-                    <div className="text-[0.7rem] font-mono text-muted-foreground tabular-nums flex items-center gap-2">
-                      <span>{articleCount} {articleCount === 1 ? "article" : "articles"}</span>
-                      {problemCount > 0 && (
-                        <>
-                          <span className="text-muted-foreground/40">·</span>
-                          <span>{problemCount} {problemCount === 1 ? "problem" : "problems"}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {module.description && (
-                    <p className="text-[0.9rem] leading-relaxed text-[color:var(--ink-soft)]">
-                      {module.description}
-                    </p>
-                  )}
-
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <ProgressMeter
-                      label="Reading"
-                      current={readArticleCount}
-                      total={articleCount}
-                      detail={`${readArticleCount}/${articleCount} articles read`}
-                    />
-                    <ProgressMeter
-                      label="Practice"
-                      current={moduleProblemSummary.solved}
-                      total={moduleProblemSummary.total}
-                      detail={`${moduleProblemSummary.solved}/${moduleProblemSummary.total} problems solved`}
-                    />
-                  </div>
-
-                  {firstArticle && (
-                    <div className="mt-3">
-                      <ArticleLink
-                        href={`/learn/${firstArticle.slug}`}
-                        preview={{
-                          title: firstArticle.title,
-                          summary: firstArticle.summary,
-                          level: firstArticle.level,
-                          estimatedMins: firstArticle.estimatedMins,
-                          moduleName: module.name,
-                        }}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--ink-blue)] link-quill"
-                      >
-                        Start: {firstArticle.title}
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </ArticleLink>
-                    </div>
-                  )}
-
-                  {module.topics.length > 0 && (
-                    <div className="mt-5 space-y-3">
-                      <div className="text-[0.7rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-                        Topic progress
-                      </div>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        {module.topics.map((topic) => {
-                          // ⚡ Bolt: Prevent hidden O(N) array allocations (.map.filter.length) using explicit iteration
-                          let topicReadCount = 0;
-                          for (const article of topic.articles) {
-                            if (readSlugSet.has(article.slug)) {
-                              topicReadCount++;
-                            }
-                          }
-
-                          const topicProblemIds: string[] = [];
-                          for (const entry of topic.problems) {
-                            topicProblemIds.push(entry.problemId);
-                          }
-
-                          const topicProblemSummary = summarizeProblemProgress(
-                            topicProblemIds,
-                            problemProgressMap,
-                          );
-                          const topicPercent =
-                            topic.articles.length + topicProblemSummary.total === 0
-                              ? 0
-                              : Math.round(
-                                  ((topicReadCount + topicProblemSummary.solved) /
-                                    (topic.articles.length + topicProblemSummary.total)) *
-                                    100,
-                                );
-
-                          return (
-                            <div
-                              key={topic.id}
-                              className="rounded-xl border border-[color:var(--rule)] bg-background/40 px-4 py-3"
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <div className="font-medium text-sm text-[color:var(--ink)]">
-                                    {topic.name}
-                                  </div>
-                                  <div className="mt-1 text-[0.68rem] font-mono uppercase tracking-[0.1em] text-muted-foreground">
-                                    {topicReadCount}/{topic.articles.length} read · {topicProblemSummary.solved}/{topicProblemSummary.total} solved
-                                  </div>
-                                </div>
-                                <span className="text-xs font-mono tabular-nums text-muted-foreground">
-                                  {topicPercent}%
-                                </span>
-                              </div>
-                              <div className="mt-3 h-1.5 rounded-full bg-[color:var(--rule)]/60 overflow-hidden">
-                                <div
-                                  className="h-full bg-[color:var(--ink-blue)] transition-[width]"
-                                  style={{ width: `${topicPercent}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {nextProblem && (
-                    <div className="mt-5 space-y-3">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="text-[0.7rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-                          Recommended next problem
-                        </div>
-                        <span className="text-[0.68rem] font-mono uppercase tracking-[0.1em] text-muted-foreground">
-                          {moduleProblemSummary.started}/{moduleProblemSummary.total} started
+            <li key={module.id}>
+              <CollapsibleRoot
+                defaultOpen={isCurrent}
+                className="overflow-hidden rounded-xl border border-border bg-surface-1 shadow-[var(--shadow-card)]"
+              >
+                <div>
+                  <CollapsibleTrigger className="px-5 py-4">
+                    <span className="flex min-w-0 flex-1 items-center gap-3">
+                      <ProgressNode order={module.order} slugs={module.topics.flatMap((t) => t.articles.map((a) => a.slug))} />
+                      <span className="min-w-0 flex-1 text-left">
+                        <span className="block truncate text-base font-semibold tracking-tight text-foreground">
+                          {module.name}
                         </span>
+                        <span className="mt-0.5 block text-xs tabular-nums text-muted-foreground">
+                          {stats.articleCount} {stats.articleCount === 1 ? "article" : "articles"}
+                          {stats.problemCount > 0 && ` · ${stats.percent}%`}
+                        </span>
+                      </span>
+                      {stats.percent >= 100 ? (
+                        <span className="pill shrink-0 border-ink-green/40 bg-ink-green-wash text-ink-green">
+                          Complete
+                        </span>
+                      ) : (
+                        isCurrent && (
+                          <span className="pill pill-primary shrink-0">
+                            Up next
+                          </span>
+                        )
+                      )}
+                    </span>
+                    <ChevronDown
+                      aria-hidden
+                      className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-[var(--dur-base)] ease-[var(--ease-out)] group-data-[open]/section:rotate-180"
+                      strokeWidth={1.75}
+                    />
+                  </CollapsibleTrigger>
+
+                    <CollapsiblePanel>
+                      <div className="px-5 pb-5 space-y-4 border-t border-border pt-4">
+                        {module.description && (
+                          <p className="text-body leading-relaxed text-ink-soft">
+                            {module.description}
+                          </p>
+                        )}
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <ProgressMeter
+                            label="Reading"
+                            current={stats.readArticleCount}
+                            total={stats.articleCount}
+                            detail={`${stats.readArticleCount}/${stats.articleCount} articles read`}
+                            sourceNote={user ? "Synced to account" : "Local to this browser"}
+                          />
+                          <ProgressMeter
+                            label="Practice"
+                            current={stats.summary.solved}
+                            total={stats.summary.total}
+                            detail={`${stats.summary.solved}/${stats.summary.total} problems solved`}
+                            sourceNote={user ? "Synced to account" : "Sign in to save progress"}
+                          />
+                        </div>
+
+                        {resumeTarget && (
+                          <div>
+                            <ArticleLink
+                              href={`/learn/${resumeTarget.slug}`}
+                              preview={{
+                                title: resumeTarget.title,
+                                summary: resumeTarget.summary,
+                                level: resumeTarget.level,
+                                estimatedMins: resumeTarget.estimatedMins,
+                                moduleName: module.name,
+                              }}
+                              className="inline-flex items-center gap-1.5 text-small font-medium text-ink-blue link-quill"
+                            >
+                              {firstUnread ? "Resume" : "Review again"}: {resumeTarget.title}
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </ArticleLink>
+                          </div>
+                        )}
+
+                        {module.topics.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="text-note font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                              Topic progress
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              {module.topics.map((topic) => {
+                                const topicSlugs = topic.articles.map((article) => article.slug);
+                                const topicProblemIds = topic.problems.map((entry) => entry.problemId);
+                                const topicProblemSummary = summarizeProblemProgress(
+                                  topicProblemIds,
+                                  problemProgressMap,
+                                );
+                                const topicReadCount = topicSlugs.filter((articleSlug) =>
+                                  readSlugSet.has(articleSlug),
+                                ).length;
+                                const topicPercent =
+                                  topic.articles.length + topicProblemSummary.total === 0
+                                    ? 0
+                                    : Math.round(
+                                        ((topicReadCount + topicProblemSummary.solved) /
+                                          (topic.articles.length + topicProblemSummary.total)) *
+                                          100,
+                                      );
+
+                                return (
+                                  <div
+                                    key={topic.id}
+                                    className="rounded-xl border border-border bg-surface-2/60 px-4 py-3"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <div className="font-medium text-small text-ink">
+                                          {topic.name}
+                                        </div>
+                                        <div className="mt-1 text-caption font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                                          {topicReadCount}/{topic.articles.length} read · {topicProblemSummary.solved}/{topicProblemSummary.total} solved
+                                        </div>
+                                      </div>
+                                      <span className="text-caption font-mono tabular-nums text-muted-foreground">
+                                        {topicPercent}%
+                                      </span>
+                                    </div>
+                                    <div className="mt-3 h-1.5 rounded-full bg-border overflow-hidden">
+                                      <div
+                                        className="h-full bg-ink-blue transition-[width]"
+                                        style={{ width: `${topicPercent}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {nextProblem && (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="text-note font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                                Recommended next problem
+                              </div>
+                              <span className="text-caption font-mono uppercase tracking-[0.1em] text-muted-foreground">
+                                {stats.summary.started}/{stats.summary.total} started
+                              </span>
+                            </div>
+                            <ProblemCard
+                              problem={{
+                                ...nextProblem,
+                                hints: [],
+                                editorial: null,
+                              }}
+                              moduleName={module.name}
+                              topicName={
+                                module.topics.find((topic) =>
+                                  topic.problems.some((entry) => entry.problemId === nextProblem.id),
+                                )?.name
+                              }
+                              status={problemProgressMap.get(nextProblem.id)}
+                              bookmarked={bookmarkIds.has(nextProblem.id)}
+                              signedIn={Boolean(user)}
+                              returnTo="/roadmap"
+                            />
+                          </div>
+                        )}
                       </div>
-                      <ProblemCard
-                        problem={{
-                          ...nextProblem,
-                          hints: [],
-                          editorial: null,
-                        }}
-                        moduleName={module.name}
-                        topicName={
-                          module.topics.find((topic) =>
-                            topic.problems.some((entry) => entry.problemId === nextProblem.id),
-                          )?.name
-                        }
-                        status={problemProgressMap.get(nextProblem.id)}
-                        bookmarked={bookmarkIds.has(nextProblem.id)}
-                        signedIn={Boolean(user)}
-                        returnTo="/roadmap"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+                    </CollapsiblePanel>
+                  </div>
+                </CollapsibleRoot>
             </li>
           );
         })}
       </ol>
-    </div>
+    </PageShell>
   );
 }
 
@@ -333,33 +333,38 @@ function ProgressMeter({
   current,
   total,
   detail,
+  sourceNote,
 }: {
   label: string;
   current: number;
   total: number;
   detail: string;
+  sourceNote?: string;
 }) {
   const percent = total === 0 ? 0 : Math.round((current / total) * 100);
 
   return (
-    <div className="rounded-xl border border-[color:var(--rule)] bg-background/40 px-4 py-3">
+    <div className="rounded-xl border border-border bg-surface-2/60 px-4 py-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-[0.68rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="text-caption font-mono uppercase tracking-[0.12em] text-muted-foreground">
             {label}
           </div>
-          <div className="mt-1 text-sm text-[color:var(--ink-soft)]">{detail}</div>
+          <div className="mt-1 text-small text-ink-soft">{detail}</div>
         </div>
-        <span className="font-mono text-sm tabular-nums text-[color:var(--ink)]">
+        <span className="font-mono text-small tabular-nums text-ink">
           {percent}%
         </span>
       </div>
-      <div className="mt-3 h-1.5 rounded-full bg-[color:var(--rule)]/60 overflow-hidden">
+      <div className="mt-3 h-1.5 rounded-full bg-border overflow-hidden">
         <div
-          className="h-full bg-[color:var(--ink-blue)] transition-[width]"
+          className="h-full bg-ink-blue transition-[width]"
           style={{ width: `${percent}%` }}
         />
       </div>
+      {sourceNote && (
+        <div className="mt-2 font-pencil text-caption text-muted-foreground">{sourceNote}</div>
+      )}
     </div>
   );
 }

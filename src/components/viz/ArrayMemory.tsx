@@ -45,7 +45,7 @@ export function ArrayMemory({
           {items.map((_, i) => (
             <div
               key={i}
-              className="flex-1 text-center font-mono text-[0.65rem] uppercase tracking-[0.1em] text-muted-foreground"
+              className="flex-1 text-center font-mono text-caption uppercase tracking-[0.1em] text-muted-foreground"
             >
               [{i}]
             </div>
@@ -76,7 +76,7 @@ export function ArrayMemory({
           {items.map((_, i) => (
             <div
               key={i}
-              className="flex-1 text-center font-mono text-[0.62rem] tabular-nums text-muted-foreground"
+              className="flex-1 text-center font-mono text-caption tabular-nums text-muted-foreground"
               style={{ color: hover === i ? PALETTE.c1 : undefined }}
             >
               0x{addr(i).toString(16).toUpperCase()}
@@ -84,7 +84,7 @@ export function ArrayMemory({
           ))}
         </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-3 font-mono text-[0.72rem]">
+        <div className="mt-3 grid grid-cols-3 gap-3 font-mono text-note">
           <Stat label="base" value={`0x${base.toString(16).toUpperCase()}`} />
           <Stat label="element size" value={`${stride} bytes`} />
           <Stat
@@ -106,7 +106,7 @@ export function ArrayMemory({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-border bg-background/60 px-3 py-2">
-      <div className="uppercase tracking-[0.12em] text-[0.62rem] text-muted-foreground">
+      <div className="uppercase tracking-[0.12em] text-caption text-muted-foreground">
         {label}
       </div>
       <div className="tabular-nums text-foreground">{value}</div>

@@ -29,16 +29,16 @@ export function GrowthTable({
   return (
     <VizFrame caption={caption}>
       <div className="overflow-x-auto">
-        <table className="w-full font-mono text-[0.78rem]">
+        <table className="w-full font-mono text-small">
           <thead>
             <tr className="border-b border-foreground">
-              <th className="text-left py-2 pr-4 font-medium tracking-[0.12em] text-[0.65rem] uppercase">
+              <th className="text-left py-2 pr-4 font-medium tracking-[0.12em] text-caption uppercase">
                 Class
               </th>
               {sizes.map((n) => (
                 <th
                   key={n}
-                  className="text-right py-2 px-2 font-medium tracking-[0.12em] text-[0.65rem] uppercase"
+                  className="text-right py-2 px-2 font-medium tracking-[0.12em] text-caption uppercase"
                 >
                   n = {fmt(n)}
                 </th>
@@ -70,7 +70,7 @@ export function GrowthTable({
             ))}
           </tbody>
         </table>
-        <div className="mt-3 text-[0.72rem] text-muted-foreground font-serif italic">
+        <div className="mt-3 text-note text-muted-foreground font-serif italic">
           Rule of thumb: a modern CPU handles ~10⁸ simple operations per second.
           Cells in <span style={{ color: PALETTE.destructive }}>brick</span> exceed that budget at the given n.
         </div>

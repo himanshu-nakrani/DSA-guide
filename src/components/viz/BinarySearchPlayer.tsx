@@ -60,7 +60,7 @@ export function BinarySearchPlayer({
       <div className="space-y-4">
         <ArrayRow arr={arr} L={frame.L} R={frame.R} M={frame.M} target={target} />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-[0.72rem]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-note">
           <Stat label="L" value={frame.L >= 0 ? `${frame.L} (${arr[frame.L]})` : "—"} />
           <Stat label="R" value={frame.R >= 0 ? `${frame.R} (${arr[frame.R]})` : "—"} />
           <Stat label="M" value={frame.M >= 0 ? `${frame.M} (${arr[frame.M]})` : "—"} />
@@ -95,7 +95,7 @@ function ArrayRow({
           const isFound = isMid && arr[M] === target;
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <div className="font-mono text-[0.6rem] uppercase tracking-[0.1em] text-muted-foreground">
+              <div className="font-mono text-micro uppercase tracking-[0.1em] text-muted-foreground">
                 [{i}]
               </div>
               <div
@@ -116,7 +116,7 @@ function ArrayRow({
               >
                 {v}
               </div>
-              <div className="h-4 font-mono text-[0.65rem] tabular-nums">
+              <div className="h-4 font-mono text-caption tabular-nums">
                 {i === L && i === R ? (
                   <span style={{ color: PALETTE.c1 }}>L=R</span>
                 ) : i === L ? (
@@ -149,7 +149,7 @@ function Trace({
   target: number;
 }) {
   return (
-    <div className="border border-border bg-background/60 p-3 font-mono text-[0.72rem] leading-relaxed">
+    <div className="border border-border bg-background/60 p-3 font-mono text-note leading-relaxed">
       {frames.slice(0, step + 1).map((f, i) => {
         if (f.status === "found")
           return (
@@ -199,7 +199,7 @@ function computeFrames(arr: number[], target: number): Frame[] {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-border bg-background/60 px-3 py-2">
-      <div className="uppercase tracking-[0.12em] text-[0.62rem] text-muted-foreground">
+      <div className="uppercase tracking-[0.12em] text-caption text-muted-foreground">
         {label}
       </div>
       <div className="tabular-nums text-foreground">{value}</div>

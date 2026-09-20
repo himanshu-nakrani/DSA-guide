@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function GlobalError({
   error,
@@ -19,43 +20,43 @@ export default function GlobalError({
     <div className="min-h-screen flex items-center justify-center px-6 md:px-12 py-20">
       <div className="max-w-md w-full bloom">
         <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
-          <span className="text-[color:var(--ink-blue)] mr-2">§</span>
+          <span className="text-ink-blue mr-2">§</span>
           Errata · An error slipped past the editor
         </div>
         <h1
-          className="font-display text-[clamp(2.25rem,5vw,3.25rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
+          className="font-display text-[clamp(2.25rem,5vw,3.25rem)] leading-[1.06] font-medium text-ink"
           style={{ ["--i" as string]: 1 }}
         >
           The press jammed mid-print.
         </h1>
         <p
-          className="text-[1.05rem] mt-4 leading-relaxed text-[color:var(--ink-soft)]"
+          className="text-title mt-4 leading-relaxed text-ink-soft"
           style={{ ["--i" as string]: 2 }}
         >
           Something went wrong rendering this page. The error has been logged.
           Try again, or return to the table of contents.
         </p>
         {error.digest && (
-          <p className="font-mono text-[0.72rem] mt-3 text-muted-foreground">
+          <p className="font-mono text-note mt-3 text-muted-foreground">
             digest: {error.digest}
           </p>
         )}
         <div
           aria-hidden
-          className="my-7 h-px bg-[color:var(--rule-strong)]"
+          className="my-7 h-px bg-rule-strong"
           style={{ ["--i" as string]: 3 }}
         />
         <div
           className="flex flex-wrap items-center gap-3"
           style={{ ["--i" as string]: 4 }}
         >
-          <button onClick={reset} className="btn-ink">
+          <Button onClick={reset}>
             <RotateCcw className="h-3.5 w-3.5" />
             Try again
-          </button>
-          <Link href="/learn" className="btn-ghost">
+          </Button>
+          <Button variant="ghost" render={<Link href="/learn" />}>
             Table of articles
-          </Link>
+          </Button>
         </div>
       </div>
     </div>
