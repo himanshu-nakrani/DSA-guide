@@ -174,6 +174,24 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
     if (el) el.scrollIntoView({ block: "nearest" });
   }, [active]);
 
+  // While open, mark every sibling of the palette inert so the background is
+  // truly unavailable to pointer, Tab, and AT virtual cursors — not just
+  // advertised as ignored via aria-modal. Enforces the modal contract.
+  useEffect(() => {
+    if (!open) return;
+    const root = dialogRef.current;
+    const siblings = Array.from(document.body.children).filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && el !== root,
+    );
+    const previouslyInert = siblings.map((el) => el.inert);
+    for (const el of siblings) el.inert = true;
+    return () => {
+      siblings.forEach((el, i) => {
+        el.inert = previouslyInert[i];
+      });
+    };
+  }, [open]);
+
   const go = (item: SearchItem) => {
     setOpen(false);
     try {
