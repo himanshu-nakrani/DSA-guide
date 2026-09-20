@@ -21,11 +21,11 @@ const levelLabel: Record<ArticleLevel, string> = {
   ADVANCED: "Advanced",
 };
 
-const PAPER = "#f7f3ea";
-const INK = "#14212e";
-const INK_BLUE = "#1f3d7a";
-const RULE = "rgba(20, 33, 46, 0.22)";
-const PENCIL = "#6b6457";
+const BG = "#0c0d10";
+const FG = "#f4f4f5";
+const MUTED = "#a1a1aa";
+const ACCENT = "#3b82f6";
+const BORDER = "#27272a";
 
 export default async function ArticleOpenGraphImage({
   params,
@@ -49,15 +49,15 @@ export default async function ArticleOpenGraphImage({
       (
         <div
           style={{
-            display: "flex",
             width: "100%",
             height: "100%",
-            background: PAPER,
-            color: INK,
+            display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            background: BG,
+            color: FG,
             fontSize: 48,
-            fontFamily: "Georgia, serif",
+            fontFamily: "ui-sans-serif, system-ui, sans-serif",
           }}
         >
           DSA Guide
@@ -75,14 +75,14 @@ export default async function ArticleOpenGraphImage({
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: PAPER,
-          color: INK,
+          background: BG,
+          color: FG,
           padding: "64px 72px",
-          fontFamily: "ui-sans-serif, system-ui, sans-serif",
+          fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif",
           position: "relative",
         }}
       >
-        {/* ruled top + bottom hairlines */}
+        {/* Subtle border lines */}
         <div
           style={{
             position: "absolute",
@@ -90,7 +90,7 @@ export default async function ArticleOpenGraphImage({
             left: 72,
             right: 72,
             height: 1,
-            background: RULE,
+            background: BORDER,
             display: "flex",
           }}
         />
@@ -101,30 +101,30 @@ export default async function ArticleOpenGraphImage({
             left: 72,
             right: 72,
             height: 1,
-            background: RULE,
+            background: BORDER,
             display: "flex",
           }}
         />
 
-        {/* running header */}
+        {/* Running header */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
           <BrandGlyph />
           <div
             style={{
               fontFamily: "ui-monospace, monospace",
               fontSize: 15,
-              letterSpacing: 3,
+              letterSpacing: 2,
               textTransform: "uppercase",
-              color: PENCIL,
+              color: MUTED,
               display: "flex",
             }}
           >
-            DSA Guide · § {String(article.topic.module.order).padStart(2, "0")} ·{" "}
+            DSA Guide · Module {String(article.topic.module.order).padStart(2, "0")} ·{" "}
             {article.topic.module.name}
           </div>
         </div>
 
-        {/* body */}
+        {/* Body */}
         <div
           style={{
             flex: 1,
@@ -132,7 +132,7 @@ export default async function ArticleOpenGraphImage({
             flexDirection: "column",
             justifyContent: "center",
             gap: 22,
-            maxWidth: 1000,
+            maxWidth: 1020,
           }}
         >
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -140,41 +140,50 @@ export default async function ArticleOpenGraphImage({
               style={{
                 display: "flex",
                 fontFamily: "ui-monospace, monospace",
-                fontSize: 14,
+                fontSize: 13,
                 letterSpacing: 2,
                 textTransform: "uppercase",
-                padding: "4px 10px",
-                border: `1px solid ${INK_BLUE}`,
-                color: INK_BLUE,
-                background: "transparent",
-                borderRadius: 2,
+                padding: "4px 12px",
+                border: `1px solid ${ACCENT}`,
+                color: ACCENT,
+                background: "rgba(59, 130, 246, 0.1)",
+                borderRadius: 6,
               }}
             >
               {levelLabel[article.level]}
             </span>
             <span
               style={{
-                fontFamily: "ui-monospace, monospace",
-                color: PENCIL,
-                fontSize: 16,
                 display: "flex",
-                letterSpacing: 1.5,
-                textTransform: "uppercase",
+                fontFamily: "ui-monospace, monospace",
+                fontSize: 14,
+                color: MUTED,
               }}
             >
-              {article.estimatedMins} min · {article.topic.name}
+              {article.topic.name}
+            </span>
+            <span style={{ display: "flex", color: MUTED }}>·</span>
+            <span
+              style={{
+                display: "flex",
+                fontFamily: "ui-monospace, monospace",
+                fontSize: 14,
+                color: MUTED,
+              }}
+            >
+              {article.estimatedMins} min read
             </span>
           </div>
 
           <div
             style={{
               display: "flex",
-              fontFamily: "Georgia, serif",
-              fontSize: article.title.length > 60 ? 64 : 80,
-              lineHeight: 1.04,
-              letterSpacing: -1.5,
-              fontWeight: 500,
-              color: INK,
+              fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif",
+              fontSize: article.title.length > 60 ? 60 : 76,
+              lineHeight: 1.05,
+              letterSpacing: -2,
+              fontWeight: 700,
+              color: FG,
             }}
           >
             {article.title}
@@ -183,18 +192,18 @@ export default async function ArticleOpenGraphImage({
           <div
             style={{
               display: "flex",
-              fontFamily: "Georgia, serif",
+              fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif",
               fontSize: 24,
               lineHeight: 1.45,
-              color: PENCIL,
-              maxWidth: 940,
+              color: MUTED,
+              maxWidth: 960,
             }}
           >
-            {truncate(article.summary, 200)}
+            {truncate(article.summary, 220)}
           </div>
         </div>
 
-        {/* colophon */}
+        {/* Footer */}
         <div
           style={{
             display: "flex",
@@ -202,14 +211,14 @@ export default async function ArticleOpenGraphImage({
             justifyContent: "space-between",
             fontFamily: "ui-monospace, monospace",
             fontSize: 15,
-            color: PENCIL,
+            color: MUTED,
             letterSpacing: 2,
             textTransform: "uppercase",
             marginBottom: 12,
           }}
         >
           <span style={{ display: "flex" }}>CLRS · Sedgewick · Laaksonen</span>
-          <span style={{ display: "flex", color: INK_BLUE }}>
+          <span style={{ display: "flex", color: ACCENT }}>
             dsa.guide/learn/{slug}
           </span>
         </div>
@@ -226,24 +235,37 @@ function truncate(s: string, n: number) {
 
 function BrandGlyph() {
   return (
-    <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
-      <rect
-        x="0.5"
-        y="0.5"
-        width="23"
-        height="23"
-        rx="1"
-        fill={PAPER}
-        stroke={INK}
-        strokeOpacity="0.55"
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+      <rect width="24" height="24" rx="6" fill="#1c1d22" stroke={BORDER} strokeWidth="1" />
+      <path
+        d="M10.5 5.5L5.5 12L10.5 18.5"
+        stroke="#f4f4f5"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
-        d="M6 4 L6 20 L11 20 C16 20 19 16.5 19 12 C19 7.5 16 4 11 4 Z"
-        stroke={INK}
-        strokeWidth="1.6"
-        fill="none"
+        d="M13.5 5.5L18.5 12L13.5 18.5"
+        stroke="#f4f4f5"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <path d="M14 7 L20 13" stroke={INK_BLUE} strokeWidth="1.8" />
+      <line
+        x1="7.5"
+        y1="12"
+        x2="16.5"
+        y2="12"
+        stroke="#3b82f6"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <circle cx="5.5" cy="12" r="2" fill="#3b82f6" />
+      <circle cx="18.5" cy="12" r="2" fill="#3b82f6" />
+      <circle cx="10.5" cy="5.5" r="1.6" fill="#f4f4f5" />
+      <circle cx="13.5" cy="5.5" r="1.6" fill="#f4f4f5" />
+      <circle cx="10.5" cy="18.5" r="1.6" fill="#f4f4f5" />
+      <circle cx="13.5" cy="18.5" r="1.6" fill="#f4f4f5" />
     </svg>
   );
 }

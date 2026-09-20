@@ -1,13 +1,15 @@
-import Form from "next/form";
 import Link from "next/link";
-import { ArrowDownAZ, ArrowRight, ArrowUpDown, Clock3, Search, Trophy } from "lucide-react";
+import { ViewTransition } from "react";
+import { ArrowLeft, ArrowRight, ArrowDownAZ, ArrowUpDown, Clock3, SearchX, Trophy } from "lucide-react";
 import { Difficulty, ProgressStatus, type Prisma } from "@/generated/prisma";
 import { ProblemCard } from "@/components/problems/ProblemCard";
-import { difficultyLabel, progressLabel } from "@/components/problems/problem-ui";
-import { FilterSubmitButton } from "./FilterSubmitButton";
+import { ProblemFilters } from "@/components/problems/ProblemFilters";
+import { PageHeader, PageShell } from "@/components/layout/PageShell";
 import { getCurrentUser } from "@/lib/auth";
 import { getBookmarkProblemIds } from "@/lib/lists";
 import { prisma } from "@/lib/prisma";
+
+const PAGE_SIZE = 24;
 
 const statusOptions = [
   ProgressStatus.NEW,
@@ -28,7 +30,6 @@ type SortOption = (typeof sortOptions)[number]["value"];
 
 const MAX_QUERY_LENGTH = 120;
 const MAX_TOPIC_SLUG_LENGTH = 120;
-const MAX_RESULTS = 100;
 
 function parseDifficulty(value?: string): Difficulty | undefined {
   return value && Object.values(Difficulty).includes(value as Difficulty)
@@ -63,7 +64,14 @@ function buildOrderBy(sort: SortOption): Prisma.ProblemOrderByWithRelationInput[
 export default async function ProblemsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ difficulty?: string; topic?: string; status?: string; q?: string; sort?: string }>;
+  searchParams: Promise<{
+    difficulty?: string;
+    topic?: string;
+    status?: string;
+    q?: string;
+    sort?: string;
+    page?: string;
+  }>;
 }) {
   const user = await getCurrentUser();
   const params = await searchParams;
@@ -73,6 +81,7 @@ export default async function ProblemsPage({
   const topicSlug = params.topic?.trim().slice(0, MAX_TOPIC_SLUG_LENGTH) || undefined;
   const query = params.q?.trim().slice(0, MAX_QUERY_LENGTH) || "";
   const sort = parseSort(params.sort);
+  const page = Math.max(1, Number.parseInt(params.page ?? "", 10) || 1);
 
   const topics = await prisma.topic.findMany({
     where: { problems: { some: { problem: { status: "PUBLISHED" } } } },
@@ -131,36 +140,36 @@ export default async function ProblemsPage({
       }
     : undefined;
 
-  const problems = await prisma.problem.findMany({
-    where: {
-      ...problemWhere,
-      ...(progressFilter ?? {}),
-    },
-    orderBy: buildOrderBy(sort),
-    take: MAX_RESULTS,
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      difficulty: true,
-      acceptanceRate: true,
-      topics: {
-        // ⚡ Bolt: Use `select` instead of `include` for relationships to prevent fetching unnecessary fields
-        select: {
-          topic: {
-            select: {
-              id: true,
-              slug: true,
-              name: true,
-              module: { select: { id: true, slug: true, name: true } },
+  const filteredWhere: Prisma.ProblemWhereInput = {
+    ...problemWhere,
+    ...(progressFilter ?? {}),
+  };
+
+  const [total, problems] = await Promise.all([
+    prisma.problem.count({ where: filteredWhere }),
+    prisma.problem.findMany({
+      where: filteredWhere,
+      orderBy: buildOrderBy(sort),
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        difficulty: true,
+        acceptanceRate: true,
+        topics: {
+          include: {
+            topic: {
+              include: { module: true },
             },
           },
         },
+        hints: { select: { id: true } },
+        editorial: { select: { id: true } },
       },
-      hints: { select: { id: true } },
-      editorial: { select: { id: true } },
-    },
-  });
+    }),
+  ]);
 
   const progressRows = user
     ? await prisma.userProblemProgress.findMany({
@@ -173,6 +182,16 @@ export default async function ProblemsPage({
     progressRows.map((row) => [row.problemId, row.status]),
   );
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
+
+  const withEditorialCount = problems.filter((p) => p.editorial).length;
+  const activeFilters = [
+    difficulty,
+    topicSlug,
+    user && status ? status : undefined,
+    query || undefined,
+    sort !== "difficulty" ? sort : undefined,
+  ].filter(Boolean).length;
+
   const currentParams = new URLSearchParams();
   if (query) currentParams.set("q", query);
   if (difficulty) currentParams.set("difficulty", difficulty);
@@ -181,50 +200,45 @@ export default async function ProblemsPage({
   if (sort !== "difficulty") currentParams.set("sort", sort);
   const returnTo = currentParams.size > 0 ? `/problems?${currentParams.toString()}` : "/problems";
 
-  const withEditorialCount = problems.filter((p) => p.editorial).length;
-  const activeFilters = [difficulty, topicSlug, user && status ? status : undefined, query || undefined, sort !== "difficulty" ? sort : undefined].filter(Boolean).length;
+  const pageHref = (targetPage: number) => {
+    const pagerParams = new URLSearchParams(currentParams);
+    if (targetPage > 1) pagerParams.set("page", String(targetPage));
+    return pagerParams.size > 0 ? `/problems?${pagerParams.toString()}` : "/problems";
+  };
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
-      <header className="bloom mb-12">
-        <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
-          <span className="text-[color:var(--ink-blue)] mr-2">§</span>
-          Practice
-        </div>
-        <h1
-          className="font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
-          style={{ ["--i" as string]: 1 }}
-        >
-          Problem Library
-        </h1>
-        <p
-          className="text-[1.05rem] mt-3 max-w-2xl text-[color:var(--ink-soft)]"
-          style={{ ["--i" as string]: 2 }}
-        >
-          Move from theory to repetition: curated practice, hints, editorials, and now a searchable, sortable queue.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[0.75rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-          <span>{problems.length} matching problems</span>
-          <span className="text-muted-foreground/40">·</span>
-          <span>{withEditorialCount} with editorials</span>
-          {activeFilters > 0 && (
-            <>
-              <span className="text-muted-foreground/40">·</span>
-              <span>{activeFilters} active filter{activeFilters === 1 ? "" : "s"}</span>
-            </>
-          )}
-          {!user && (
-            <>
-              <span className="text-muted-foreground/40">·</span>
-              <Link href="/auth" className="link-quill text-[color:var(--ink-blue)] normal-case tracking-normal font-sans text-sm inline-flex items-center gap-1">
-                Sign in to save progress
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </>
-          )}
-        </div>
-        <div aria-hidden className="mt-8 h-px bg-[color:var(--rule-strong)]" />
-      </header>
+    <PageShell width="wide">
+      <PageHeader
+        eyebrow="Practice"
+        title="Problem Library"
+        lede="Move from theory to repetition: curated practice, hints, editorials, and now a searchable, sortable queue."
+        meta={
+          <div aria-live="polite" aria-atomic="true" className="flex flex-wrap items-center gap-3 text-note font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            <span>{total} matching problem{total === 1 ? "" : "s"}</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span>{withEditorialCount} with editorials</span>
+            {activeFilters > 0 && (
+              <>
+                <span className="text-muted-foreground/40">·</span>
+                <span>{activeFilters} active filter{activeFilters === 1 ? "" : "s"}</span>
+              </>
+            )}
+            {!user && (
+              <>
+                <span className="text-muted-foreground/40">·</span>
+                <Link href="/auth" className="link-quill text-ink-blue normal-case tracking-normal font-sans text-small inline-flex items-center gap-1">
+                  Sign in to save progress
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </>
+            )}
+          </div>
+        }
+      />
 
       <section className="surface-card p-5 md:p-6 mb-8 space-y-4">
         <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -232,127 +246,122 @@ export default async function ProblemsPage({
             <div className="eyebrow mb-2">Filters</div>
             <h2 className="font-display text-xl font-medium">Search, narrow, and sort the practice set</h2>
           </div>
+          <span className="text-caption font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            Applies as you type
+          </span>
+        </div>
+
+        <ProblemFilters
+          topics={topics.map((topic) => ({
+            id: topic.id,
+            slug: topic.slug,
+            name: topic.name,
+            moduleName: topic.module.name,
+          }))}
+          sortOptions={sortOptions.map(({ value, label }) => ({ value, label }))}
+          statusOptions={statusOptions}
+          signedIn={Boolean(user)}
+          query={query}
+          difficulty={difficulty ?? ""}
+          topicSlug={topicSlug ?? ""}
+          status={user && status ? status : ""}
+          sort={sort}
+        />
+      </section>
+
+      {problems.length === 0 ? (
+        <div className="surface-card p-12 text-center space-y-4">
+          <div className="mx-auto h-12 w-12 grid place-items-center rounded-xl border border-border text-muted-foreground bg-surface-2">
+            <SearchX className="h-6 w-6" strokeWidth={1.5} />
+          </div>
+          <h2 className="font-display text-2xl font-medium text-ink">Nothing on this shelf</h2>
+          <p className="text-body text-muted-foreground max-w-md mx-auto leading-relaxed">
+            {activeFilters > 0
+              ? "No problems match the current combination of filters. Try loosening one."
+              : "The library is empty for now — check back once the next edition ships."}
+          </p>
           {activeFilters > 0 && (
-            <Link href="/problems" className="link-quill text-sm text-[color:var(--ink-blue)] inline-flex items-center gap-1.5">
-              Clear filters
+            <Link
+              href="/problems"
+              className="inline-flex items-center gap-1.5 text-small font-medium text-ink-blue link-quill"
+            >
+              Clear all filters
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           )}
         </div>
 
-        <Form className="grid gap-4 md:grid-cols-2 xl:grid-cols-5" action="/problems">
-          <label className="space-y-1.5 xl:col-span-2">
-            <span className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Search</span>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                name="q"
-                maxLength={MAX_QUERY_LENGTH}
-                defaultValue={query}
-                placeholder="Search title, statement, topic, module…"
-                className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background pl-9 pr-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
-              />
-            </div>
-          </label>
-
-          <label className="space-y-1.5">
-            <span className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Difficulty</span>
-            <select
-              name="difficulty"
-              defaultValue={difficulty ?? ""}
-              className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
-            >
-              <option value="">All levels</option>
-              {Object.values(Difficulty).map((value) => (
-                <option key={value} value={value}>{difficultyLabel[value]}</option>
-              ))}
-            </select>
-          </label>
-
-          <label className="space-y-1.5">
-            <span className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Topic</span>
-            <select
-              name="topic"
-              defaultValue={topicSlug ?? ""}
-              className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
-            >
-              <option value="">All topics</option>
-              {topics.map((topic) => (
-                <option key={topic.id} value={topic.slug}>{topic.module.name} · {topic.name}</option>
-              ))}
-            </select>
-          </label>
-
-          <label className="space-y-1.5">
-            <span className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Status</span>
-            <select
-              name="status"
-              defaultValue={user ? status ?? "" : ""}
-              disabled={!user}
-              className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)] disabled:opacity-60"
-            >
-              <option value="">All statuses</option>
-              {statusOptions.map((value) => (
-                <option key={value} value={value}>{progressLabel[value]}</option>
-              ))}
-            </select>
-            {!user && <span className="block text-xs text-muted-foreground">Sign in to filter by saved status.</span>}
-          </label>
-
-          <label className="space-y-1.5">
-            <span className="block text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">Sort by</span>
-            <select
-              name="sort"
-              defaultValue={sort}
-              className="w-full rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </label>
-
-          <div className="flex items-end gap-3 xl:col-span-5 xl:justify-end">
-            <FilterSubmitButton />
-          </div>
-        </Form>
-      </section>
-
-      {problems.length === 0 ? (
-        <div className="surface-card p-8 text-muted-foreground">No problems match the current filters.</div>
       ) : (
         <div className="space-y-5">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground">
-            <span>Sorted by</span>
-            <span className="pill border-[color:var(--rule)] text-muted-foreground">
-              {sortOptions.find((option) => option.value === sort)?.label ?? "Difficulty"}
-            </span>
-            {query && (
-              <span className="pill border-[color:var(--rule)] text-muted-foreground normal-case tracking-normal font-sans">
-                “{query}”
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 text-caption font-mono uppercase tracking-[0.12em] text-muted-foreground">
+              <span>
+                Showing {rangeStart}–{rangeEnd} of {total}
               </span>
-            )}
+              <span className="pill border-rule text-muted-foreground">
+                {sortOptions.find((option) => option.value === sort)?.label ?? "Difficulty"}
+              </span>
+              {query && (
+                <span className="pill border-rule text-muted-foreground normal-case tracking-normal font-sans">
+                  “{query}”
+                </span>
+              )}
+            </div>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {problems.map((problem) => {
-              const primaryTopic = problem.topics[0]?.topic;
-              return (
-                <ProblemCard
-                  key={problem.id}
-                  problem={problem}
-                  moduleName={primaryTopic?.module.name}
-                  topicName={primaryTopic?.name}
-                  status={progressMap.get(problem.id)}
-                  bookmarked={bookmarkIds.has(problem.id)}
-                  signedIn={Boolean(user)}
-                  returnTo={returnTo}
-                />
-              );
-            })}
-          </div>
+          <ViewTransition name="problem-cards-grid">
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {problems.map((problem) => {
+                const primaryTopic = problem.topics[0]?.topic;
+                return (
+                  <ProblemCard
+                    key={problem.id}
+                    problem={problem}
+                    moduleName={primaryTopic?.module.name}
+                    topicName={primaryTopic?.name}
+                    status={progressMap.get(problem.id)}
+                    bookmarked={bookmarkIds.has(problem.id)}
+                    signedIn={Boolean(user)}
+                    returnTo={returnTo}
+                  />
+                );
+              })}
+            </div>
+          </ViewTransition>
+
+          {totalPages > 1 && (
+            <nav
+              aria-label="Pagination"
+              className="flex items-center justify-between gap-4 pt-4 border-t border-rule"
+            >
+              {page > 1 ? (
+                <Link
+                  href={pageHref(page - 1)}
+                  className="inline-flex items-center gap-1.5 text-small font-medium text-ink-blue link-quill"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Previous
+                </Link>
+              ) : (
+                <span />
+              )}
+              <span className="font-mono text-caption uppercase tracking-[0.12em] text-muted-foreground">
+                Page {page} of {totalPages}
+              </span>
+              {page < totalPages ? (
+                <Link
+                  href={pageHref(page + 1)}
+                  className="inline-flex items-center gap-1.5 text-small font-medium text-ink-blue link-quill"
+                >
+                  Next
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              ) : (
+                <span />
+              )}
+            </nav>
+          )}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

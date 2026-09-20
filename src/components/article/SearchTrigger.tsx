@@ -16,11 +16,11 @@ export function SearchTrigger() {
       aria-label="Open search"
       aria-haspopup="dialog"
       onClick={() => window.dispatchEvent(new CustomEvent("dsa:open-palette"))}
-      className="inline-flex items-center gap-1.5 text-[0.7rem] font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-[color:var(--ink-blue)] transition-colors rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
+      className="inline-flex min-h-[44px] items-center gap-1.5 px-2 text-note font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-ink-blue transition-colors"
     >
       <Search className="h-3 w-3" strokeWidth={1.5} />
       <span className="hidden sm:inline">Search</span>
-      <kbd className="ml-1 px-1.5 py-0.5 rounded-[2px] border border-[color:var(--rule)] bg-[color:var(--surface-2)] text-[0.6rem]">
+      <kbd className="ml-1 px-1.5 py-0.5 rounded border border-border bg-surface-2 text-micro">
         ⌘K
       </kbd>
     </button>

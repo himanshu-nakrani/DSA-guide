@@ -66,16 +66,18 @@ async function nextListOrder(tx: Prisma.TransactionClient, listId: string) {
   return (last?.order ?? 0) + 1;
 }
 
-export async function createListAction(formData: FormData) {
+export async function createListAction(
+  formData: FormData,
+): Promise<{ ok: boolean }> {
   const user = await getCurrentUser();
-  if (!user) return;
+  if (!user) return { ok: false };
 
   const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData(user.id));
-  if (rateLimit.limited) return;
+  if (rateLimit.limited) return { ok: false };
 
   const name = getString(formData, "name");
   const description = getString(formData, "description");
-  if (!name || name.length > 255 || description.length > 1024) return;
+  if (!name || name.length > 255 || description.length > 1024) return { ok: false };
 
   // A duplicate submission becomes a no-op rather than surfacing a unique-key error.
   await prisma.customList.upsert({
@@ -89,20 +91,24 @@ export async function createListAction(formData: FormData) {
   });
 
   revalidatePath("/lists");
+  return { ok: true };
 }
 
-export async function toggleBookmarkAction(formData: FormData) {
+export async function toggleBookmarkAction(
+  formData: FormData,
+): Promise<{ ok: true; saved: boolean } | { ok: false }> {
   const user = await getCurrentUser();
-  if (!user) return;
+  if (!user) return { ok: false };
 
   const rateLimit = await checkRateLimit("bookmark", rateLimitFormData(user.id));
-  if (rateLimit.limited) return;
+  if (rateLimit.limited) return { ok: false };
 
   const problemSlug = getString(formData, "problemSlug");
   const returnTo = getString(formData, "returnTo");
   const problemId = await getProblemId(problemSlug);
-  if (!problemId) return;
+  if (!problemId) return { ok: false };
 
+  let saved = false;
   await serializable(async (tx) => {
     const list = await tx.customList.upsert({
       where: { userId_name: { userId: user.id, name: BOOKMARK_LIST_NAME } },
@@ -120,6 +126,7 @@ export async function toggleBookmarkAction(formData: FormData) {
 
     if (existing) {
       await tx.customListItem.delete({ where: { id: existing.id } });
+      saved = false;
       return;
     }
 
@@ -130,9 +137,11 @@ export async function toggleBookmarkAction(formData: FormData) {
         order: await nextListOrder(tx, list.id),
       },
     });
+    saved = true;
   });
 
   revalidateListSurfaces(returnTo);
+  return { ok: true, saved };
 }
 
 export async function addProblemToListAction(formData: FormData) {
@@ -173,6 +182,51 @@ export async function addProblemToListAction(formData: FormData) {
   revalidateListSurfaces(returnTo);
 }
 
+export async function renameListAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const listId = getString(formData, "listId");
+  const name = getString(formData, "name");
+  const description = getString(formData, "description");
+  if (!listId || !name) return;
+
+  const list = await prisma.customList.findFirst({
+    where: { id: listId, userId: user.id },
+    select: { id: true, name: true },
+  });
+  if (!list) return;
+
+  await prisma.customList.update({
+    where: { id: listId },
+    data: {
+      name,
+      description: description || null,
+    },
+  });
+
+  revalidatePath("/lists");
+}
+
+export async function deleteListAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const listId = getString(formData, "listId");
+  if (!listId) return;
+
+  const list = await prisma.customList.findFirst({
+    where: { id: listId, userId: user.id },
+    select: { id: true, name: true },
+  });
+  // The bookmark list is structural — it can be emptied but not deleted.
+  if (!list || list.name === BOOKMARK_LIST_NAME) return;
+
+  await prisma.customList.delete({ where: { id: listId } });
+
+  revalidatePath("/lists");
+}
+
 export async function removeProblemFromListAction(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) return;
@@ -197,4 +251,106 @@ export async function removeProblemFromListAction(formData: FormData) {
   });
 
   revalidateListSurfaces(returnTo);
+}
+
+function getStringList(formData: FormData, key: string) {
+  return formData
+    .getAll(key)
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.slice(0, 256).trim())
+    .filter(Boolean)
+    .slice(0, 100);
+}
+
+export async function bulkRemoveFromListAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData(user.id));
+  if (rateLimit.limited) return;
+
+  const listId = getString(formData, "listId");
+  const returnTo = getString(formData, "returnTo");
+  const problemIds = getStringList(formData, "problemIds");
+  if (!listId || problemIds.length === 0) return;
+
+  const list = await prisma.customList.findFirst({
+    where: { id: listId, userId: user.id },
+    select: { id: true },
+  });
+  if (!list) return;
+
+  await prisma.customListItem.deleteMany({
+    where: { listId, problemId: { in: problemIds } },
+  });
+
+  revalidateListSurfaces(returnTo);
+}
+
+export async function bulkMoveToListAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData(user.id));
+  if (rateLimit.limited) return;
+
+  const fromListId = getString(formData, "fromListId");
+  const toListId = getString(formData, "toListId");
+  const returnTo = getString(formData, "returnTo");
+  const problemIds = getStringList(formData, "problemIds");
+  if (!fromListId || !toListId || fromListId === toListId || problemIds.length === 0) return;
+
+  await serializable(async (tx) => {
+    const owned = await tx.customList.findMany({
+      where: { id: { in: [fromListId, toListId] }, userId: user.id },
+      select: { id: true },
+    });
+    if (owned.length !== 2) return;
+
+    await tx.customListItem.deleteMany({
+      where: { listId: fromListId, problemId: { in: problemIds } },
+    });
+
+    for (const problemId of problemIds) {
+      const existing = await tx.customListItem.findUnique({
+        where: { listId_problemId: { listId: toListId, problemId } },
+        select: { id: true },
+      });
+      if (existing) continue;
+      await tx.customListItem.create({
+        data: {
+          listId: toListId,
+          problemId,
+          order: await nextListOrder(tx, toListId),
+        },
+      });
+    }
+  });
+
+  revalidateListSurfaces(returnTo);
+}
+
+export async function toggleListPublicAction(
+  formData: FormData,
+): Promise<{ isPublic: boolean } | undefined> {
+  const user = await getCurrentUser();
+  if (!user) return undefined;
+
+  const listId = getString(formData, "listId");
+  if (!listId) return undefined;
+
+  const list = await prisma.customList.findFirst({
+    where: { id: listId, userId: user.id },
+    select: { id: true, isPublic: true },
+  });
+  if (!list) return undefined;
+
+  const updated = await prisma.customList.update({
+    where: { id: listId },
+    data: { isPublic: !list.isPublic },
+    select: { isPublic: true },
+  });
+
+  revalidatePath("/lists");
+  return { isPublic: updated.isPublic };
 }

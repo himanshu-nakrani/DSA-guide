@@ -14,12 +14,12 @@ export function ReadBadge({ slug }: { slug: string }) {
   if (!slugs.has(slug)) return null;
   return (
     <span
-      className="inline-flex items-center gap-1 text-[0.62rem] font-mono uppercase tracking-[0.12em] text-[color:var(--pencil)]"
+      className="inline-flex items-center gap-1 text-xs font-medium text-ink-green"
       title="You've read this article"
       aria-label="Read"
       suppressHydrationWarning
     >
-      <Check className="h-3 w-3" strokeWidth={1.8} />
+      <Check className="h-3 w-3" strokeWidth={2} />
       Read
     </span>
   );

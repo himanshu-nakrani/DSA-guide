@@ -80,21 +80,21 @@ export function TwoPointers({
             const found = f.action === "found" && (isL || isR);
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <div className="font-mono text-[0.6rem] uppercase tracking-[0.1em] text-muted-foreground">
+                <div className="font-mono text-micro uppercase tracking-[0.1em] text-muted-foreground">
                   [{i}]
                 </div>
                 <div
                   className="w-full text-center py-3 font-mono text-base tabular-nums border"
                   style={{
                     background: found ? PALETTE.c1 : isL ? PALETTE.c3 : isR ? PALETTE.c2 : "transparent",
-                    color: found || isL || isR ? PALETTE.paper : PALETTE.ink,
+                    color: found ? PALETTE.paper : PALETTE.ink,
                     borderColor: PALETTE.ink,
                     opacity: inWindow ? 1 : 0.4,
                   }}
                 >
                   {v}
                 </div>
-                <div className="h-4 font-mono text-[0.65rem]">
+                <div className="h-4 font-mono text-caption">
                   {isL && isR ? (
                     <span style={{ color: PALETTE.ink }}>L=R</span>
                   ) : isL ? (
@@ -108,7 +108,7 @@ export function TwoPointers({
           })}
         </div>
 
-        <div className="border border-border p-3 font-mono text-[0.78rem]">
+        <div className="border border-border p-3 font-mono text-small">
           <span className="text-muted-foreground">
             A[{f.L}] + A[{f.R}] ={" "}
           </span>
@@ -122,7 +122,7 @@ export function TwoPointers({
           )}
           {f.action === "move-R" && (
             <span>
-              &gt; target ⇒ <span style={{ color: PALETTE.c2 }}>R--</span> (need smaller)
+              &gt; target ⇒ <span style={{ color: PALETTE.c1 }}>R--</span> (need smaller)
             </span>
           )}
           {f.action === "miss" && <span style={{ color: PALETTE.destructive }}>L ≥ R ⇒ no pair</span>}

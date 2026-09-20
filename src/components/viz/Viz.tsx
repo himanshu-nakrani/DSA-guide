@@ -135,7 +135,7 @@ export function Viz({ raw }: { raw: string }) {
     return <VizError message="Viz block missing `type`" detail={raw} />;
   }
   // Callouts already render as semantic <aside>s; wrapping them in a <figure>
-  // would (a) break the `.essay > .annotation` selector that slots them into
+  // would (a) break the `.article-prose > .annotation` selector that slots them into
   // the desktop marginalia gutter and (b) add a second visual frame around
   // what is already an editorial side-note. Kept eagerly imported because
   // it's small and shows up in nearly every article.
@@ -158,7 +158,7 @@ export function Viz({ raw }: { raw: string }) {
 function VizSkeleton() {
   return (
     <div
-      className="animate-pulse rounded-sm border border-[color:var(--rule)]"
+      className="animate-pulse rounded-lg border border-border"
       style={{ background: "var(--surface-1)", minHeight: 220 }}
       aria-label="Loading figure"
     />

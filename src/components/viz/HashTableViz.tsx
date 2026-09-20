@@ -101,7 +101,7 @@ export function HashTableViz({
           })}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-[0.72rem]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-note">
           <Stat label="m (buckets)" value={`${size}`} />
           <Stat label="n (keys)" value={`${keys.length}`} />
           <Stat label="load factor α" value={`${lf.toFixed(2)}`} />
@@ -165,7 +165,7 @@ function hashKey(s: string): number {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-border bg-background/60 px-3 py-2">
-      <div className="uppercase tracking-[0.12em] text-[0.62rem] text-muted-foreground">
+      <div className="uppercase tracking-[0.12em] text-caption text-muted-foreground">
         {label}
       </div>
       <div className="tabular-nums text-foreground">{value}</div>

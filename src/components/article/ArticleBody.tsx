@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
+import { Link2, Check } from "lucide-react";
 import { Viz } from "@/components/viz/Viz";
 import { CopyButton } from "./CopyButton";
 import { ArticleLink, type ArticleLinkPreview } from "./ArticleLink";
@@ -106,15 +107,16 @@ export function ArticleBody({
         h2({ children }) {
           const id = slugify(extractText(children));
           return (
-            <h2 id={id} className="scroll-mt-24 group relative">
+            <h2 id={id} className="scroll-mt-32 group relative">
               <a
                 href={`#${id}`}
-                className="no-underline no-quill group-hover:opacity-100 opacity-0 absolute -ml-7 text-[color:var(--ink-blue-soft)] transition-opacity"
+                className="no-underline no-quill group-hover:opacity-100 opacity-0 absolute -ml-7 text-ink-blue-soft transition-opacity"
                 aria-label="anchor"
               >
                 §
               </a>
               {children}
+              <SectionLinkButton id={id} />
             </h2>
           );
         },
@@ -195,6 +197,35 @@ function detectAnnotation(
   ];
 
   return { tone, title, body };
+}
+
+/**
+ * Hover copy-link button appended to H2s. Copies the absolute section URL
+ * so readers can deep-link a section from outside the page.
+ */
+function SectionLinkButton({ id }: { id: string }) {
+  const [copied, setCopied] = React.useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        try {
+          const url = `${window.location.origin}${window.location.pathname}#${id}`;
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          window.setTimeout(() => setCopied(false), 1400);
+        } catch {
+          setCopied(false);
+        }
+      }}
+      aria-label={copied ? "Section link copied" : "Copy link to section"}
+      title={copied ? "Copied" : "Copy link to section"}
+      className="ml-1 inline-grid h-11 w-11 min-h-[44px] min-w-[44px] place-items-center rounded-md text-ink-blue-soft opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 hover:text-ink-blue hover:bg-surface-2 focus-visible:bg-surface-2 align-middle"
+    >
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+    </button>
+  );
 }
 
 function extractText(node: React.ReactNode): string {

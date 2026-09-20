@@ -3,7 +3,7 @@
 import * as React from "react";
 
 /**
- * Callout — editorial side-note rendered through the manuscript annotation
+ * Callout — editorial callout rendered through the annotation
  * system. Mirrors the markdown `> [!TONE]` blockquotes so authored callouts
  * inside viz blocks visually agree with margin notes in the body.
  */

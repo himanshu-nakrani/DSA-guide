@@ -35,11 +35,32 @@ const nextConfig: NextConfig = {
   turbopack: {
     root,
   },
+  experimental: {
+    optimizePackageImports: ["lucide-react", "@base-ui/react"],
+  },
   async headers() {
     return [
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/opengraph-image",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/learn/:slug/opengraph-image",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400",
+          },
+        ],
       },
     ];
   },

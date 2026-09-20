@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { Difficulty, ProgressStatus } from "@/generated/prisma";
 import { BookmarkButton } from "@/components/problems/BookmarkButton";
@@ -35,27 +36,28 @@ export function ProblemCard({
   const externalUrl = getProblemExternalUrl(problem.slug);
 
   return (
-    <div
-      className="group surface-card p-5 transition-colors hover:border-[color:var(--ink-blue)]"
-    >
-      <div className="flex items-start justify-between gap-4">
+    <ViewTransition name={`problem-card-${problem.slug}`}>
+      <div className="group rounded-xl border border-border bg-surface-1 p-5 shadow-[var(--shadow-card)] transition-all hover:border-border-hover hover:shadow-[var(--shadow-pop)]">
+        <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <Link href={`/problems/${problem.slug}`} className="inline-flex items-center gap-1.5">
-              <h3 className="font-display text-[1.05rem] font-medium text-[color:var(--ink)] hover:text-[color:var(--ink-blue)] transition-colors">
-                {problem.title}
-              </h3>
-              <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:text-[color:var(--ink-blue)] group-hover:translate-x-0.5" />
+              <ViewTransition name={`problem-title-${problem.slug}`}>
+                <h3 className="text-[15px] font-semibold tracking-tight text-foreground transition-colors group-hover:text-ink-blue">
+                  {problem.title}
+                </h3>
+              </ViewTransition>
+              <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-ink-blue" />
             </Link>
             <span className={difficultyClass[problem.difficulty]}>{difficultyLabel[problem.difficulty]}</span>
             {status && (
-              <span className="pill border-[color:var(--rule)] text-muted-foreground">
+              <span className="pill border-rule text-muted-foreground">
                 {progressLabel[status]}
               </span>
             )}
           </div>
           {(moduleName || topicName) && (
-            <p className="mt-1 text-[0.72rem] font-mono uppercase tracking-[0.1em] text-muted-foreground">
+            <p className="mt-1.5 text-xs text-muted-foreground">
               {[moduleName, topicName].filter(Boolean).join(" · ")}
             </p>
           )}
@@ -69,14 +71,14 @@ export function ProblemCard({
       </div>
 
       {!compact && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[0.75rem] text-muted-foreground">
-          <span>{Math.round(problem.acceptanceRate)}% acceptance</span>
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-4 text-[13px] text-muted-foreground">
+          <span className="tabular-nums">{Math.round(problem.acceptanceRate)}% acceptance</span>
           {externalUrl && (
             <a
               href={externalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[color:var(--ink-blue)] hover:underline"
+              className="inline-flex items-center gap-1 text-ink-blue hover:underline"
             >
               Solve on LeetCode
               <ExternalLink className="h-3 w-3" />
@@ -89,6 +91,7 @@ export function ProblemCard({
           />
         </div>
       )}
-    </div>
+      </div>
+    </ViewTransition>
   );
 }

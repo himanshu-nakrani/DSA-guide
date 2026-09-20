@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { ProgressStatus } from "@/generated/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { transitionProblemProgress } from "@/lib/problem-progress";
@@ -83,6 +84,10 @@ export async function POST(request: Request) {
       data: nextProgress,
     });
   }
+
+  // Surface the change immediately instead of waiting out the dashboard's
+  // 60s ISR window.
+  revalidatePath("/dashboard");
 
   return NextResponse.json({ ok: true });
 }

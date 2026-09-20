@@ -85,12 +85,12 @@ export function FocusMode() {
       aria-label={on ? "Exit focus mode" : "Enter focus mode"}
       title={on ? "Exit focus mode (esc)" : "Enter focus mode (f)"}
       suppressHydrationWarning
-      className="inline-flex items-center gap-1.5 text-[0.7rem] font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
+      className="inline-flex min-h-[44px] items-center gap-1.5 px-2 text-note font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors"
     >
       <span suppressHydrationWarning className="inline-flex items-center gap-1.5">
         {on ? <X className="h-3 w-3" /> : <Focus className="h-3 w-3" />}
         {on ? "Exit focus" : "Focus"}
-        <kbd className="ml-1 px-1.5 py-0.5 rounded border border-border bg-muted text-[0.6rem]">
+        <kbd className="ml-1 px-1.5 py-0.5 rounded border border-border bg-muted text-micro">
           {on ? "esc" : "f"}
         </kbd>
       </span>

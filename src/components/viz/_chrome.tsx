@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { chipButtonVariants } from "@/components/ui/button";
 
 /**
- * VizFrame — printed-figure chrome: paper-toned surface, ruled border, a
- * "Figure" small-cap caption, optional controls slot in the running head.
+ * VizFrame — minimal figure chrome: neutral surface, hairline border,
+ * small caption, optional controls.
  */
 export function VizFrame({
   caption,
@@ -23,18 +24,14 @@ export function VizFrame({
     <div
       role="group"
       aria-label={frameLabel}
-      className="border border-[color:var(--rule-strong)] overflow-hidden"
+      className="border border-border overflow-hidden bg-surface-1"
       style={{
-        background: "var(--surface-1)",
-        borderRadius: "var(--radius-md)",
+        borderRadius: "var(--radius-lg)",
         boxShadow: "var(--shadow-card)",
       }}
     >
-      <div
-        className="flex flex-col items-start gap-2 border-b border-[color:var(--rule)] px-4 py-2 sm:flex-row sm:items-center sm:justify-between"
-        style={{ background: "var(--surface-2)" }}
-      >
-        <span className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[color:var(--pencil)]">
+      <div className="flex flex-col items-start gap-2 border-b border-border px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-xs font-medium text-muted-foreground">
           {displayCaption}
         </span>
         {controls ? (
@@ -76,11 +73,7 @@ export function VizButton({
       onClick={onClick}
       disabled={disabled}
       aria-pressed={active === undefined ? undefined : active}
-      className={`min-h-8 whitespace-nowrap rounded-[2px] border px-2 py-1 font-mono text-[0.66rem] uppercase tracking-[0.1em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] ${
-        active
-          ? "border-[color:var(--ink-blue)] bg-[color:var(--ink-blue)] text-[color:var(--primary-foreground)]"
-          : "border-[color:var(--rule-strong)] bg-transparent text-[color:var(--ink)] hover:text-[color:var(--ink-blue)] hover:border-[color:var(--ink-blue)]"
-      } disabled:opacity-30 disabled:cursor-not-allowed`}
+      className={chipButtonVariants({ active: Boolean(active) })}
     >
       {children}
     </button>
@@ -93,11 +86,19 @@ export function useTicker(active: boolean, intervalMs: number, onTick: () => voi
     cbRef.current = onTick;
   }, [onTick]);
   const reducedMotion = usePrefersReducedMotion();
+  const [hidden, setHidden] = React.useState(false);
+
   React.useEffect(() => {
-    if (!active || reducedMotion) return;
+    const onVis = () => setHidden(document.hidden);
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
+  React.useEffect(() => {
+    if (!active || reducedMotion || hidden) return;
     const id = window.setInterval(() => cbRef.current(), intervalMs);
     return () => window.clearInterval(id);
-  }, [active, intervalMs, reducedMotion]);
+  }, [active, intervalMs, reducedMotion, hidden]);
 }
 
 /**
@@ -118,7 +119,7 @@ export function usePrefersReducedMotion(): boolean {
 }
 
 /**
- * Manuscript ink palette. Every slot resolves through a CSS variable so the
+ * Theme palette. Every slot resolves through a CSS variable so the
  * colours track light/dark. The slots are *semantic*, not just a rainbow:
  *
  *   c1  — primary ink (deep blue): "active / selected" cells, "visited" nodes,

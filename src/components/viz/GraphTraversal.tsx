@@ -177,7 +177,7 @@ export function GraphTraversal({
 function Section({ label, items, color }: { label: string; items: string[]; color: string }) {
   return (
     <div className="border border-border bg-background/60 p-3">
-      <div className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground mb-2">
+      <div className="font-mono text-caption uppercase tracking-[0.14em] text-muted-foreground mb-2">
         {label}
       </div>
       <div className="flex flex-wrap gap-1.5 min-h-7">

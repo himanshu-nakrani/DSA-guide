@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { ProgressStatus } from "@/generated/prisma";
 import { progressLabel, progressOptions } from "@/components/problems/problem-ui";
+import { toast } from "@/components/ui/toast";
 
 export function ProblemStatusControl({
   slug,
@@ -30,6 +31,14 @@ export function ProblemStatusControl({
       if (!res.ok) {
         setStatus(prev);
         setError("Could not save progress.");
+        toast("Couldn't save the status", { tone: "error" });
+      } else {
+        toast(
+          next === ProgressStatus.NEW
+            ? "Progress reset"
+            : `Marked as ${progressLabel[next].toLowerCase()}`,
+          { key: "problem-status" },
+        );
       }
     });
   };
@@ -57,10 +66,10 @@ export function ProblemStatusControl({
               aria-pressed={active}
               onClick={() => onChange(option)}
               disabled={isPending}
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] ${
+              className={`inline-flex min-h-[44px] items-center rounded-full border px-4 py-2 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)] ${
                 active
-                  ? "border-[color:var(--ink-blue)] bg-[color:var(--ink-blue-wash)] text-[color:var(--ink-blue)]"
-                  : "border-[color:var(--rule)] text-muted-foreground hover:text-foreground"
+                  ? "border-ink-blue bg-ink-blue-wash text-ink-blue"
+                  : "border-rule text-muted-foreground hover:text-foreground"
               } ${isPending ? "opacity-70" : ""}`}
             >
               {progressLabel[option]}
@@ -68,7 +77,7 @@ export function ProblemStatusControl({
           );
         })}
       </div>
-      {error && <p className="text-xs text-red-600 dark:text-red-300">{error}</p>}
+      {error && <p className="text-xs text-ink-red">{error}</p>}
     </div>
   );
 }

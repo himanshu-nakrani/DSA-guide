@@ -78,7 +78,7 @@ export function DPGrid({
                 {colLabels.map((c, j) => (
                   <th
                     key={j}
-                    className="w-9 h-9 font-medium text-[0.7rem] uppercase tracking-[0.1em] text-muted-foreground border-b border-foreground"
+                    className="w-9 h-9 font-medium text-note uppercase tracking-[0.1em] text-muted-foreground border-b border-foreground"
                   >
                     {c}
                   </th>
@@ -88,7 +88,7 @@ export function DPGrid({
             <tbody>
               {Array.from({ length: rows }).map((_, i) => (
                 <tr key={i}>
-                  <th className="w-9 h-9 font-medium text-[0.7rem] uppercase tracking-[0.1em] text-muted-foreground border-r border-foreground text-right pr-1">
+                  <th className="w-9 h-9 font-medium text-note uppercase tracking-[0.1em] text-muted-foreground border-r border-foreground text-right pr-1">
                     {rowLabels[i]}
                   </th>
                   {Array.from({ length: cols }).map((_, j) => {
@@ -118,18 +118,18 @@ export function DPGrid({
           </table>
         </div>
 
-        <div className="border border-border bg-background/60 p-3 font-mono text-[0.78rem] leading-relaxed min-w-64">
-          <div className="text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground mb-2">
+        <div className="border border-border bg-background/60 p-3 font-mono text-small leading-relaxed min-w-64">
+          <div className="text-caption uppercase tracking-[0.14em] text-muted-foreground mb-2">
             recurrence
           </div>
           <pre className="whitespace-pre-wrap !bg-transparent !text-inherit !p-0 !m-0">{recurrence}</pre>
-          <div className="mt-3 text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="mt-3 text-caption uppercase tracking-[0.14em] text-muted-foreground">
             step
           </div>
           <div>
             cell ({f.r}, {f.c}) = <span className="tabular-nums">{f.value}</span>
           </div>
-          <div className="mt-2 text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="mt-2 text-caption uppercase tracking-[0.14em] text-muted-foreground">
             answer
           </div>
           <div className="tabular-nums">

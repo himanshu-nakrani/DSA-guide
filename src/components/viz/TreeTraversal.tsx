@@ -147,7 +147,7 @@ export function TreeTraversal({
           >
             →
           </VizButton>
-          <div className="ml-auto font-mono text-[0.72rem] text-muted-foreground">
+          <div className="ml-auto font-mono text-note text-muted-foreground">
             step {step + 1} / {order.length}
           </div>
         </div>

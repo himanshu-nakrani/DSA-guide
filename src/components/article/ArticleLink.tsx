@@ -19,11 +19,11 @@ const levelLabel: Record<ArticleLinkPreview["level"], string> = {
 };
 const levelStyle: Record<ArticleLinkPreview["level"], string> = {
   FOUNDATION:
-    "bg-[color:var(--chart-2)]/10 text-[color:var(--chart-2)] border-[color:var(--chart-2)]/25",
+    "bg-chart-2/10 text-chart-2 border-chart-2/25",
   INTERMEDIATE:
-    "bg-[color:var(--chart-3)]/12 text-[color:var(--chart-3)] border-[color:var(--chart-3)]/25",
+    "bg-chart-3/12 text-chart-3 border-chart-3/25",
   ADVANCED:
-    "bg-[color:var(--primary)]/12 text-[color:var(--primary)] border-[color:var(--primary)]/25",
+    "bg-primary/12 text-primary border-primary/25",
 };
 
 /**
@@ -142,23 +142,23 @@ export function ArticleLink({
         >
           <div className="flex items-center gap-1.5 flex-wrap mb-2">
             <span
-              className={`text-[0.6rem] font-mono uppercase tracking-[0.06em] px-1.5 py-0.5 rounded border ${levelStyle[preview.level]}`}
+              className={`rounded-full px-1.5 py-px text-[11px] font-medium border ${levelStyle[preview.level]}`}
             >
               {levelLabel[preview.level]}
             </span>
-            <span className="text-[0.65rem] font-mono text-muted-foreground tabular-nums">
+            <span className="text-xs text-muted-foreground tabular-nums">
               {preview.estimatedMins}m read
             </span>
             {preview.moduleName && (
-              <span className="text-[0.65rem] font-mono text-muted-foreground truncate">
+              <span className="text-xs text-muted-foreground truncate">
                 · {preview.moduleName}
               </span>
             )}
           </div>
-          <div className="font-medium text-[0.95rem] tracking-[-0.005em] leading-snug">
+          <div className="text-[15px] font-semibold tracking-tight leading-snug">
             {preview.title}
           </div>
-          <p className="text-[0.82rem] text-muted-foreground mt-1.5 leading-snug line-clamp-3">
+          <p className="text-sm text-muted-foreground mt-1.5 leading-snug line-clamp-3">
             {preview.summary}
           </p>
         </div>

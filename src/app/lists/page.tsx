@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, Bookmark, Plus } from "lucide-react";
-import { createListAction, removeProblemFromListAction } from "@/app/lists/actions";
-import { CreateListButton, RemoveListButton } from "./SubmitButtons";
-import { ProblemCard } from "@/components/problems/ProblemCard";
+import { CreateListForm, ListActions, ListItemsManager, ShareButton } from "@/components/lists/ListActions";
+import { Button } from "@/components/ui/button";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { PageHeader, PageShell } from "@/components/layout/PageShell";
 import { getCurrentUser } from "@/lib/auth";
 import { BOOKMARK_LIST_NAME, getBookmarkProblemIds, getOrCreateBookmarkList } from "@/lib/lists";
 import { prisma } from "@/lib/prisma";
@@ -12,38 +13,25 @@ export default async function ListsPage() {
 
   if (!user) {
     return (
-      <div className="max-w-5xl mx-auto px-6 md:px-12 py-16 space-y-10">
-        <header className="bloom">
-          <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
-            <span className="text-[color:var(--ink-blue)] mr-2">§</span>
-            Lists
-          </div>
-          <h1
-            className="font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
-            style={{ ["--i" as string]: 1 }}
-          >
-            Save problems for later
-          </h1>
-          <p
-            className="text-[1.05rem] mt-3 max-w-2xl text-[color:var(--ink-soft)]"
-            style={{ ["--i" as string]: 2 }}
-          >
-            Sign in to bookmark problems and organize practice lists.
-          </p>
-        </header>
+      <PageShell width="default">
+        <PageHeader
+          eyebrow="Lists"
+          title="Save problems for later"
+          lede="Sign in to bookmark problems and organize practice lists."
+        />
 
         <section className="surface-card p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="eyebrow mb-2">Saved practice</div>
             <h2 className="font-display text-2xl font-medium">No account connected</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Lists are stored with your DSA Guide account.</p>
+            <p className="mt-2 text-small text-muted-foreground">Lists are stored with your DSA Guide account.</p>
           </div>
-          <Link href="/auth" className="btn-ink">
+          <Button render={<Link href="/auth" />}>
             Sign in or create account
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </Button>
         </section>
-      </div>
+      </PageShell>
     );
   }
 
@@ -104,35 +92,26 @@ export default async function ListsPage() {
   const savedCount = savedSet.size;
 
   return (
-    <div className="max-w-6xl mx-auto px-6 md:px-12 py-16 space-y-10">
-      <header className="bloom">
-        <div className="eyebrow mb-4" style={{ ["--i" as string]: 0 }}>
-          <span className="text-[color:var(--ink-blue)] mr-2">§</span>
-          Lists
-        </div>
-        <h1
-          className="font-display text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.06] font-medium text-[color:var(--ink)]"
-          style={{ ["--i" as string]: 1 }}
-        >
-          Saved Problems
-        </h1>
-        <p
-          className="text-[1.05rem] mt-3 max-w-2xl text-[color:var(--ink-soft)]"
-          style={{ ["--i" as string]: 2 }}
-        >
-          Keep a fast revisit queue with bookmarks, then split focused practice into custom lists.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[0.75rem] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-          <span>{savedCount} unique saved problems</span>
-          <span className="text-muted-foreground/40">·</span>
-          <span>{sortedLists.length} lists</span>
-        </div>
-        <div aria-hidden className="mt-8 h-px bg-[color:var(--rule-strong)]" />
-      </header>
+    <PageShell width="wide" className="space-y-10">
+      <div>
+        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Lists" }]} />
+        <PageHeader
+          eyebrow="Lists"
+          title="Saved Problems"
+          lede="Keep a fast revisit queue with bookmarks, then split focused practice into custom lists."
+          meta={
+            <span className="flex flex-wrap items-center gap-3 text-note font-mono uppercase tracking-[0.12em] text-muted-foreground">
+              <span>{savedCount} unique saved problems</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span>{sortedLists.length} lists</span>
+            </span>
+          }
+        />
+      </div>
 
       <section className="surface-card p-5 md:p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-sm grid place-items-center border border-[color:var(--rule-strong)] text-[color:var(--ink-blue)] bg-[color:var(--surface-2)]">
+          <div className="h-10 w-10 rounded-xl grid place-items-center border border-border text-ink-blue bg-surface-2">
             <Plus className="h-5 w-5" />
           </div>
           <div>
@@ -141,30 +120,13 @@ export default async function ListsPage() {
           </div>
         </div>
 
-        <form action={createListAction} className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-          <input
-            aria-label="List name"
-            type="text"
-            name="name"
-            required
-            placeholder="List name"
-            className="rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
-          />
-          <input
-            aria-label="List description"
-            type="text"
-            name="description"
-            placeholder="Optional description"
-            className="rounded-md border border-[color:var(--rule-strong)] bg-background px-3 py-2 text-sm outline-none focus:border-[color:var(--ink-blue)]"
-          />
-          <CreateListButton />
-        </form>
+        <CreateListForm />
       </section>
 
       <div className="space-y-10">
         {sortedLists.map((list) => (
           <section key={list.id} className="space-y-4">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
                 <div className="eyebrow mb-2 flex items-center gap-2">
                   {list.name === BOOKMARK_LIST_NAME && <Bookmark className="h-3.5 w-3.5" />}
@@ -172,50 +134,56 @@ export default async function ListsPage() {
                 </div>
                 <h2 className="font-display text-2xl font-medium">{list.name}</h2>
                 {list.description && (
-                  <p className="mt-1 text-sm text-muted-foreground">{list.description}</p>
+                  <p className="mt-1 text-small text-muted-foreground">{list.description}</p>
                 )}
               </div>
-              <span className="pill border-[color:var(--rule)] text-muted-foreground">
-                {list.items.length} problem{list.items.length === 1 ? "" : "s"}
-              </span>
+              <div className="flex items-center gap-3">
+                {list.name !== BOOKMARK_LIST_NAME && (
+                  <ShareButton listId={list.id} initialPublic={list.isPublic} />
+                )}
+                <ListActions
+                  listId={list.id}
+                  name={list.name}
+                  description={list.description ?? ""}
+                  isBookmark={list.name === BOOKMARK_LIST_NAME}
+                />
+                <span className="pill border-rule text-muted-foreground">
+                  {list.items.length} problem{list.items.length === 1 ? "" : "s"}
+                </span>
+              </div>
             </div>
 
             {list.items.length === 0 ? (
               <div className="surface-card p-8 text-muted-foreground">
                 No saved problems yet.
-                <Link href="/problems" className="ml-2 link-quill text-[color:var(--ink-blue)]">
+                <Link href="/problems" className="ml-2 link-quill text-ink-blue">
                   Browse problems
                 </Link>
               </div>
             ) : (
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {list.items.map((item) => {
+              <ListItemsManager
+                listId={list.id}
+                listName={list.name}
+                items={list.items.map((item) => {
                   const primaryTopic = item.problem.topics[0]?.topic;
-                  return (
-                    <div key={item.id} className="space-y-2">
-                      <ProblemCard
-                        problem={item.problem}
-                        moduleName={primaryTopic?.module.name}
-                        topicName={primaryTopic?.name}
-                        bookmarked={bookmarkIds.has(item.problemId)}
-                        signedIn
-                        returnTo="/lists"
-                      />
-                      <form action={removeProblemFromListAction}>
-                        <input type="hidden" name="listId" value={list.id} />
-                        <input type="hidden" name="problemSlug" value={item.problem.slug} />
-                        <input type="hidden" name="returnTo" value="/lists" />
-                        <RemoveListButton listName={list.name} />
-                      </form>
-                    </div>
-                  );
+                  return {
+                    problemId: item.problemId,
+                    slug: item.problem.slug,
+                    problem: item.problem,
+                    moduleName: primaryTopic?.module.name,
+                    topicName: primaryTopic?.name,
+                  };
                 })}
-              </div>
+                bookmarkedIds={Array.from(bookmarkIds)}
+                moveTargets={sortedLists
+                  .filter((l) => l.id !== list.id && l.name !== BOOKMARK_LIST_NAME)
+                  .map((l) => ({ id: l.id, name: l.name }))}
+              />
             )}
           </section>
         ))}
       </div>
-    </div>
+    </PageShell>
   );
 }
 

@@ -1,9 +1,39 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, BookOpen, Layers, Map, Code2 } from "lucide-react";
 import type { SearchItem } from "@/lib/searchIndex";
+
+const KIND_RANK: Record<SearchItem["kind"], number> = {
+  article: 0,
+  problem: 1,
+  topic: 2,
+  module: 3,
+};
+
+const KIND_LABEL: Record<SearchItem["kind"], string> = {
+  article: "Articles",
+  problem: "Problems",
+  topic: "Topics",
+  module: "Modules",
+};
+
+const RECENT_KEY = "dsa.recent-searches";
+const MAX_RECENTS = 5;
+
+function readRecentHrefs(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((x): x is string => typeof x === "string").slice(0, MAX_RECENTS)
+      : [];
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Command palette — ⌘K (or ctrl+K). Fuzzy-matches titles + summaries against
@@ -13,6 +43,13 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  // Lazy initializer reads storage once per mount (server-safe via the
+  // window guard); refreshed on every `go()` below. No effect needed.
+  const [recentHrefs, setRecentHrefs] = useState<string[]>(() =>
+    readRecentHrefs(),
+  );
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -20,12 +57,17 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
   const optionId = (i: number) => `cmdk-opt-${i}`;
 
   const openPalette = () => {
+    triggerRef.current = (document.activeElement as HTMLElement) || null;
     setQuery("");
     setActive(0);
     setOpen(true);
     window.setTimeout(() => inputRef.current?.focus(), 0);
   };
 
+  const closePalette = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
   useEffect(() => {
     const isEditable = (el: EventTarget | null) => {
       if (!(el instanceof HTMLElement)) return false;
@@ -35,7 +77,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        if (open) setOpen(false);
+        if (open) closePalette();
         else openPalette();
         return;
       }
@@ -73,9 +115,27 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
     }));
   }, [index]);
 
-  const results = useMemo(() => {
+  const { items: results, recentCount } = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return precomputedIndex.slice(0, 24).map((x) => x.item);
+    const rank = (item: SearchItem) => KIND_RANK[item.kind];
+    if (!q) {
+      const base = precomputedIndex.slice(0, 24).map((x) => x.item);
+      if (recentHrefs.length === 0) return { items: base, recentCount: 0 };
+      // NB: `Map` here would resolve to the lucide icon imported above,
+      // so the lookup is a plain record.
+      const byHref: Record<string, SearchItem> = {};
+      for (const x of precomputedIndex) byHref[x.item.href] = x.item;
+      const inBase = new Set(base.map((x) => x.href));
+      const recents: SearchItem[] = [];
+      for (const href of recentHrefs) {
+        const item = byHref[href];
+        if (item && !inBase.has(href) && !recents.some((r) => r.href === href)) {
+          recents.push(item);
+        }
+      }
+      recents.sort((a, b) => rank(a) - rank(b));
+      return { items: [...recents, ...base].slice(0, 40), recentCount: recents.length };
+    }
     const tokens = q.split(/\s+/);
 
     // Optimization: Avoid chained array allocations (.map.filter.sort.slice)
@@ -100,11 +160,14 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
       }
     }
 
-    return matches
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 40)
-      .map((x) => x.item);
-  }, [query, precomputedIndex]);
+    return {
+      items: matches
+        .sort((a, b) => KIND_RANK[a.item.kind] - KIND_RANK[b.item.kind] || b.score - a.score)
+        .slice(0, 40)
+        .map((x) => x.item),
+      recentCount: 0,
+    };
+  }, [query, precomputedIndex, recentHrefs]);
 
   useEffect(() => {
     const el = listRef.current?.querySelector<HTMLElement>(`[data-idx="${active}"]`);
@@ -113,6 +176,14 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
 
   const go = (item: SearchItem) => {
     setOpen(false);
+    try {
+      const prev = readRecentHrefs();
+      const next = [item.href, ...prev.filter((h) => h !== item.href)].slice(0, MAX_RECENTS);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+      setRecentHrefs(next);
+    } catch {
+      // Recents are a nicety; navigation must never depend on storage.
+    }
     router.push(item.href);
   };
 
@@ -129,19 +200,29 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
       if (item) go(item);
     } else if (e.key === "Escape") {
       e.preventDefault();
-      setOpen(false);
+      closePalette();
     }
   };
 
   if (!open) return null;
 
+  const handleDialogKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      inputRef.current?.focus();
+    }
+  };
+
   return (
     <div
+      ref={dialogRef}
       role="dialog"
+      aria-modal="true"
       aria-label="Command palette"
+      onKeyDown={handleDialogKeyDown}
       className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] px-4"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) setOpen(false);
+        if (e.target === e.currentTarget) closePalette();
       }}
     >
       <div
@@ -152,7 +233,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
             "color-mix(in srgb, var(--paper) 65%, transparent)",
           backdropFilter: "blur(2px)",
         }}
-        onClick={() => setOpen(false)}
+        onClick={closePalette}
       />
       <div
         className="relative w-full max-w-xl overflow-hidden"
@@ -163,8 +244,8 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
           boxShadow: "var(--shadow-pop)",
         }}
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[color:var(--rule)]">
-          <Search className="h-4 w-4 text-[color:var(--ink-blue)] shrink-0" strokeWidth={1.5} />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-rule">
+          <Search className="h-4 w-4 text-ink-blue shrink-0" strokeWidth={1.5} />
           <input
             ref={inputRef}
             type="text"
@@ -176,7 +257,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
             onKeyDown={onInputKey}
             placeholder="Search articles, topics, modules…"
             aria-label="Search articles, topics, modules"
-            className="flex-1 bg-transparent outline-none text-[0.95rem] placeholder:text-muted-foreground font-display"
+            className="flex-1 bg-transparent outline-none text-lead placeholder:text-muted-foreground font-display"
             autoComplete="off"
             spellCheck={false}
             role="combobox"
@@ -199,26 +280,40 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
               No matches.
             </div>
           ) : (
-            results.map((item, i) => (
-              <Row
-                // Use href (a stable identity) as the React key so reorders
-                // and re-filters don't remount rows. The trailing index
-                // disambiguates a hypothetical duplicate href, which the
-                // search index can produce for problem slugs that collide
-                // with article slugs.
-                key={`${item.kind}:${item.href}:${i}`}
-                item={item}
-                idx={i}
-                id={optionId(i)}
-                active={i === active}
-                onHover={() => setActive(i)}
-                onClick={() => go(item)}
-              />
-            ))
+            results.map((item, i) => {
+              const prev: SearchItem | undefined = i > 0 ? results[i - 1] : undefined;
+              const inRecents = i < recentCount;
+              const showHeader =
+                (inRecents && i === 0) || (!inRecents && (!prev || prev.kind !== item.kind));
+              return (
+                // href is the stable identity so reorders and re-filters
+                // don't remount rows; the index disambiguates a hypothetical
+                // duplicate href (e.g. a problem slug colliding with an
+                // article slug).
+                <Fragment key={`${item.kind}:${item.href}:${i}`}>
+                  {showHeader && (
+                    <div
+                      aria-hidden
+                      className="px-4 pt-2.5 pb-0.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    >
+                      {inRecents ? "Recent" : KIND_LABEL[item.kind]}
+                    </div>
+                  )}
+                  <Row
+                    item={item}
+                    idx={i}
+                    id={optionId(i)}
+                    active={i === active}
+                    onHover={() => setActive(i)}
+                    onClick={() => go(item)}
+                  />
+                </Fragment>
+              );
+            })
           )}
         </div>
         <div
-          className="flex items-center justify-between px-4 py-2 border-t border-[color:var(--rule)] text-[0.62rem] font-mono uppercase tracking-[0.12em] text-muted-foreground"
+          className="flex items-center justify-between px-4 py-2 border-t border-rule text-caption font-mono uppercase tracking-[0.12em] text-muted-foreground"
           style={{ background: "var(--surface-2)" }}
         >
           <span className="flex items-center gap-1.5">
@@ -286,32 +381,32 @@ function Row({
       }}
       className={`relative w-full text-left flex items-start gap-3 px-4 py-2.5 transition-colors ${
         active
-          ? "bg-[color:var(--ink-blue-wash)] text-[color:var(--ink)]"
+          ? "bg-ink-blue-wash text-ink"
           : "text-foreground/85"
       }`}
     >
       {active && (
         <span
           aria-hidden
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[2px] bg-[color:var(--ink-blue)]"
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[2px] bg-ink-blue"
         />
       )}
       <Icon
-        className={`h-4 w-4 mt-0.5 shrink-0 ${active ? "text-[color:var(--ink-blue)]" : "text-muted-foreground"}`}
+        className={`h-4 w-4 mt-0.5 shrink-0 ${active ? "text-ink-blue" : "text-muted-foreground"}`}
         strokeWidth={1.5}
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span
-            className={`font-display text-[0.95rem] truncate ${active ? "text-[color:var(--ink-blue)]" : ""}`}
+            className={`font-display text-lead truncate ${active ? "text-ink-blue" : ""}`}
           >
             {item.title}
           </span>
-          <span className="text-[0.58rem] font-mono uppercase tracking-[0.12em] text-muted-foreground border border-[color:var(--rule)] px-1 py-px rounded-[2px]">
+          <span className="rounded-full border border-border px-1.5 py-px text-[11px] font-medium text-muted-foreground">
             {kindLabel}
           </span>
         </div>
-        <div className="text-[0.78rem] text-muted-foreground mt-0.5 truncate">
+        <div className="text-small text-muted-foreground mt-0.5 truncate">
           {item.kind === "article" && (
             <>
               {item.moduleName} · {item.topicName} · {item.mins}m
@@ -333,7 +428,7 @@ function Row({
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
     <kbd
-      className="px-1.5 py-px text-[0.6rem] font-mono rounded-[2px] border border-[color:var(--rule-strong)]"
+      className="px-1.5 py-px text-micro font-mono rounded border border-border"
       style={{ background: "var(--surface-1)", color: "var(--ink)" }}
     >
       {children}

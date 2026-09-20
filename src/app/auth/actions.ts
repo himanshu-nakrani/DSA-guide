@@ -15,6 +15,7 @@ function finishAuthRedirect(destination: string): never {
 
 export type AuthFormState = {
   error?: string;
+  unexpected?: boolean;
 };
 
 function getString(formData: FormData, key: string) {
@@ -43,7 +44,7 @@ async function clientAddress() {
 
 async function enforceNetworkLimit(name: "login" | "register") {
   const rateLimit = await checkRateLimit(name, null, 1, { identifier: await clientAddress() });
-  return rateLimit.limited ? rateLimitedResponse(rateLimit) : null;
+  return rateLimit.limited ? { ...rateLimitedResponse(rateLimit), unexpected: true } : null;
 }
 
 export async function registerAction(
@@ -89,7 +90,7 @@ export async function registerAction(
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { error: "Unable to create an account with those details." };
     }
-    throw error;
+    return { error: "An unexpected error occurred. Please try again.", unexpected: true };
   }
 
   finishAuthRedirect("/learn");
@@ -115,15 +116,19 @@ export async function loginAction(
   const accountRateLimit = await checkRateLimit("login_account", null, 1, { identifier: email });
   if (accountRateLimit.limited) return rateLimitedResponse(accountRateLimit);
 
-  const user = await prisma.user.findUnique({ where: { email } });
-  const dummyHash = "00000000000000000000000000000000:00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-  const isValidPassword = await verifyPassword(password, user?.passwordHash || dummyHash);
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    const dummyHash = "00000000000000000000000000000000:00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    const isValidPassword = await verifyPassword(password, user?.passwordHash || dummyHash);
 
-  if (!user || !user.passwordHash || !isValidPassword) {
-    return { error: "Invalid email or password." };
+    if (!user || !user.passwordHash || !isValidPassword) {
+      return { error: "Invalid email or password." };
+    }
+
+    await setSession(user.id);
+  } catch {
+    return { error: "An unexpected error occurred. Please try again.", unexpected: true };
   }
-
-  await setSession(user.id);
   finishAuthRedirect("/learn");
 }
 

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { ArticleStatus } from "@/generated/prisma";
 
@@ -35,8 +36,15 @@ export type SearchItem =
       moduleName: string;
     };
 
-export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
-  const modules = await prisma.module.findMany({
+/**
+ * Global, user-independent index — safe to share across requests. The
+ * per-request `cache()` dedupes the layout + page calls within one render;
+ * `unstable_cache` (1h TTL) removes the DB round-trip from every request.
+ * Content changes land via TTL (writes happen through seed, not the app).
+ */
+const getCachedSearchIndex = unstable_cache(
+  async (): Promise<SearchItem[]> => {
+    const modules = await prisma.module.findMany({
     orderBy: { order: "asc" },
     include: {
       topics: {
@@ -113,4 +121,9 @@ export const getSearchIndex = cache(async (): Promise<SearchItem[]> => {
     }
   }
   return items;
-});
+  },
+  ["search-index"],
+  { revalidate: 3600, tags: ["search-index"] },
+);
+
+export const getSearchIndex = cache(() => getCachedSearchIndex());
