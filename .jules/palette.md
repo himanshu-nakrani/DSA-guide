@@ -69,3 +69,7 @@
 ## 2026-09-05 - Pending feedback on GET filter forms
 **Learning:** `useFormStatus().pending` only flips when submit runs inside a React transition. A native `<form action="/problems">` does a full document GET, so a spinner child never shows pending. These filters are search-param navigation, not Server Actions.
 **Action:** Use `import Form from "next/form"` with a string `action`, plus a client submit child that reads `useFormStatus`. Mention Server Actions only for mutation forms.
+
+## 2026-07-03 - Missing accessible focus states on interactive layout toggles
+**Learning:** Several custom layout toggles and interactive buttons (e.g., FocusMode toggle, SearchTrigger, and ThemeToggle) lacked visible `focus-visible` outlines. This creates an accessibility gap where keyboard users cannot perceive when these elements receive focus, making navigation difficult and violating standard accessibility guidelines.
+**Action:** Applied standard Tailwind `focus-visible` styles (`outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to these custom buttons to ensure consistent and clear visual focus feedback for keyboard users.

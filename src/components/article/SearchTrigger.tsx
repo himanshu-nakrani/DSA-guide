@@ -16,7 +16,7 @@ export function SearchTrigger() {
       aria-label="Open search"
       aria-haspopup="dialog"
       onClick={() => window.dispatchEvent(new CustomEvent("dsa:open-palette"))}
-      className="inline-flex min-h-[44px] items-center gap-1.5 px-2 text-note font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-ink-blue transition-colors"
+      className="inline-flex min-h-[44px] items-center gap-1.5 px-2 text-note font-mono uppercase tracking-[0.06em] text-muted-foreground hover:text-ink-blue transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
     >
       <Search className="h-3 w-3" strokeWidth={1.5} />
       <span className="hidden sm:inline">Search</span>
