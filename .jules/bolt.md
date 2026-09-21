@@ -57,3 +57,7 @@
 ## 2026-09-05 - Binning into a complete record in the existing loop
 **Learning:** `.map(status => data.filter(...))` over a tiny fixed enum is not a real bottleneck, but a second dedicated binning loop is wasted work if the page already walks the same array.
 **Action:** Pre-allocate a complete `Record` of the displayed keys (not `Partial` + `!`) and fill buckets in the existing aggregation loop. Do not claim main-thread DoS for an async Server Component.
+
+## 2025-10-24 - Prevent Redundant Topic Stat Calculation in JSX Maps
+**Learning:** Computing item statistics like `.filter().length` over topic problem lists inside a React `.map()` during render redundantly recalculates work that could have been collected during the outer module statistics pass.
+**Action:** When aggregating nested data (like topics in a module), collect all sub-item statistics into a Map during a single explicit `for...of` pass, rather than allocating inner lists and recounting them dynamically inside JSX maps.
