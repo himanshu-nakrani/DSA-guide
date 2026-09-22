@@ -186,6 +186,9 @@ export async function renameListAction(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) return;
 
+  const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData(user.id));
+  if (rateLimit.limited) return;
+
   const listId = getString(formData, "listId");
   const name = getString(formData, "name");
   const description = getString(formData, "description");
@@ -211,6 +214,9 @@ export async function renameListAction(formData: FormData) {
 export async function deleteListAction(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) return;
+
+  const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData(user.id));
+  if (rateLimit.limited) return;
 
   const listId = getString(formData, "listId");
   if (!listId) return;
@@ -335,6 +341,9 @@ export async function toggleListPublicAction(
 ): Promise<{ isPublic: boolean } | undefined> {
   const user = await getCurrentUser();
   if (!user) return undefined;
+
+  const rateLimit = await checkRateLimit("list_mutate", rateLimitFormData(user.id));
+  if (rateLimit.limited) return undefined;
 
   const listId = getString(formData, "listId");
   if (!listId) return undefined;
