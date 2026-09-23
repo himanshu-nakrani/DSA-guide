@@ -101,13 +101,29 @@ export default async function RoadmapPage() {
   // One stats pass up front so the "current module" (first one not finished)
   // can be auto-expanded while completed and untouched ones stay folded.
   const moduleStats = track.modules.map((module) => {
-    const articleCount = module.topics.reduce((s, t) => s + t.articles.length, 0);
-    const problemCount = module.topics.reduce((s, t) => s + t.problems.length, 0);
-    const moduleSlugs = module.topics.flatMap((t) => t.articles.map((a) => a.slug));
-    const readArticleCount = moduleSlugs.filter((slug) => readSlugSet.has(slug)).length;
-    const moduleProblemIds = module.topics.flatMap((topic) =>
-      topic.problems.map((entry) => entry.problemId),
-    );
+    // ⚡ Bolt: Prevent hidden O(N) intermediate array allocations (e.g., .reduce() and .flatMap())
+    // using a single-pass explicit loop to calculate total counts and gather problem IDs.
+    // Impact: Avoids multiple traversals and memory pressure when track data scales.
+    let articleCount = 0;
+    let problemCount = 0;
+    let readArticleCount = 0;
+    const moduleProblemIds: string[] = [];
+
+    for (const topic of module.topics) {
+      articleCount += topic.articles.length;
+      problemCount += topic.problems.length;
+
+      for (const article of topic.articles) {
+        if (readSlugSet.has(article.slug)) {
+          readArticleCount++;
+        }
+      }
+
+      for (const entry of topic.problems) {
+        moduleProblemIds.push(entry.problemId);
+      }
+    }
+
     const summary = summarizeProblemProgress(moduleProblemIds, problemProgressMap);
     const denom = articleCount + summary.total;
     const percent = denom === 0 ? 0 : Math.round(((readArticleCount + summary.solved) / denom) * 100);
@@ -238,15 +254,20 @@ export default async function RoadmapPage() {
                             </div>
                             <div className="grid gap-3 md:grid-cols-2">
                               {module.topics.map((topic) => {
-                                const topicSlugs = topic.articles.map((article) => article.slug);
+                                // ⚡ Bolt: Use a single explicit pass to compute topicReadCount
+                                // rather than `.map().filter().length` to eliminate intermediate arrays.
+                                let topicReadCount = 0;
+                                for (const article of topic.articles) {
+                                  if (readSlugSet.has(article.slug)) {
+                                    topicReadCount++;
+                                  }
+                                }
+
                                 const topicProblemIds = topic.problems.map((entry) => entry.problemId);
                                 const topicProblemSummary = summarizeProblemProgress(
                                   topicProblemIds,
                                   problemProgressMap,
                                 );
-                                const topicReadCount = topicSlugs.filter((articleSlug) =>
-                                  readSlugSet.has(articleSlug),
-                                ).length;
                                 const topicPercent =
                                   topic.articles.length + topicProblemSummary.total === 0
                                     ? 0

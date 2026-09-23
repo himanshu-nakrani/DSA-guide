@@ -57,3 +57,7 @@
 ## 2026-09-05 - Binning into a complete record in the existing loop
 **Learning:** `.map(status => data.filter(...))` over a tiny fixed enum is not a real bottleneck, but a second dedicated binning loop is wasted work if the page already walks the same array.
 **Action:** Pre-allocate a complete `Record` of the displayed keys (not `Partial` + `!`) and fill buckets in the existing aggregation loop. Do not claim main-thread DoS for an async Server Component.
+
+## 2026-11-20 - Optimize redundant array allocations in module mapping in src/app/roadmap/page.tsx
+**Learning:** Chaining array methods like `.reduce()`, `.flatMap()`, `.map()`, and `.filter().length` in `moduleStats` and topic rendering created multiple hidden O(N) array allocations. This pattern in deeply nested lists scales poorly and blocks the main thread.
+**Action:** Use explicit single-pass iteration (`for...of` loops) when processing nested lists and extracting specific counts to prevent unnecessary intermediate arrays and multiple traversals.
