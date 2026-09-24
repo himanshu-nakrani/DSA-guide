@@ -69,3 +69,7 @@
 ## 2026-09-05 - Pending feedback on GET filter forms
 **Learning:** `useFormStatus().pending` only flips when submit runs inside a React transition. A native `<form action="/problems">` does a full document GET, so a spinner child never shows pending. These filters are search-param navigation, not Server Actions.
 **Action:** Use `import Form from "next/form"` with a string `action`, plus a client submit child that reads `useFormStatus`. Mention Server Actions only for mutation forms.
+
+## 2025-02-27 - Missing accessible interaction context on Header palette triggers
+**Learning:** The global Search button in the Header triggers the Command Palette dialog but lacked the `aria-haspopup="dialog"` attribute. Without it, screen reader users expect standard navigation or button behavior, rather than being prepared for a modal context change (like the command palette dialog opening). This complements the finding from 2026-08-25 about palette triggers.
+**Action:** Always verify that global header buttons that trigger modal overlays or search palettes include `aria-haspopup="dialog"` to explicitly communicate the interaction model to assistive technologies before they activate the control.
