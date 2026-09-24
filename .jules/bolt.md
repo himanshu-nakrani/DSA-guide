@@ -57,3 +57,7 @@
 ## 2026-09-05 - Binning into a complete record in the existing loop
 **Learning:** `.map(status => data.filter(...))` over a tiny fixed enum is not a real bottleneck, but a second dedicated binning loop is wasted work if the page already walks the same array.
 **Action:** Pre-allocate a complete `Record` of the displayed keys (not `Partial` + `!`) and fill buckets in the existing aggregation loop. Do not claim main-thread DoS for an async Server Component.
+
+## 2025-02-18 - Eliminating Redundant Array Allocations in React Render Tree
+**Learning:** Calculating aggregate statistics using nested `.map()`, `.flatMap()`, or `.filter(slug => set.has(slug)).length` inside a React JSX list iteration (like a `<CollapsiblePanel>`'s inner loop) creates redundant O(N) array allocations that run on every map iteration, leading to significant garbage collection overhead and blocking the render thread.
+**Action:** When rendering nested collections (e.g. `module.topics.map()`) that require aggregate statistics, always calculate these statistics using a single-pass `for...of` loop *outside* the JSX render tree, storing the results in a precomputed Map (like `topicStatsMap`). Use `map.get(id)` inside the JSX to look up the precomputed values.

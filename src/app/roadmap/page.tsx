@@ -100,26 +100,66 @@ export default async function RoadmapPage() {
 
   // One stats pass up front so the "current module" (first one not finished)
   // can be auto-expanded while completed and untouched ones stay folded.
-  const moduleStats = track.modules.map((module) => {
-    const articleCount = module.topics.reduce((s, t) => s + t.articles.length, 0);
-    const problemCount = module.topics.reduce((s, t) => s + t.problems.length, 0);
-    const moduleSlugs = module.topics.flatMap((t) => t.articles.map((a) => a.slug));
-    const readArticleCount = moduleSlugs.filter((slug) => readSlugSet.has(slug)).length;
-    const moduleProblemIds = module.topics.flatMap((topic) =>
-      topic.problems.map((entry) => entry.problemId),
-    );
+  // ⚡ Bolt: Single-pass iteration to prevent O(N) intermediate array allocations (flatMap/map/filter.length)
+  const moduleStats: Array<{
+    moduleId: string;
+    articleCount: number;
+    problemCount: number;
+    readArticleCount: number;
+    summary: ReturnType<typeof summarizeProblemProgress>;
+    percent: number;
+  }> = [];
+  const topicStatsMap = new Map<string, { readCount: number; summary: ReturnType<typeof summarizeProblemProgress>; percent: number }>();
+
+  for (const trackModule of track.modules) {
+    let articleCount = 0;
+    let problemCount = 0;
+    let readArticleCount = 0;
+    const moduleProblemIds: string[] = [];
+
+    for (const topic of trackModule.topics) {
+      articleCount += topic.articles.length;
+      problemCount += topic.problems.length;
+
+      let topicReadCount = 0;
+      for (const article of topic.articles) {
+        if (readSlugSet.has(article.slug)) {
+          topicReadCount++;
+          readArticleCount++;
+        }
+      }
+
+      const topicProblemIds: string[] = [];
+      for (const entry of topic.problems) {
+        topicProblemIds.push(entry.problemId);
+        moduleProblemIds.push(entry.problemId);
+      }
+
+      const topicSummary = summarizeProblemProgress(topicProblemIds, problemProgressMap);
+      const topicDenom = topic.articles.length + topicSummary.total;
+      const topicPercent = topicDenom === 0 ? 0 : Math.round(((topicReadCount + topicSummary.solved) / topicDenom) * 100);
+
+      topicStatsMap.set(topic.id, {
+        readCount: topicReadCount,
+        summary: topicSummary,
+        percent: topicPercent,
+      });
+    }
+
     const summary = summarizeProblemProgress(moduleProblemIds, problemProgressMap);
     const denom = articleCount + summary.total;
     const percent = denom === 0 ? 0 : Math.round(((readArticleCount + summary.solved) / denom) * 100);
-    return {
-      moduleId: module.id,
+
+    moduleStats.push({
+      moduleId: trackModule.id,
       articleCount,
       problemCount,
       readArticleCount,
       summary,
       percent,
-    };
-  });
+    });
+  }
+
   const currentModuleId =
     moduleStats.find((stats) => stats.percent < 100)?.moduleId ??
     track.modules[track.modules.length - 1]?.id ??
@@ -238,23 +278,13 @@ export default async function RoadmapPage() {
                             </div>
                             <div className="grid gap-3 md:grid-cols-2">
                               {module.topics.map((topic) => {
-                                const topicSlugs = topic.articles.map((article) => article.slug);
-                                const topicProblemIds = topic.problems.map((entry) => entry.problemId);
-                                const topicProblemSummary = summarizeProblemProgress(
-                                  topicProblemIds,
-                                  problemProgressMap,
-                                );
-                                const topicReadCount = topicSlugs.filter((articleSlug) =>
-                                  readSlugSet.has(articleSlug),
-                                ).length;
-                                const topicPercent =
-                                  topic.articles.length + topicProblemSummary.total === 0
-                                    ? 0
-                                    : Math.round(
-                                        ((topicReadCount + topicProblemSummary.solved) /
-                                          (topic.articles.length + topicProblemSummary.total)) *
-                                          100,
-                                      );
+                                // ⚡ Bolt: Use precomputed stats from topicStatsMap instead of allocating intermediate arrays
+                                // and recalculating inside the map iteration.
+                                const stats = topicStatsMap.get(topic.id) ?? {
+                                  readCount: 0,
+                                  summary: { total: 0, solved: 0, attempted: 0, unattempted: 0 },
+                                  percent: 0,
+                                };
 
                                 return (
                                   <div
@@ -267,17 +297,17 @@ export default async function RoadmapPage() {
                                           {topic.name}
                                         </div>
                                         <div className="mt-1 text-caption font-mono uppercase tracking-[0.1em] text-muted-foreground">
-                                          {topicReadCount}/{topic.articles.length} read · {topicProblemSummary.solved}/{topicProblemSummary.total} solved
+                                          {stats.readCount}/{topic.articles.length} read · {stats.summary.solved}/{stats.summary.total} solved
                                         </div>
                                       </div>
                                       <span className="text-caption font-mono tabular-nums text-muted-foreground">
-                                        {topicPercent}%
+                                        {stats.percent}%
                                       </span>
                                     </div>
                                     <div className="mt-3 h-1.5 rounded-full bg-border overflow-hidden">
                                       <div
                                         className="h-full bg-ink-blue transition-[width]"
-                                        style={{ width: `${topicPercent}%` }}
+                                        style={{ width: `${stats.percent}%` }}
                                       />
                                     </div>
                                   </div>
