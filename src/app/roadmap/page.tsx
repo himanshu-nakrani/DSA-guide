@@ -101,13 +101,27 @@ export default async function RoadmapPage() {
   // One stats pass up front so the "current module" (first one not finished)
   // can be auto-expanded while completed and untouched ones stay folded.
   const moduleStats = track.modules.map((module) => {
-    const articleCount = module.topics.reduce((s, t) => s + t.articles.length, 0);
-    const problemCount = module.topics.reduce((s, t) => s + t.problems.length, 0);
-    const moduleSlugs = module.topics.flatMap((t) => t.articles.map((a) => a.slug));
-    const readArticleCount = moduleSlugs.filter((slug) => readSlugSet.has(slug)).length;
-    const moduleProblemIds = module.topics.flatMap((topic) =>
-      topic.problems.map((entry) => entry.problemId),
-    );
+    let articleCount = 0;
+    let problemCount = 0;
+    let readArticleCount = 0;
+    const moduleProblemIds: string[] = [];
+
+    // ⚡ Bolt: Single-pass iteration to prevent intermediate array allocations
+    for (const topic of module.topics) {
+      articleCount += topic.articles.length;
+      problemCount += topic.problems.length;
+
+      for (const article of topic.articles) {
+        if (readSlugSet.has(article.slug)) {
+          readArticleCount += 1;
+        }
+      }
+
+      for (const entry of topic.problems) {
+        moduleProblemIds.push(entry.problemId);
+      }
+    }
+
     const summary = summarizeProblemProgress(moduleProblemIds, problemProgressMap);
     const denom = articleCount + summary.total;
     const percent = denom === 0 ? 0 : Math.round(((readArticleCount + summary.solved) / denom) * 100);
@@ -138,14 +152,28 @@ export default async function RoadmapPage() {
       <ol className="space-y-4">
         {track.modules.map((module, i) => {
           const stats = moduleStats[i];
-          const moduleProblems = module.topics.flatMap((topic) =>
-            topic.problems.map((entry) => entry.problem),
-          );
+
+          const moduleProblems = [];
+          let firstArticle = null;
+          let firstUnread = null;
+          const moduleSlugs = [];
+
+          // ⚡ Bolt: Use explicit single-pass iteration instead of chained mapped flatMaps
+          for (const topic of module.topics) {
+            for (const article of topic.articles) {
+              if (!firstArticle) firstArticle = article;
+              if (!firstUnread && !readSlugSet.has(article.slug)) {
+                firstUnread = article;
+              }
+              moduleSlugs.push(article.slug);
+            }
+
+            for (const entry of topic.problems) {
+              moduleProblems.push(entry.problem);
+            }
+          }
+
           const nextProblem = pickNextProblem(moduleProblems, problemProgressMap);
-          const moduleArticles = module.topics.flatMap((t) => t.articles);
-          const firstArticle = moduleArticles[0] ?? null;
-          const firstUnread =
-            moduleArticles.find((a) => !readSlugSet.has(a.slug)) ?? null;
           const resumeTarget = firstUnread ?? firstArticle;
           const isCurrent = module.id === currentModuleId;
 
@@ -158,7 +186,7 @@ export default async function RoadmapPage() {
                 <div>
                   <CollapsibleTrigger className="px-5 py-4">
                     <span className="flex min-w-0 flex-1 items-center gap-3">
-                      <ProgressNode order={module.order} slugs={module.topics.flatMap((t) => t.articles.map((a) => a.slug))} />
+                      <ProgressNode order={module.order} slugs={moduleSlugs} />
                       <span className="min-w-0 flex-1 text-left">
                         <span className="block truncate text-base font-semibold tracking-tight text-foreground">
                           {module.name}
@@ -238,15 +266,18 @@ export default async function RoadmapPage() {
                             </div>
                             <div className="grid gap-3 md:grid-cols-2">
                               {module.topics.map((topic) => {
-                                const topicSlugs = topic.articles.map((article) => article.slug);
+                                let topicReadCount = 0;
+                                for (const article of topic.articles) {
+                                  if (readSlugSet.has(article.slug)) {
+                                    topicReadCount += 1;
+                                  }
+                                }
+
                                 const topicProblemIds = topic.problems.map((entry) => entry.problemId);
                                 const topicProblemSummary = summarizeProblemProgress(
                                   topicProblemIds,
                                   problemProgressMap,
                                 );
-                                const topicReadCount = topicSlugs.filter((articleSlug) =>
-                                  readSlugSet.has(articleSlug),
-                                ).length;
                                 const topicPercent =
                                   topic.articles.length + topicProblemSummary.total === 0
                                     ? 0
