@@ -121,6 +121,7 @@ export function Header({
             onClick={() => window.dispatchEvent(new CustomEvent("dsa:open-palette"))}
             aria-label="Search (Ctrl+K)"
             title="Search (Ctrl+K)"
+            aria-haspopup="dialog"
             className="inline-flex h-10 min-h-[44px] items-center gap-2 rounded-md border border-border px-3 text-sm text-muted-foreground transition-colors hover:border-border-hover hover:text-foreground"
           >
             <Search className="h-4 w-4" strokeWidth={1.75} />
