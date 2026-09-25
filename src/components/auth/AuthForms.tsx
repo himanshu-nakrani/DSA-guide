@@ -102,7 +102,7 @@ function AuthForm({
             aria-label={showPassword ? "Hide password" : "Show password"}
             aria-pressed={showPassword}
             title={showPassword ? "Hide password" : "Show password"}
-            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-muted-foreground hover:text-ink-blue transition-colors rounded-md"
+            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-muted-foreground hover:text-ink-blue transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" strokeWidth={1.5} />
