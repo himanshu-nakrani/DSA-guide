@@ -24,7 +24,7 @@ export function BookmarkButton({
     return (
       <Link
         href="/auth"
-        className="inline-grid h-9 w-9 min-h-[44px] min-w-[44px] sm:h-8 sm:w-8 sm:min-h-0 sm:min-w-0 place-items-center rounded-md border border-border text-muted-foreground hover:text-ink-blue hover:border-ink-blue transition-colors"
+        className="inline-grid h-9 w-9 min-h-[44px] min-w-[44px] sm:h-8 sm:w-8 sm:min-h-0 sm:min-w-0 place-items-center rounded-md border border-border text-muted-foreground hover:text-ink-blue hover:border-ink-blue transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
         aria-label="Sign in to bookmark this problem"
         title="Sign in to bookmark"
       >
@@ -64,7 +64,7 @@ export function BookmarkButton({
       type="button"
       onClick={onToggle}
       disabled={pending}
-      className={`inline-grid h-9 w-9 min-h-[44px] min-w-[44px] sm:h-8 sm:w-8 sm:min-h-0 sm:min-w-0 place-items-center rounded-md border transition-colors ${
+      className={`inline-grid h-9 w-9 min-h-[44px] min-w-[44px] sm:h-8 sm:w-8 sm:min-h-0 sm:min-w-0 place-items-center rounded-md border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] ${
         optimisticSaved
           ? "border-ink-blue bg-ink-blue-wash text-ink-blue"
           : "border-rule text-muted-foreground hover:text-ink-blue hover:border-ink-blue"

@@ -22,7 +22,15 @@ export function ActivityChart({ days }: { days: ActivityDay[] }) {
   const PAD_TOP = 16;
   const PAD_BOTTOM = 30;
   const innerHeight = H - PAD_TOP - PAD_BOTTOM;
-  const max = Math.max(1, ...days.map((day) => day.count));
+
+  // ⚡ Bolt: Prevent hidden O(N) array allocation (.map) and spreading into Math.max
+  let max = 1;
+  for (const day of days) {
+    if (day.count > max) {
+      max = day.count;
+    }
+  }
+
   const slot = W / Math.max(1, days.length);
   const barWidth = slot * 0.52;
 

@@ -57,6 +57,9 @@
 ## 2026-09-05 - Binning into a complete record in the existing loop
 **Learning:** `.map(status => data.filter(...))` over a tiny fixed enum is not a real bottleneck, but a second dedicated binning loop is wasted work if the page already walks the same array.
 **Action:** Pre-allocate a complete `Record` of the displayed keys (not `Partial` + `!`) and fill buckets in the existing aggregation loop. Do not claim main-thread DoS for an async Server Component.
+## 2026-09-06 - Prevent Array Spreading in Mathematical Accumulations
+**Learning:** Chaining `.map()` to create an intermediate array and then spreading it (`...array`) into `Math.max()` or `Math.min()` causes hidden O(N) array allocations and risks exceeding the V8 call stack size limit for large data sets, leading to unpredictable crashes.
+**Action:** Always compute aggregates like maximums or minimums over object arrays using explicit single-pass iteration (like `for...of`) to strictly bound memory allocations and avoid spread syntax limits.
 ## 2026-10-27 - Preventing chained mapped array allocations
 **Learning:** During rendering in React Server Components handling deeply nested hierarchical data (like a roadmap with tracks -> modules -> topics -> articles), using chained array processing like \`.flatMap(topic => topic.articles.map(a => a.slug)).filter(hasRead).length\` redundantly allocates intermediate arrays on every render pass, which degrades V8's GC performance.
 **Action:** Replace functional array chaining inside rendering blocks with explicit \`for...of\` loops and variables. This allows traversing the deepest relationships safely in a single pass without allocating massive intermediate \`flatMap\` garbage arrays.
