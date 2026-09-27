@@ -1,6 +1,3 @@
-## 2025-02-18 - Heavy Model Fields and Unpaginated Lists
-**Learning:** In `src/app/problems/page.tsx`, `prisma.problem.findMany` fetched all fields by default on an unpaginated list, loading massive strings like `statementMd`, `examplesJson`, and `starterCodeJson` into memory and transit unnecessarily.
-**Action:** Always prefer `select` over `include` when fetching list views for Prisma models containing large text/JSON columns to avoid ballooning memory and transit size, especially when not paginating.
 ## 2026-06-14 - Prevent Heavy Field Over-fetching in Problem Lists
 **Learning:** Prisma models with large text/JSON fields (like `Problem` containing `statementMd` and `examplesJson`) cause unnecessary database load and memory bloat when fetched in list views using `include`.
 **Action:** Always prefer `select` over `include` for list fetches (like dashboard history or related problems) to retrieve only the fields required for rendering cards (e.g., `id`, `slug`, `title`, `difficulty`).
@@ -63,3 +60,7 @@
 ## 2026-10-27 - Preventing chained mapped array allocations
 **Learning:** During rendering in React Server Components handling deeply nested hierarchical data (like a roadmap with tracks -> modules -> topics -> articles), using chained array processing like \`.flatMap(topic => topic.articles.map(a => a.slug)).filter(hasRead).length\` redundantly allocates intermediate arrays on every render pass, which degrades V8's GC performance.
 **Action:** Replace functional array chaining inside rendering blocks with explicit \`for...of\` loops and variables. This allows traversing the deepest relationships safely in a single pass without allocating massive intermediate \`flatMap\` garbage arrays.
+
+## 2026-10-28 - Prevent Hidden O(N) Array Allocations in Aggregations
+**Learning:** Chaining array methods like `.flatMap().flatMap().map()` or multiple `.reduce()` calls in the root page view for data aggregation creates hidden O(N) intermediate array allocations and redundant O(N) traversals, blocking the main thread when rendering heavily nested relationships (e.g. `modules -> topics -> articles`).
+**Action:** Use explicit single-pass iteration (like `for...of`) when aggregating over collections (like extracting deeply nested fields or generating keys and properties like `allSlugs` or `articleCount`) to prevent unnecessary memory allocations, redundant passes, and main-thread blocking.

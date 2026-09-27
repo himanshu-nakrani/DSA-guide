@@ -82,15 +82,22 @@ export default async function HomePage() {
     },
   });
 
-  const articleCount = modules.reduce(
-    (n, m) => n + m.topics.reduce((t, topic) => t + topic.articles.length, 0),
-    0,
-  );
-  const topicCount = modules.reduce((n, m) => n + m.topics.length, 0);
-  const firstSlug = modules[0]?.topics[0]?.articles[0]?.slug ?? "";
-  const allSlugs = modules.flatMap((m) =>
-    m.topics.flatMap((topic) => topic.articles.map((article) => article.slug)),
-  );
+  // ⚡ Bolt: Prevent chained array allocations (.reduce() and .flatMap().map()) using explicit single-pass iteration
+  let articleCount = 0;
+  let topicCount = 0;
+  let firstSlug = "";
+  const allSlugs: string[] = [];
+
+  for (const trackModule of modules) {
+    topicCount += trackModule.topics.length;
+    for (const topic of trackModule.topics) {
+      articleCount += topic.articles.length;
+      for (const article of topic.articles) {
+        if (!firstSlug) firstSlug = article.slug;
+        allSlugs.push(article.slug);
+      }
+    }
+  }
 
   const siteUrl = getSiteUrl();
   const jsonLd = {
