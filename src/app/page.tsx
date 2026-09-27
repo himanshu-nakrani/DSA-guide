@@ -82,7 +82,7 @@ export default async function HomePage() {
     },
   });
 
-  // ⚡ Bolt: Prevent chained array allocations (.reduce() and .flatMap().map()) using explicit single-pass iteration
+  // One pass over modules, topics, and articles. Avoids intermediate arrays from chained map/reduce.
   let articleCount = 0;
   let topicCount = 0;
   let firstSlug = "";
