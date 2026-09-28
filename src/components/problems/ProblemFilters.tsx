@@ -126,7 +126,7 @@ export function ProblemFilters({
           onClick={() => setFiltersOpen((v) => !v)}
           aria-expanded={filtersOpen}
           className={cn(
-            "inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors",
+            "inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]",
             activeCount > 0 || filtersOpen
               ? "border-ink-blue/40 bg-ink-blue-wash text-ink-blue"
               : "border-border text-muted-foreground hover:text-foreground hover:border-border-hover",
@@ -254,7 +254,7 @@ export function ProblemFilters({
               setSearchText("");
               apply({ q: null, difficulty: null, topic: null, status: null });
             }}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-ink-red transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-ink-red transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] rounded-sm"
           >
             <X className="h-3.5 w-3.5" strokeWidth={1.5} />
             Clear all filters
