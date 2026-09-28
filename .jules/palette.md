@@ -73,3 +73,7 @@
 ## 2026-10-25 - Missing accessible interaction context on palette triggers in Header
 **Learning:** Buttons that trigger modal overlays, dialogs, or search palettes (e.g., Command Palette triggers) often lack the `aria-haspopup` attribute. Without it, screen reader users expect standard navigation or button behavior, rather than being prepared for a modal context change (like a dialog opening).
 **Action:** Always include `aria-haspopup="dialog"` on buttons that trigger command palettes or modal search dialogs to explicitly communicate the interaction model to assistive technologies before they activate the control.
+
+## 2024-10-25 - Missing accessible focus states on interactive buttons
+**Learning:** Several custom interactive buttons (e.g., HintList toggle, ProblemFilters toggle and clear buttons) lacked visible `focus-visible` outlines. This creates an accessibility gap where keyboard users cannot perceive when these elements receive focus, making navigation extremely difficult and violating standard accessibility guidelines.
+**Action:** Applied standard Tailwind `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to these custom buttons to ensure consistent and clear visual focus feedback for keyboard users.
