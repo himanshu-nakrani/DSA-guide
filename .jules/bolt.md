@@ -67,3 +67,6 @@
 ## 2026-10-28 - Prevent Hidden O(N) Array Allocations in Aggregations
 **Learning:** Chaining array methods like `.flatMap().flatMap().map()` or multiple `.reduce()` calls in the root page view for data aggregation creates hidden O(N) intermediate array allocations and redundant O(N) traversals, blocking the main thread when rendering heavily nested relationships (e.g. `modules -> topics -> articles`).
 **Action:** Use explicit single-pass iteration (like `for...of`) when aggregating over collections (like extracting deeply nested fields or generating keys and properties like `allSlugs` or `articleCount`) to prevent unnecessary memory allocations, redundant passes, and main-thread blocking.
+## 2026-10-29 - Prevent Hidden O(N) Array Allocations in Page Setup
+**Learning:** Using chained methods like `.map()` to initialize Maps or `.filter().length` on large lists (like Prisma query results with hundreds of problems) silently creates hidden O(N) intermediate array allocations before processing, adding unnecessary GC pressure.
+**Action:** Always replace intermediate array allocations in Map initialization or reduction helpers with explicit single-pass iteration (`for...of` loops) and standard variables, especially when processing large datasets from the database.
