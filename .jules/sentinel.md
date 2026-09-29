@@ -87,3 +87,8 @@
 **Vulnerability:** Several state-modifying server actions for custom lists (`renameListAction`, `deleteListAction`, `toggleListPublicAction`) were missing rate limit protections. This allowed authenticated attackers to submit unbounded, automated requests to these endpoints, causing excessive database updates and burning server resources, which could lead to a Denial of Service (DoS).
 **Learning:** Even simple database operations like updates or deletes can be weaponized if exposed as un-rate-limited authenticated endpoints. Attackers can spam these operations to exhaust database connections, CPU, or lock resources.
 **Prevention:** Always ensure that all state-modifying Next.js Server Actions (e.g., database insertions, updates, deletes) are protected by rate limits. Use the authenticated `user.id` as the rate limiter bucket key.
+
+## 2024-10-25 - Rate Limiter DoS via Unbounded Input Processing (toLowerCase)
+**Vulnerability:** The rate limiter identifier extraction in `identifierFor` called `.toLowerCase()` directly on a user-provided `email` string extracted from `FormData` before any length bounds were applied. An attacker could provide a massive string, causing `.toLowerCase()` to block the event loop and crash/hang the server (DoS).
+**Learning:** Always apply a maximum length constraint on untrusted strings from `FormData` *before* invoking expensive string operations like `.toLowerCase()`.
+**Prevention:** Slice the string to a safe maximum length (e.g., `.slice(0, 4096)`) before performing string manipulation.

@@ -59,7 +59,7 @@ function identifierFor(name: string, formData: FormData | null, options?: RateLi
   // pass a server-derived address explicitly and never depend on email alone.
   const email = formData?.get("email");
   if (typeof email === "string" && (name === "login" || name === "register")) {
-    return normalizeIdentifier(email.toLowerCase());
+    return normalizeIdentifier(email.slice(0, 4096).toLowerCase());
   }
 
   return "anonymous";
