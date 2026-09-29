@@ -178,12 +178,21 @@ export default async function ProblemsPage({
       })
     : [];
 
-  const progressMap = new Map<string, ProgressStatus>(
-    progressRows.map((row) => [row.problemId, row.status]),
-  );
+  // ⚡ Bolt: Use explicit single-pass iteration instead of mapped arrays for Map initialization
+  const progressMap = new Map<string, ProgressStatus>();
+  for (const row of progressRows) {
+    progressMap.set(row.problemId, row.status);
+  }
+
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
 
-  const withEditorialCount = problems.filter((p) => p.editorial).length;
+  // ⚡ Bolt: Prevent intermediate array allocations in reduction helpers
+  let withEditorialCount = 0;
+  for (const p of problems) {
+    if (p.editorial) {
+      withEditorialCount++;
+    }
+  }
   const activeFilters = [
     difficulty,
     topicSlug,
