@@ -24,6 +24,12 @@ const NODES: NodeLayout[] = [
   { id: "E", x: 448, y: 228, children: [] },
 ];
 
+// ⚡ Bolt: Move expensive static map generation outside the render function
+// This avoids O(N) allocations and redundant passes on every TreeDiagram re-render.
+// Reduces main thread work and intermediate object churn.
+const NODE_BY_ID = new Map<NodeId, NodeLayout>();
+for (const node of NODES) NODE_BY_ID.set(node.id, node);
+
 const FRAMES: Frame[] = [
   {
     current: "D",
@@ -131,14 +137,13 @@ export function TreeDPExplorer({
 function TreeDiagram({ frame }: { frame: Frame }) {
   const W = 560;
   const H = 286;
-  const nodeById = new Map(NODES.map((node) => [node.id, node]));
   const computed = new Set(frame.computed);
 
   return (
     <div className="overflow-x-auto">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Tree showing include and exclude dynamic-programming states">
         {NODES.flatMap((node) => node.children.map((child) => {
-          const destination = nodeById.get(child)!;
+          const destination = NODE_BY_ID.get(child)!;
           return <line key={`${node.id}-${child}`} x1={node.x} y1={node.y + 22} x2={destination.x} y2={destination.y - 22} stroke={PALETTE.border} strokeWidth="1.5" />;
         }))}
         {NODES.map((node) => {
