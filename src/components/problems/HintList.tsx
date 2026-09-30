@@ -34,8 +34,9 @@ export function HintList({ hints }: { hints: Hint[] }) {
               type="button"
               onClick={() => toggle(hint.id)}
               aria-expanded={revealed}
+              aria-controls={"hint-content-" + hint.id}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors",
+                "w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--ink-blue)]",
                 revealed ? "hover:bg-surface-2" : "hover:bg-ink-blue-wash",
               )}
             >
@@ -52,7 +53,10 @@ export function HintList({ hints }: { hints: Hint[] }) {
               )}
             </button>
             {revealed && (
-              <p className="px-4 pb-4 pt-1 leading-relaxed border-t border-rule bg-surface-1">
+              <p
+                id={"hint-content-" + hint.id}
+                className="px-4 pb-4 pt-1 leading-relaxed border-t border-rule bg-surface-1"
+              >
                 {hint.content}
               </p>
             )}

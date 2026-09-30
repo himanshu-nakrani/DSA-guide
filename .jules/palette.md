@@ -73,3 +73,7 @@
 ## 2026-10-25 - Missing accessible interaction context on palette triggers in Header
 **Learning:** Buttons that trigger modal overlays, dialogs, or search palettes (e.g., Command Palette triggers) often lack the `aria-haspopup` attribute. Without it, screen reader users expect standard navigation or button behavior, rather than being prepared for a modal context change (like a dialog opening).
 **Action:** Always include `aria-haspopup="dialog"` on buttons that trigger command palettes or modal search dialogs to explicitly communicate the interaction model to assistive technologies before they activate the control.
+
+## 2026-10-26 - Accessible disclosure regions and unclipped focus
+**Learning:** Expanding/collapsing regions (like Hint lists and Mobile Filters) need `aria-controls` explicitly linked to the container's `id` to provide screen readers with proper layout context. Furthermore, when adding `focus-visible:ring` to interactive elements inside an `overflow-hidden` container (like a hint row), the focus ring gets clipped and invisible. Using `focus-visible:ring-inset` ensures the outline renders inward and remains visible to keyboard users.
+**Action:** Always link toggle buttons to their collapsible content with `aria-controls`, and use `focus-visible:ring-inset` for interactive elements constrained by `overflow-hidden` containers to ensure keyboard focus states remain visible.
