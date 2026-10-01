@@ -67,3 +67,7 @@
 ## 2026-10-28 - Prevent Hidden O(N) Array Allocations in Aggregations
 **Learning:** Chaining array methods like `.flatMap().flatMap().map()` or multiple `.reduce()` calls in the root page view for data aggregation creates hidden O(N) intermediate array allocations and redundant O(N) traversals, blocking the main thread when rendering heavily nested relationships (e.g. `modules -> topics -> articles`).
 **Action:** Use explicit single-pass iteration (like `for...of`) when aggregating over collections (like extracting deeply nested fields or generating keys and properties like `allSlugs` or `articleCount`) to prevent unnecessary memory allocations, redundant passes, and main-thread blocking.
+
+## 2026-10-29 - Prevent O(N) Array Allocations When Initializing Maps
+**Learning:** Instantiating a `Map` from a static list using `new Map(NODES.map(...))` inside a React component render function causes unnecessary O(N) tuple array allocations on every render.
+**Action:** Hoist the initialization of `Map`s that depend on static constants outside of the render function, and use a `for...of` loop to populate them with `.set()` to avoid creating intermediate arrays of tuples.

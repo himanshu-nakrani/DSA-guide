@@ -24,6 +24,12 @@ const NODES: NodeLayout[] = [
   { id: "E", x: 448, y: 228, children: [] },
 ];
 
+// ⚡ Bolt: Hoist Map initialization outside render to prevent O(N) tuple allocations on every re-render
+const nodeById = new Map<NodeId, NodeLayout>();
+for (const node of NODES) {
+  nodeById.set(node.id, node);
+}
+
 const FRAMES: Frame[] = [
   {
     current: "D",
@@ -131,7 +137,6 @@ export function TreeDPExplorer({
 function TreeDiagram({ frame }: { frame: Frame }) {
   const W = 560;
   const H = 286;
-  const nodeById = new Map(NODES.map((node) => [node.id, node]));
   const computed = new Set(frame.computed);
 
   return (
