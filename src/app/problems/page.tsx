@@ -78,8 +78,8 @@ export default async function ProblemsPage({
 
   const difficulty = parseDifficulty(params.difficulty);
   const status = parseStatus(params.status);
-  const topicSlug = params.topic?.trim().slice(0, MAX_TOPIC_SLUG_LENGTH) || undefined;
-  const query = params.q?.trim().slice(0, MAX_QUERY_LENGTH) || "";
+  const topicSlug = params.topic?.slice(0, 4096).trim().slice(0, MAX_TOPIC_SLUG_LENGTH) || undefined;
+  const query = params.q?.slice(0, 4096).trim().slice(0, MAX_QUERY_LENGTH) || "";
   const sort = parseSort(params.sort);
   const page = Math.max(1, Number.parseInt(params.page ?? "", 10) || 1);
 
