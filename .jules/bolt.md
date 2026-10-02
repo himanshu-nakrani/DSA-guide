@@ -67,3 +67,7 @@
 ## 2026-10-28 - Prevent Hidden O(N) Array Allocations in Aggregations
 **Learning:** Chaining array methods like `.flatMap().flatMap().map()` or multiple `.reduce()` calls in the root page view for data aggregation creates hidden O(N) intermediate array allocations and redundant O(N) traversals, blocking the main thread when rendering heavily nested relationships (e.g. `modules -> topics -> articles`).
 **Action:** Use explicit single-pass iteration (like `for...of`) when aggregating over collections (like extracting deeply nested fields or generating keys and properties like `allSlugs` or `articleCount`) to prevent unnecessary memory allocations, redundant passes, and main-thread blocking.
+
+## 2026-11-20 - Prevent Hidden Array Allocations and Redundant Iterations in Aggregations
+**Learning:** In dashboard components that display many derived metrics (like total articles, next module, and module progress bars), traversing deeply nested relationships (`modules -> topics -> articles`) multiple times utilizing chained array methods like `.reduce()`, `.find()`, and `.map()` separately results in redundant O(N) passes and redundant intermediate array allocations.
+**Action:** Consolidate multiple metrics into a single explicit `for...of` iteration over nested datasets. Use standard variables and `Set` lookups inside the loop to accumulate all required state at once, eliminating intermediate arrays and main-thread blocking.
