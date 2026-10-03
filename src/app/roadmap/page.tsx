@@ -92,9 +92,10 @@ export default async function RoadmapPage() {
         select: { problemId: true, status: true },
       })
     : [];
-  const problemProgressMap = new Map<string, ProgressStatus>(
-    problemProgressRows.map((row) => [row.problemId, row.status]),
-  );
+  const problemProgressMap = new Map<string, ProgressStatus>();
+  for (const row of problemProgressRows) {
+    problemProgressMap.set(row.problemId, row.status);
+  }
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
   const readSlugSet = new Set(readSlugs);
 
