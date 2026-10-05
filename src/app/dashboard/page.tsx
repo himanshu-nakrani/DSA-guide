@@ -168,10 +168,12 @@ export default async function DashboardPage() {
   // ⚡ Bolt: Use a Set for O(1) lookups below instead of O(N) array .includes()
   const readSlugSet = new Set(readSlugs);
 
-  const totalArticles = modules.reduce(
-    (sum, module) => sum + module.topics.reduce((inner, topic) => inner + topic.articles.length, 0),
-    0,
-  );
+  let totalArticles = 0;
+  for (const trackModule of modules) {
+    for (const topic of trackModule.topics) {
+      totalArticles += topic.articles.length;
+    }
+  }
   const articlePct = totalArticles === 0 ? 0 : Math.round((readSlugs.length / totalArticles) * 100);
   const displayedStatuses = [
     ProgressStatus.ATTEMPTED,

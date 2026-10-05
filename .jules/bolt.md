@@ -67,3 +67,7 @@
 ## 2026-10-28 - Prevent Hidden O(N) Array Allocations in Aggregations
 **Learning:** Chaining array methods like `.flatMap().flatMap().map()` or multiple `.reduce()` calls in the root page view for data aggregation creates hidden O(N) intermediate array allocations and redundant O(N) traversals, blocking the main thread when rendering heavily nested relationships (e.g. `modules -> topics -> articles`).
 **Action:** Use explicit single-pass iteration (like `for...of`) when aggregating over collections (like extracting deeply nested fields or generating keys and properties like `allSlugs` or `articleCount`) to prevent unnecessary memory allocations, redundant passes, and main-thread blocking.
+
+## 2026-11-20 - Prevent Hidden Array Allocations with `reduce()`
+**Learning:** In heavily nested React layouts (like the dashboard parsing deeply nested modules -> topics -> articles), calculating aggregations utilizing nested array reductions (e.g. `modules.reduce((sum, module) => sum + module.topics.reduce(...))`) generates unnecessary inner function contexts and redundant main thread operations, which hurts performance on unpaginated summary endpoints.
+**Action:** Always count items in multi-level relationships using explicit `for...of` loops rather than using nested `.reduce()` chains. This ensures 0 hidden allocations and keeps main-thread execution strictly O(N) over the flattened data.
