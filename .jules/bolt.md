@@ -67,3 +67,7 @@
 ## 2026-10-28 - Prevent Hidden O(N) Array Allocations in Aggregations
 **Learning:** Chaining array methods like `.flatMap().flatMap().map()` or multiple `.reduce()` calls in the root page view for data aggregation creates hidden O(N) intermediate array allocations and redundant O(N) traversals, blocking the main thread when rendering heavily nested relationships (e.g. `modules -> topics -> articles`).
 **Action:** Use explicit single-pass iteration (like `for...of`) when aggregating over collections (like extracting deeply nested fields or generating keys and properties like `allSlugs` or `articleCount`) to prevent unnecessary memory allocations, redundant passes, and main-thread blocking.
+
+## 2026-10-03 - Prevent Array Allocations in Map Initialization
+**Learning:** Initializing a `Map` directly from a mapped array of tuples (e.g. `new Map(data.map(item => [item.id, item.value]))`) creates an unnecessary intermediate O(N) array allocation. In list views returning deeply nested or large query results (like problems or roadmap modules), this creates hidden GC pressure.
+**Action:** When converting lists into dictionaries, always initialize an empty `Map` and populate it using a single-pass `for...of` loop with `.set()`.
