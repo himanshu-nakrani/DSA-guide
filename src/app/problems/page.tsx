@@ -178,9 +178,11 @@ export default async function ProblemsPage({
       })
     : [];
 
-  const progressMap = new Map<string, ProgressStatus>(
-    progressRows.map((row) => [row.problemId, row.status]),
-  );
+  // ⚡ Bolt: Populate Map directly to avoid O(N) intermediate array allocation
+  const progressMap = new Map<string, ProgressStatus>();
+  for (const row of progressRows) {
+    progressMap.set(row.problemId, row.status);
+  }
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
 
   const withEditorialCount = problems.filter((p) => p.editorial).length;
