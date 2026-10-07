@@ -71,3 +71,6 @@
 ## 2026-10-03 - Prevent Array Allocations in Map Initialization
 **Learning:** Initializing a `Map` directly from a mapped array of tuples (e.g. `new Map(data.map(item => [item.id, item.value]))`) creates an unnecessary intermediate O(N) array allocation. In list views returning deeply nested or large query results (like problems or roadmap modules), this creates hidden GC pressure.
 **Action:** When converting lists into dictionaries, always initialize an empty `Map` and populate it using a single-pass `for...of` loop with `.set()`.
+## 2024-11-20 - Prevent Array Allocation in Aggregation in root page
+**Learning:** Chaining array methods `.map()` and `.reduce()` to count topic articles in a loop creates hidden intermediate array allocations and redundant O(N) traversals.
+**Action:** Use a single-pass `for...of` loop or integrate calculations into an existing outer loop to avoid mapping arrays just to reduce them.
