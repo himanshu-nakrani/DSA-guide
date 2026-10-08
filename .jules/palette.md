@@ -73,3 +73,7 @@
 ## 2026-10-25 - Missing accessible interaction context on palette triggers in Header
 **Learning:** Buttons that trigger modal overlays, dialogs, or search palettes (e.g., Command Palette triggers) often lack the `aria-haspopup` attribute. Without it, screen reader users expect standard navigation or button behavior, rather than being prepared for a modal context change (like a dialog opening).
 **Action:** Always include `aria-haspopup="dialog"` on buttons that trigger command palettes or modal search dialogs to explicitly communicate the interaction model to assistive technologies before they activate the control.
+
+## 2026-11-20 - Adding grouped and pressed states for mutually exclusive candidates
+**Learning:** In interactive learning tools (like DPDecisionTrace and ZeroOneDeque), candidate selection buttons that act as mutually exclusive choices often lack programmatic grouping and state feedback. While they may have visual selection styles, screen readers have no context of the relationship or the active choice.
+**Action:** Always wrap lists of candidate selection buttons in a container with `role="group"` and `aria-label="Candidates"` (or similar). Furthermore, apply the `aria-pressed={selected}` attribute to each candidate `<button>` to communicate the currently active choice to assistive technologies.

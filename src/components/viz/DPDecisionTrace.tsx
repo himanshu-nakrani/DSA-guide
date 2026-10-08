@@ -95,14 +95,14 @@ export function DPDecisionTrace({
         <div className="grid gap-4 md:grid-cols-[1fr_auto]">
           <div className="space-y-3">
             <div className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-[color:var(--pencil)]">Candidates for {safeMode === "house-robber" ? "best[i]" : "current[i]"}</div>
-            <div className="grid gap-2">
+            <div className="grid gap-2" role="group" aria-label="Candidates">
               {frame.choices.map((candidate) => {
                 const selected = choice === candidate.id;
                 const correct = revealed && candidate.id === frame.selected;
                 const incorrect = revealed && selected && candidate.id !== frame.selected;
                 const borderColor = correct ? PALETTE.c1 : incorrect ? PALETTE.destructive : selected ? PALETTE.c3 : PALETTE.border;
                 return (
-                  <button key={candidate.id} type="button" onClick={() => { setChoice(candidate.id); setRevealed(false); }} className="flex w-full items-center justify-between gap-3 border px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]" style={{ borderColor, background: correct ? "color-mix(in srgb, var(--ink-blue) 11%, transparent)" : incorrect ? "color-mix(in srgb, var(--ink-red) 8%, transparent)" : selected ? "color-mix(in srgb, var(--ink-ochre) 13%, transparent)" : "var(--surface-1)" }}>
+                  <button key={candidate.id} type="button" aria-pressed={selected} onClick={() => { setChoice(candidate.id); setRevealed(false); }} className="flex w-full items-center justify-between gap-3 border px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]" style={{ borderColor, background: correct ? "color-mix(in srgb, var(--ink-blue) 11%, transparent)" : incorrect ? "color-mix(in srgb, var(--ink-red) 8%, transparent)" : selected ? "color-mix(in srgb, var(--ink-ochre) 13%, transparent)" : "var(--surface-1)" }}>
                     <span className="text-sm leading-relaxed text-[color:var(--ink)]">{candidate.label}</span>
                     <span className="font-mono text-sm tabular-nums" style={{ color: correct ? PALETTE.c1 : incorrect ? PALETTE.destructive : PALETTE.ink }}>{candidate.value}</span>
                   </button>
