@@ -171,9 +171,20 @@ export default async function ProblemsPage({
     }),
   ]);
 
+  // ⚡ Bolt: Consolidate aggregations (extracting IDs and counting editorials) using a single explicit for...of pass
+  // This prevents redundant O(N) traversals and eliminates the hidden intermediate array allocations from .map() and .filter()
+  const problemIds: string[] = [];
+  let withEditorialCount = 0;
+  for (const problem of problems) {
+    problemIds.push(problem.id);
+    if (problem.editorial) {
+      withEditorialCount++;
+    }
+  }
+
   const progressRows = user
     ? await prisma.userProblemProgress.findMany({
-        where: { userId: user.id, problemId: { in: problems.map((problem) => problem.id) } },
+        where: { userId: user.id, problemId: { in: problemIds } },
         select: { problemId: true, status: true },
       })
     : [];
@@ -183,8 +194,6 @@ export default async function ProblemsPage({
     progressMap.set(row.problemId, row.status);
   }
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
-
-  const withEditorialCount = problems.filter((p) => p.editorial).length;
   const activeFilters = [
     difficulty,
     topicSlug,
