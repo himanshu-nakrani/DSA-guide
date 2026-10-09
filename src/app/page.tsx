@@ -87,16 +87,26 @@ export default async function HomePage() {
   let topicCount = 0;
   let firstSlug = "";
   const allSlugs: string[] = [];
+  const moduleStats = new Map<string, { count: number; topicLine: string }>();
 
   for (const trackModule of modules) {
     topicCount += trackModule.topics.length;
+    let trackModuleCount = 0;
+    let trackModuleTopicLine = "";
     for (const topic of trackModule.topics) {
+      if (trackModuleTopicLine) trackModuleTopicLine += " · ";
+      trackModuleTopicLine += topic.name;
       articleCount += topic.articles.length;
+      trackModuleCount += topic.articles.length;
       for (const article of topic.articles) {
         if (!firstSlug) firstSlug = article.slug;
         allSlugs.push(article.slug);
       }
     }
+    moduleStats.set(trackModule.id, {
+      count: trackModuleCount,
+      topicLine: trackModuleTopicLine,
+    });
   }
 
   const siteUrl = getSiteUrl();
@@ -306,8 +316,9 @@ export default async function HomePage() {
         ) : (
           <ol className="grid gap-4 md:grid-cols-2">
             {modules.map((m) => {
-              const count = m.topics.reduce((t, topic) => t + topic.articles.length, 0);
-              const topicLine = m.topics.map((t) => t.name).join(" · ");
+              const stats = moduleStats.get(m.id)!;
+              const count = stats.count;
+              const topicLine = stats.topicLine;
               return (
                 <li key={m.id}>
                   <Link

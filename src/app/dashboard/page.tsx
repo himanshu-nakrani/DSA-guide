@@ -168,11 +168,7 @@ export default async function DashboardPage() {
   // ⚡ Bolt: Use a Set for O(1) lookups below instead of O(N) array .includes()
   const readSlugSet = new Set(readSlugs);
 
-  const totalArticles = modules.reduce(
-    (sum, module) => sum + module.topics.reduce((inner, topic) => inner + topic.articles.length, 0),
-    0,
-  );
-  const articlePct = totalArticles === 0 ? 0 : Math.round((readSlugs.length / totalArticles) * 100);
+
   const displayedStatuses = [
     ProgressStatus.ATTEMPTED,
     ProgressStatus.NEEDS_REVISION,
@@ -199,14 +195,7 @@ export default async function DashboardPage() {
     if (bucket) bucket.push(entry);
   }
 
-  const nextModule = modules.find((module) => {
-    for (const topic of module.topics) {
-      for (const article of topic.articles) {
-        if (!readSlugSet.has(article.slug)) return true;
-      }
-    }
-    return false;
-  });
+
 
   const statusBuckets = displayedStatuses.map((status) => ({
     status,
@@ -218,31 +207,43 @@ export default async function DashboardPage() {
   for (const entry of allProblems) activityDates.push(entry.updatedAt);
   const activityDays = buildActivityDays(activityDates);
   const currentStreak = computeCurrentStreak(activityDays.map((day) => day.dateKey));
-  const moduleCompletion = modules.map((module) => {
+  // ⚡ Bolt: Consolidate aggregations using a single explicit for...of pass to prevent redundant O(N) traversals and array allocations
+  let totalArticles = 0;
+  let nextModule: { name: string } | undefined = undefined;
+  const moduleCompletion: ModuleCompletion[] = [];
+  for (const trackModule of modules) {
     let readCount = 0;
     let total = 0;
     let nextArticle: { id: string; slug: string; title: string; } | null = null;
+    let hasUnread = false;
 
-    for (const topic of module.topics) {
+    for (const topic of trackModule.topics) {
       for (const article of topic.articles) {
         total++;
         if (readSlugSet.has(article.slug)) {
           readCount++;
         } else if (!nextArticle) {
           nextArticle = article;
+          hasUnread = true;
         }
       }
     }
+    totalArticles += total;
+    if (hasUnread && !nextModule) {
+      nextModule = trackModule;
+    }
 
     const pct = total === 0 ? 0 : Math.round((readCount / total) * 100);
-    return {
-      name: module.name,
+    moduleCompletion.push({
+      name: trackModule.name,
       readCount,
       total,
       pct,
       nextArticle,
-    };
-  });
+    });
+  }
+
+  const articlePct = totalArticles === 0 ? 0 : Math.round((readSlugs.length / totalArticles) * 100);
 
   return (
     <PageShell width="wide" className="space-y-10 md:space-y-12">
