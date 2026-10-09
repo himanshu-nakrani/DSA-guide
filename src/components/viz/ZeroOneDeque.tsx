@@ -199,13 +199,13 @@ export function ZeroOneDeque({
 
           {frame.stage === "edge" ? (
             <div className="space-y-3" aria-label="Deque insertion prediction">
-              <div className="grid gap-2">
+              <div className="grid gap-2" role="group" aria-label="Candidates">
                 {edgeChoices.map((candidate) => {
                   const selected = choice === candidate.id;
                   const correct = revealed && candidate.id === frame.correctAction;
                   const incorrect = revealed && selected && candidate.id !== frame.correctAction;
                   const borderColor = correct ? PALETTE.c1 : incorrect ? PALETTE.destructive : selected ? PALETTE.c3 : PALETTE.border;
-                  return <button key={candidate.id} type="button" onClick={() => { setChoice(candidate.id); setRevealed(false); }} className="flex w-full items-center justify-between border px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]" style={{ borderColor, background: selected ? "color-mix(in srgb, var(--ink-ochre) 12%, transparent)" : "var(--surface-1)" }}><span>{candidate.label}</span><span className="font-mono text-xs" style={{ color: correct ? PALETTE.c1 : incorrect ? PALETTE.destructive : PALETTE.muted }}>{candidate.id === "front" ? "0" : candidate.id === "back" ? "1" : candidate.id === "invalid" ? "!" : "—"}</span></button>;
+                  return <button key={candidate.id} type="button" aria-pressed={selected} onClick={() => { setChoice(candidate.id); setRevealed(false); }} className="flex w-full items-center justify-between border px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]" style={{ borderColor, background: selected ? "color-mix(in srgb, var(--ink-ochre) 12%, transparent)" : "var(--surface-1)" }}><span>{candidate.label}</span><span className="font-mono text-xs" style={{ color: correct ? PALETTE.c1 : incorrect ? PALETTE.destructive : PALETTE.muted }}>{candidate.id === "front" ? "0" : candidate.id === "back" ? "1" : candidate.id === "invalid" ? "!" : "—"}</span></button>;
                 })}
               </div>
               <div className="flex flex-wrap items-center gap-3">
