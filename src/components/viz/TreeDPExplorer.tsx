@@ -131,16 +131,27 @@ export function TreeDPExplorer({
 function TreeDiagram({ frame }: { frame: Frame }) {
   const W = 560;
   const H = 286;
-  const nodeById = new Map(NODES.map((node) => [node.id, node]));
+  // ⚡ Bolt: Prevent array allocations in Map initialization and chained flatMap().map() array methods
+  const nodeById = new Map<NodeId, NodeLayout>();
+  for (const node of NODES) {
+    nodeById.set(node.id, node);
+  }
   const computed = new Set(frame.computed);
+
+  const edges: React.ReactNode[] = [];
+  for (const node of NODES) {
+    for (const child of node.children) {
+      const destination = nodeById.get(child)!;
+      edges.push(
+        <line key={`${node.id}-${child}`} x1={node.x} y1={node.y + 22} x2={destination.x} y2={destination.y - 22} stroke={PALETTE.border} strokeWidth="1.5" />
+      );
+    }
+  }
 
   return (
     <div className="overflow-x-auto">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Tree showing include and exclude dynamic-programming states">
-        {NODES.flatMap((node) => node.children.map((child) => {
-          const destination = nodeById.get(child)!;
-          return <line key={`${node.id}-${child}`} x1={node.x} y1={node.y + 22} x2={destination.x} y2={destination.y - 22} stroke={PALETTE.border} strokeWidth="1.5" />;
-        }))}
+        {edges}
         {NODES.map((node) => {
           const state = frame.states[node.id];
           const isCurrent = frame.current === node.id;
