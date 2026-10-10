@@ -77,3 +77,7 @@
 ## 2026-11-20 - Adding grouped and pressed states for mutually exclusive candidates
 **Learning:** In interactive learning tools (like DPDecisionTrace and ZeroOneDeque), candidate selection buttons that act as mutually exclusive choices often lack programmatic grouping and state feedback. While they may have visual selection styles, screen readers have no context of the relationship or the active choice.
 **Action:** Always wrap lists of candidate selection buttons in a container with `role="group"` and `aria-label="Candidates"` (or similar). Furthermore, apply the `aria-pressed={selected}` attribute to each candidate `<button>` to communicate the currently active choice to assistive technologies.
+
+## 2026-12-05 - Missing accessible focus states on interactive chart legend buttons
+**Learning:** In interactive visualizations (like ComplexityChart), buttons that act as toggleable legend items often lack visible `focus-visible` outlines. Without these, keyboard users cannot perceive which item has focus, hindering accessibility and navigation.
+**Action:** Always verify that interactive buttons within charts and custom visualizations have explicit `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to ensure keyboard accessibility.
