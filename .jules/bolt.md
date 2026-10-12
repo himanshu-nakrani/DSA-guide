@@ -74,3 +74,6 @@
 ## 2024-11-20 - Prevent Array Allocation in Aggregation in root page
 **Learning:** Chaining array methods `.map()` and `.reduce()` to count topic articles in a loop creates hidden intermediate array allocations and redundant O(N) traversals.
 **Action:** Use a single-pass `for...of` loop or integrate calculations into an existing outer loop to avoid mapping arrays just to reduce them.
+## 2026-10-12 - Prevent Array Allocation in React Visualization Tree Rendering
+**Learning:** Generating React edge elements or filtering dictionaries directly inside JSX return statements using functional chains (e.g. `.flatMap().map()` or `.filter().map()`) triggers an intermediate array allocation that runs on every render cycle. When visualizing interactive graph topologies, these hidden allocations trigger unnecessary garbage collection pauses.
+**Action:** Extract tree edge rendering or dictionary mapping from the JSX into a pure, one-pass explicit `for...of` iteration outside the React render body. Collect the computed React elements into a single flat array and render that.
