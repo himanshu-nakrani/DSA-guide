@@ -74,3 +74,7 @@
 ## 2024-11-20 - Prevent Array Allocation in Aggregation in root page
 **Learning:** Chaining array methods `.map()` and `.reduce()` to count topic articles in a loop creates hidden intermediate array allocations and redundant O(N) traversals.
 **Action:** Use a single-pass `for...of` loop or integrate calculations into an existing outer loop to avoid mapping arrays just to reduce them.
+
+## 2024-11-20 - Prevent Render-Cycle Re-allocation of Static Maps and Arrays
+**Learning:** Initializing Maps (`new Map(NODES.map(...))`) and flattening edge arrays (`NODES.flatMap(node => node.children.map(...))`) inline within a React functional component's render cycle creates redundant object and array allocations on every state update, even when the underlying data (`NODES`) is static.
+**Action:** Always hoist derivations (Maps, layout array edges) that depend purely on static module-level constants out of the React render cycle and into the module scope. Populate them using explicit single-pass `for...of` loops rather than chained functional methods to ensure minimal memory pressure.

@@ -24,6 +24,25 @@ const NODES: NodeLayout[] = [
   { id: "E", x: 448, y: 228, children: [] },
 ];
 
+const NODE_BY_ID = new Map<NodeId, NodeLayout>();
+for (const node of NODES) {
+  NODE_BY_ID.set(node.id, node);
+}
+
+const TREE_EDGES: { key: string; x1: number; y1: number; x2: number; y2: number }[] = [];
+for (const node of NODES) {
+  for (const child of node.children) {
+    const destination = NODE_BY_ID.get(child)!;
+    TREE_EDGES.push({
+      key: `${node.id}-${child}`,
+      x1: node.x,
+      y1: node.y + 22,
+      x2: destination.x,
+      y2: destination.y - 22,
+    });
+  }
+}
+
 const FRAMES: Frame[] = [
   {
     current: "D",
@@ -131,16 +150,14 @@ export function TreeDPExplorer({
 function TreeDiagram({ frame }: { frame: Frame }) {
   const W = 560;
   const H = 286;
-  const nodeById = new Map(NODES.map((node) => [node.id, node]));
   const computed = new Set(frame.computed);
 
   return (
     <div className="overflow-x-auto">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Tree showing include and exclude dynamic-programming states">
-        {NODES.flatMap((node) => node.children.map((child) => {
-          const destination = nodeById.get(child)!;
-          return <line key={`${node.id}-${child}`} x1={node.x} y1={node.y + 22} x2={destination.x} y2={destination.y - 22} stroke={PALETTE.border} strokeWidth="1.5" />;
-        }))}
+        {TREE_EDGES.map((edge) => (
+          <line key={edge.key} x1={edge.x1} y1={edge.y1} x2={edge.x2} y2={edge.y2} stroke={PALETTE.border} strokeWidth="1.5" />
+        ))}
         {NODES.map((node) => {
           const state = frame.states[node.id];
           const isCurrent = frame.current === node.id;
