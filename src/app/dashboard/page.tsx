@@ -163,10 +163,13 @@ export default async function DashboardPage() {
   const allProblems = userProblemProgress;
   const recentReads: DashboardArticle[] = articleProgress.slice(0, 6);
   const allArticles = articleProgress;
-  const readSlugs = Array.from(new Set(articleProgress.map((entry) => entry.article.slug)));
 
-  // ⚡ Bolt: Use a Set for O(1) lookups below instead of O(N) array .includes()
-  const readSlugSet = new Set(readSlugs);
+  // ⚡ Bolt: Single pass explicit iteration prevents redundant Sets and hidden mapped Array allocations
+  const readSlugSet = new Set<string>();
+  for (const entry of articleProgress) {
+    readSlugSet.add(entry.article.slug);
+  }
+  const readSlugs = Array.from(readSlugSet);
 
 
   const displayedStatuses = [

@@ -74,3 +74,7 @@
 ## 2024-11-20 - Prevent Array Allocation in Aggregation in root page
 **Learning:** Chaining array methods `.map()` and `.reduce()` to count topic articles in a loop creates hidden intermediate array allocations and redundant O(N) traversals.
 **Action:** Use a single-pass `for...of` loop or integrate calculations into an existing outer loop to avoid mapping arrays just to reduce them.
+
+## 2026-10-17 - Prevent Array Allocations in Map/Set Initialization
+**Learning:** Initializing a `Set` or `Map` by passing an intermediate array via chained mapping (e.g., `new Set(data.map(item => item.slug))`) creates a redundant array allocation. Converting it back to an Array and creating yet another Set amplifies this memory waste.
+**Action:** When extracting a unique list of items, instantiate an empty `Set` and populate it directly using a single-pass `for...of` loop with `.add()` before converting to an Array. This avoids all intermediate allocations.
