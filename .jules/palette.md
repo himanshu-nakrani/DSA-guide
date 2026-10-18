@@ -81,3 +81,7 @@
 ## 2026-10-12 - Missing focus rings on list actions
 **Learning:** Interactive list action buttons (like Cancel, Remove, Rename, Delete, Save changes) within list manager and dialog views frequently omitted explicit focus-visible rings. Relying on hover states or border changes alone creates a severe accessibility gap where keyboard users cannot perceive when these elements receive focus, making list management tasks difficult to navigate.
 **Action:** Always apply standard Tailwind `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to all interactive list action buttons. For solid background buttons (like Delete/Confirm), ensure `focus-visible:ring-offset-1` is used so the ring remains visible against the colored surface.
+
+## 2026-12-05 - Missing accessible focus states on interactive chart legend buttons
+**Learning:** In interactive visualizations (like ComplexityChart), buttons that act as toggleable legend items often lack visible `focus-visible` outlines. Without these, keyboard users cannot perceive which item has focus, hindering accessibility and navigation.
+**Action:** Always verify that interactive buttons within charts and custom visualizations have explicit `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to ensure keyboard accessibility.

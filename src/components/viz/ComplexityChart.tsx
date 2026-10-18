@@ -226,7 +226,7 @@ export function ComplexityChart({
                 setActive(next);
               }}
               aria-pressed={on}
-              className="font-mono text-caption uppercase tracking-[0.12em] px-2 py-1 border border-border bg-background flex items-center gap-2"
+              className="font-mono text-caption uppercase tracking-[0.12em] px-2 py-1 border border-border bg-background flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
               style={{ opacity: on ? 1 : 0.3 }}
             >
               <span
