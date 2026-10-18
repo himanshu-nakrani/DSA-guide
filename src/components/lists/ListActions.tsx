@@ -66,14 +66,14 @@ function ConfirmDialog({
             {description}
           </DialogDescription>
           <div className="mt-5 flex justify-end gap-2">
-            <DialogClose className="inline-flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-border-hover hover:text-foreground">
+            <DialogClose className="inline-flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-border-hover hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]">
               Cancel
             </DialogClose>
             <button
               type="button"
               disabled={pending}
               onClick={onConfirm}
-              className="inline-flex min-h-[44px] items-center rounded-md bg-ink-red px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="inline-flex min-h-[44px] items-center rounded-md bg-ink-red px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
             >
               {pending ? "Working…" : confirmLabel}
             </button>
@@ -110,7 +110,7 @@ export function RemoveFromListButton({
         type="button"
         onClick={() => setOpen(true)}
         title={`Remove from ${listName}`}
-        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-ink-red hover:border-ink-red/50 transition-colors cursor-pointer"
+        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-ink-red hover:border-ink-red/50 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
       >
         <X className="h-3.5 w-3.5" strokeWidth={1.5} />
         Remove
@@ -249,14 +249,14 @@ export function ListActions({
         <div className="flex items-center gap-2">
           <button
             type="submit"
-            className="inline-flex min-h-[44px] items-center rounded-md border border-ink bg-ink px-4 py-2 text-small font-medium text-paper transition-colors hover:bg-ink-blue hover:border-ink-blue cursor-pointer"
+            className="inline-flex min-h-[44px] items-center rounded-md border border-ink bg-ink px-4 py-2 text-small font-medium text-paper transition-colors hover:bg-ink-blue hover:border-ink-blue cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
           >
             Save changes
           </button>
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="inline-flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-small font-medium text-muted-foreground hover:text-ink-blue hover:border-ink-blue transition-colors cursor-pointer"
+            className="inline-flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-small font-medium text-muted-foreground hover:text-ink-blue hover:border-ink-blue transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
           >
             Cancel
           </button>
@@ -270,7 +270,7 @@ export function ListActions({
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-ink-blue hover:border-ink-blue/50 transition-colors cursor-pointer"
+        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-ink-blue hover:border-ink-blue/50 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
       >
         <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
         Rename
@@ -279,7 +279,7 @@ export function ListActions({
         type="button"
         onClick={() => setConfirmOpen(true)}
         title={`Delete ${currentName}`}
-        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-ink-red hover:border-ink-red/50 transition-colors cursor-pointer"
+        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-ink-red hover:border-ink-red/50 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
       >
         <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
         Delete
@@ -344,7 +344,7 @@ export function ShareButton({
         }}
         aria-pressed={isPublic}
         title={isPublic ? "Make private" : "Make public"}
-        className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-md border px-3.5 py-2 text-xs font-medium transition-colors cursor-pointer disabled:opacity-60 ${
+        className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-md border px-3.5 py-2 text-xs font-medium transition-colors cursor-pointer disabled:opacity-60 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] ${
           isPublic
             ? "border-ink-blue/40 bg-ink-blue-wash text-ink-blue"
             : "border-border text-muted-foreground hover:text-foreground hover:border-border-hover"
@@ -370,7 +370,7 @@ export function ShareButton({
           }}
           aria-label="Copy public link"
           title="Copy public link"
-          className="grid h-10 w-10 min-h-[44px] min-w-[44px] place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:border-border-hover hover:text-foreground"
+          className="grid h-10 w-10 min-h-[44px] min-w-[44px] place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:border-border-hover hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
         >
           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </button>
@@ -466,7 +466,7 @@ export function ListItemsManager({
             setSelected(new Set());
           }}
           aria-pressed={selecting}
-          className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-md border px-3.5 py-2 text-xs font-medium transition-colors cursor-pointer ${
+          className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-md border px-3.5 py-2 text-xs font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] ${
             selecting
               ? "border-ink-blue/40 bg-ink-blue-wash text-ink-blue"
               : "border-border text-muted-foreground hover:text-foreground hover:border-border-hover"
@@ -489,7 +489,7 @@ export function ListItemsManager({
                   aria-checked={checked}
                   aria-label={`Select ${problem.title}`}
                   onClick={() => toggleOne(problemId)}
-                  className="absolute left-2 top-2 z-10 grid h-11 w-11 min-h-[44px] min-w-[44px] place-items-center"
+                  className="absolute left-2 top-2 z-10 grid h-11 w-11 min-h-[44px] min-w-[44px] place-items-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]"
                 >
                   <span
                     className={`grid h-5 w-5 place-items-center rounded-md border transition-colors ${
@@ -549,7 +549,7 @@ export function ListItemsManager({
               type="button"
               disabled={pending}
               onClick={() => runBulk("move")}
-              className="inline-flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:border-border-hover disabled:opacity-60"
+              className="inline-flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:border-border-hover disabled:opacity-60 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
             >
               Move
             </button>
@@ -558,7 +558,7 @@ export function ListItemsManager({
             type="button"
             disabled={pending}
             onClick={() => runBulk("remove")}
-            className="inline-flex min-h-[44px] items-center rounded-md border border-ink-red/40 px-4 py-2 text-sm font-medium text-ink-red transition-colors hover:bg-ink-red-wash disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center rounded-md border border-ink-red/40 px-4 py-2 text-sm font-medium text-ink-red transition-colors hover:bg-ink-red-wash disabled:opacity-60 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
           >
             Remove
           </button>

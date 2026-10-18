@@ -134,13 +134,21 @@ function TreeDiagram({ frame }: { frame: Frame }) {
   const nodeById = new Map(NODES.map((node) => [node.id, node]));
   const computed = new Set(frame.computed);
 
+  // ⚡ Bolt: Prevent hidden O(N) array allocations (.flatMap.map) using explicit iteration
+  const edges = [];
+  for (const node of NODES) {
+    for (const child of node.children) {
+      const destination = nodeById.get(child)!;
+      edges.push(
+        <line key={`${node.id}-${child}`} x1={node.x} y1={node.y + 22} x2={destination.x} y2={destination.y - 22} stroke={PALETTE.border} strokeWidth="1.5" />
+      );
+    }
+  }
+
   return (
     <div className="overflow-x-auto">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Tree showing include and exclude dynamic-programming states">
-        {NODES.flatMap((node) => node.children.map((child) => {
-          const destination = nodeById.get(child)!;
-          return <line key={`${node.id}-${child}`} x1={node.x} y1={node.y + 22} x2={destination.x} y2={destination.y - 22} stroke={PALETTE.border} strokeWidth="1.5" />;
-        }))}
+        {edges}
         {NODES.map((node) => {
           const state = frame.states[node.id];
           const isCurrent = frame.current === node.id;
@@ -167,7 +175,14 @@ function TreeDiagram({ frame }: { frame: Frame }) {
 }
 
 function StatePanel({ frame }: { frame: Frame }) {
-  const rows = NODES.filter((node) => frame.states[node.id]).map((node) => ({ id: node.id, state: frame.states[node.id]! }));
+  // ⚡ Bolt: Prevent hidden O(N) array allocations (.filter.map) using explicit iteration
+  const rows = [];
+  for (const node of NODES) {
+    if (frame.states[node.id]) {
+      rows.push({ id: node.id, state: frame.states[node.id]! });
+    }
+  }
+
   return (
     <aside className="border p-3" style={{ borderColor: PALETTE.border, background: "var(--surface-2)" }} aria-label="Computed Tree DP states">
       <div className="mb-2 font-mono text-[0.64rem] uppercase tracking-[0.14em] text-[color:var(--pencil)]">Computed states</div>
