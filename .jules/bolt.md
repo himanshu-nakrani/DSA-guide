@@ -78,6 +78,10 @@
 **Learning:** Chaining array methods like `problems.map(p => p.id)` and `problems.filter(p => p.editorial).length` across large, deeply nested lists causes multiple O(N) intermediate array memory allocations and redundant iterations inside React Server Components during rendering or database querying.
 **Action:** Replace sequential `.map()` and `.filter()` operations over the same dataset with a single explicit `for...of` pass, executing `.push()` and inline counts. This strictly limits iteration to one pass and avoids intermediate garbage collection pressure from temporary mapped arrays.
 
+## 2026-10-17 - Prevent Array Allocations in Map/Set Initialization
+**Learning:** Initializing a `Set` or `Map` by passing an intermediate array via chained mapping (e.g., `new Set(data.map(item => item.slug))`) creates a redundant array allocation. Converting it back to an Array and creating yet another Set amplifies this memory waste.
+**Action:** When extracting a unique list of items, instantiate an empty `Set` and populate it directly using a single-pass `for...of` loop with `.add()` before converting to an Array. This avoids all intermediate allocations.
+
 ## 2026-11-10 - Prevent Chained Array Allocations inside Component Render
 **Learning:** Using functional array chaining like `.flatMap((node) => node.children.map(...))` and `.filter().map()` inside React render blocks causes redundant, hidden O(N) array allocations on every component re-render, degrading UI performance. Additionally, performing array searches like `.find()` inside these mappings degrades rendering performance from O(N) to O(N²).
 **Action:** Replace functional array chaining inside rendering blocks with explicit `for...of` loops outside of the render tree (or memoized) to compute arrays in a single pass. Also, always resolve cross-references by converting target arrays to a `Map` before the loop, enabling strictly O(1) lookups during traversal.
