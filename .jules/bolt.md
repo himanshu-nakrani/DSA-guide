@@ -74,3 +74,7 @@
 ## 2024-11-20 - Prevent Array Allocation in Aggregation in root page
 **Learning:** Chaining array methods `.map()` and `.reduce()` to count topic articles in a loop creates hidden intermediate array allocations and redundant O(N) traversals.
 **Action:** Use a single-pass `for...of` loop or integrate calculations into an existing outer loop to avoid mapping arrays just to reduce them.
+
+## 2026-11-10 - Prevent Chained Array Allocations inside Component Render
+**Learning:** Using functional array chaining like `.flatMap((node) => node.children.map(...))` and `.filter().map()` inside React render blocks causes redundant, hidden O(N) array allocations on every component re-render, degrading UI performance. Additionally, performing array searches like `.find()` inside these mappings degrades rendering performance from O(N) to O(N²).
+**Action:** Replace functional array chaining inside rendering blocks with explicit `for...of` loops outside of the render tree (or memoized) to compute arrays in a single pass. Also, always resolve cross-references by converting target arrays to a `Map` before the loop, enabling strictly O(1) lookups during traversal.

@@ -67,6 +67,28 @@ export function RerootingPropagation({ caption = "Tree DP rerooting: propagate t
   const [step, setStep] = React.useState(0);
   const frame = frames[step];
 
+  const nodeById = React.useMemo(() => {
+    const map = new Map<RerootNode, NodeLayout>();
+    for (const node of NODES) {
+      map.set(node.id, node);
+    }
+    return map;
+  }, []);
+
+  // ⚡ Bolt: Prevent hidden O(N) array allocations (.flatMap.map) using explicit iteration
+  const edges = React.useMemo(() => {
+    const arr = [];
+    for (const node of NODES) {
+      for (const child of node.children) {
+        const destination = nodeById.get(child)!;
+        arr.push(
+          <line key={`${node.id}-${child}`} x1={node.x} y1={node.y + 22} x2={destination.x} y2={destination.y - 22} stroke={PALETTE.border} strokeWidth="1.5" />
+        );
+      }
+    }
+    return arr;
+  }, [nodeById]);
+
   return (
     <VizFrame caption={caption} controls={
       <>
@@ -88,7 +110,7 @@ export function RerootingPropagation({ caption = "Tree DP rerooting: propagate t
         <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_15rem]">
           <div className="overflow-x-auto">
             <svg viewBox="0 0 560 300" className="w-full min-w-[32rem] h-auto" role="img" aria-label="Five-node tree with subtree sizes and propagated distance sums">
-              {NODES.flatMap((node) => node.children.map((child) => { const destination = NODES.find((candidate) => candidate.id === child)!; return <line key={`${node.id}-${child}`} x1={node.x} y1={node.y + 22} x2={destination.x} y2={destination.y - 22} stroke={PALETTE.border} strokeWidth="1.5" />; }))}
+              {edges}
               {NODES.map((node) => {
                 const isCurrent = frame.current === node.id;
                 const size = frame.sizes[node.id];
