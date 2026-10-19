@@ -52,5 +52,12 @@ export const getBookmarkProblemIds = cache(async (userId: string) => {
     },
   });
 
-  return new Set(list?.items.map((item) => item.problemId) ?? []);
+  // ⚡ Bolt: Prevent hidden O(N) array allocation (.map()) when initializing the Set
+  const problemIds = new Set<string>();
+  if (list?.items) {
+    for (const item of list.items) {
+      problemIds.add(item.problemId);
+    }
+  }
+  return problemIds;
 });
