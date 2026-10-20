@@ -85,3 +85,7 @@
 ## 2026-12-05 - Missing accessible focus states on interactive chart legend buttons
 **Learning:** In interactive visualizations (like ComplexityChart), buttons that act as toggleable legend items often lack visible `focus-visible` outlines. Without these, keyboard users cannot perceive which item has focus, hindering accessibility and navigation.
 **Action:** Always verify that interactive buttons within charts and custom visualizations have explicit `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to ensure keyboard accessibility.
+
+## 2025-07-25 - Missing accessible focus states on main search palette triggers
+**Learning:** The main search button (Command Palette trigger) in the primary header lacked visible `focus-visible` outlines. Because this button is a primary navigational tool and often accessed early in the document flow by keyboard users, the absence of a visible focus ring makes keyboard navigation confusing and creates a significant accessibility gap.
+**Action:** Always verify that primary navigation and action buttons, especially search triggers like the main Command Palette button in the Header, include explicit `focus-visible` styles (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--links)]`) to ensure keyboard accessibility.
