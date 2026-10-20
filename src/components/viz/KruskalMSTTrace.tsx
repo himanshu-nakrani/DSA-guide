@@ -39,7 +39,15 @@ function root(parent: Record<string, string>, node: string): string {
 
 export function buildKruskalFrames(inputEdges: KruskalEdge[] = DEFAULT_EDGES): KruskalFrame[] {
   const edges = [...inputEdges].sort((a, b) => a.weight - b.weight || `${a.from}${a.to}`.localeCompare(`${b.from}${b.to}`));
-  const nodes = [...new Set(edges.flatMap((edge) => [edge.from, edge.to]))].sort();
+  // ⚡ Bolt: Prevent chained intermediate array allocations during Set initialization
+  // We populate the nodeSet using a single-pass loop instead of edges.flatMap().map()
+  // to avoid redundant O(N) memory allocations, reducing garbage collection pressure.
+  const nodeSet = new Set<string>();
+  for (const edge of edges) {
+    nodeSet.add(edge.from);
+    nodeSet.add(edge.to);
+  }
+  const nodes = Array.from(nodeSet).sort();
   const parent = Object.fromEntries(nodes.map((node) => [node, node]));
   const accepted: KruskalEdge[] = [];
   let components = nodes.length;
