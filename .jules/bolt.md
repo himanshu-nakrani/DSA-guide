@@ -85,3 +85,7 @@
 ## 2026-11-10 - Prevent Chained Array Allocations inside Component Render
 **Learning:** Using functional array chaining like `.flatMap((node) => node.children.map(...))` and `.filter().map()` inside React render blocks causes redundant, hidden O(N) array allocations on every component re-render, degrading UI performance. Additionally, performing array searches like `.find()` inside these mappings degrades rendering performance from O(N) to O(N²).
 **Action:** Replace functional array chaining inside rendering blocks with explicit `for...of` loops outside of the render tree (or memoized) to compute arrays in a single pass. Also, always resolve cross-references by converting target arrays to a `Map` before the loop, enabling strictly O(1) lookups during traversal.
+
+## 2026-11-12 - Prevent Intermediate Array Allocations inside React cache()
+**Learning:** Initializing Sets using mapped arrays (like `new Set(data.map(...))`) inside React `cache()` functions causes redundant O(N) intermediate array allocations that amplify GC pressure during hot paths.
+**Action:** Always instantiate an empty `Set` and populate it using a single-pass `for...of` loop with `.add()` inside performance-sensitive helpers like `cache()`.
