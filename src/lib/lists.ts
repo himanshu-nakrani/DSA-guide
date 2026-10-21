@@ -52,5 +52,12 @@ export const getBookmarkProblemIds = cache(async (userId: string) => {
     },
   });
 
-  return new Set(list?.items.map((item) => item.problemId) ?? []);
+  // ⚡ Bolt: Prevent intermediate O(N) array allocation inside React cache()
+  // by populating the Set directly using a single-pass iteration.
+  const ids = new Set<string>();
+  const items = list?.items ?? [];
+  for (const item of items) {
+    ids.add(item.problemId);
+  }
+  return ids;
 });
