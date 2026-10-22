@@ -140,11 +140,15 @@ export default async function HomePage() {
     <div className="min-h-screen">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(moduleListLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(moduleListLd).replace(/</g, "\\u003c"),
+        }}
       />
       <link rel="preload" href="/fonts/iAWriterQuattroV.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       <link rel="preload" href="/icon.svg" as="image" type="image/svg+xml" />
