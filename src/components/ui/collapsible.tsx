@@ -23,7 +23,7 @@ export function CollapsibleTrigger({
   return (
     <Collapsible.Trigger
       className={cn(
-        "group/section flex w-full items-center justify-between gap-3 py-3 text-left cursor-pointer",
+        "group/section flex w-full items-center justify-between gap-3 py-3 text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-inset",
         className,
       )}
       {...props}

@@ -116,7 +116,7 @@ export function Toaster() {
               type="button"
               onClick={() => dismiss(item.id)}
               aria-label="Dismiss notification"
-              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]"
             >
               <X className="h-3.5 w-3.5" />
             </button>
