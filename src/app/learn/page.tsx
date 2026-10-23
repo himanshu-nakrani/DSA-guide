@@ -142,7 +142,7 @@ export default async function LearnPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd).replace(/</g, "\\u003c") }}
       />
     <PageShell width="narrow">
       {readSlugs.length > 0 && <ReadProgressSync slugs={readSlugs} />}
