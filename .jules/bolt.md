@@ -85,3 +85,7 @@
 ## 2026-11-10 - Prevent Chained Array Allocations inside Component Render
 **Learning:** Using functional array chaining like `.flatMap((node) => node.children.map(...))` and `.filter().map()` inside React render blocks causes redundant, hidden O(N) array allocations on every component re-render, degrading UI performance. Additionally, performing array searches like `.find()` inside these mappings degrades rendering performance from O(N) to O(N²).
 **Action:** Replace functional array chaining inside rendering blocks with explicit `for...of` loops outside of the render tree (or memoized) to compute arrays in a single pass. Also, always resolve cross-references by converting target arrays to a `Map` before the loop, enabling strictly O(1) lookups during traversal.
+
+## 2025-05-19 - Prevent array allocations when initializing Map or Set with flatMap
+**Learning:** Initializing a `Map` or `Set` directly from a mapped array using `.flatMap()` (e.g. `new Set(edges.flatMap(...))`) creates an unnecessary intermediate O(N) array allocation, increasing memory pressure during frequent UI renders or tree traversal visualizations.
+**Action:** When extracting lists into uniqueness Sets or Maps from nested structures or edges, instantiate an empty `Set` or `Map` and use an explicit single-pass `for...of` loop with `.add()` or `.set()` to avoid hidden intermediate garbage arrays.
