@@ -85,3 +85,7 @@
 ## 2026-11-10 - Prevent Chained Array Allocations inside Component Render
 **Learning:** Using functional array chaining like `.flatMap((node) => node.children.map(...))` and `.filter().map()` inside React render blocks causes redundant, hidden O(N) array allocations on every component re-render, degrading UI performance. Additionally, performing array searches like `.find()` inside these mappings degrades rendering performance from O(N) to O(N²).
 **Action:** Replace functional array chaining inside rendering blocks with explicit `for...of` loops outside of the render tree (or memoized) to compute arrays in a single pass. Also, always resolve cross-references by converting target arrays to a `Map` before the loop, enabling strictly O(1) lookups during traversal.
+
+## 2025-05-19 - Precomputing Maps to avoid O(N²) .find in render maps
+**Learning:** Using array search methods like `.find()` inside rendering loops like `edges.map()` creates a hidden O(N²) bottleneck, scaling quadratically during component rendering and negatively impacting GC performance.
+**Action:** When resolving cross-references in arrays during render operations, explicitly precompute a lookup `Map` of the target array using `useMemo` and a single-pass `for...of` loop (avoiding `.map()` to bypass intermediate array allocation). Then, use O(1) `.get()` lookups within the rendering `.map` call.

@@ -58,6 +58,13 @@ export function DAGScheduler({
   const available = new Set(state.queue);
   const processed = new Set(state.processed);
 
+  // ⚡ Bolt: Precompute node map to avoid O(N^2) lookups inside render loops
+  const nodeById = React.useMemo(() => {
+    const map = new Map<NodeId, { id: NodeId; x: number; y: number }>();
+    for (const node of NODES) map.set(node.id, node);
+    return map;
+  }, []);
+
   return (
     <VizFrame
       caption={caption}
@@ -88,8 +95,8 @@ export function DAGScheduler({
               </marker>
             </defs>
             {edges.map((edge, index) => {
-              const from = NODES.find((node) => node.id === edge.from)!;
-              const to = NODES.find((node) => node.id === edge.to)!;
+              const from = nodeById.get(edge.from)!;
+              const to = nodeById.get(edge.to)!;
               const isCycleEdge = safeMode === "cycle" && edge.from === "E" && edge.to === "B";
               const changed = state.current === edge.from;
               return (
@@ -185,9 +192,16 @@ export function advanceDAGState(state: GraphState, edges: Edge[], node: NodeId):
 export function buildInitialState(edges: Edge[]): GraphState {
   const inDegree: Record<NodeId, number> = { A: 0, B: 0, C: 0, D: 0, E: 0 };
   for (const edge of edges) inDegree[edge.to] += 1;
+
+  // ⚡ Bolt: Prevent chained array allocations (.map.filter) using explicit iteration
+  const queue: NodeId[] = [];
+  for (const node of NODES) {
+    if (inDegree[node.id] === 0) queue.push(node.id);
+  }
+
   return {
     inDegree,
-    queue: NODES.map((node) => node.id).filter((node) => inDegree[node] === 0),
+    queue,
     processed: [],
     current: null,
     status: "ready",

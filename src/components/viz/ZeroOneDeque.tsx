@@ -84,13 +84,20 @@ export function ZeroOneDeque({
 
   const frame = frames[step];
   const complete = frame.stage === "complete" || frame.stage === "invalid";
-  const edgeChoices: Choice[] = [
+  const edgeChoices = React.useMemo<Choice[]>(() => [
     { id: "front", label: "push front" },
     { id: "back", label: "push back" },
     { id: "keep", label: "keep deque" },
     { id: "invalid", label: "reject weight" },
-  ];
-  const selectedChoice = edgeChoices.find((candidate) => candidate.id === choice);
+  ], []);
+
+  const edgeChoicesById = React.useMemo(() => {
+    const map = new Map<ZeroOneAction, Choice>();
+    for (const choice of edgeChoices) map.set(choice.id, choice);
+    return map;
+  }, [edgeChoices]);
+  const selectedChoice = choice ? edgeChoicesById.get(choice) : undefined;
+
   const isCorrect = revealed && choice === frame.correctAction;
   const nextDisabled = frame.stage === "edge" && !revealed;
 
@@ -104,6 +111,13 @@ export function ZeroOneDeque({
     setChoice(null);
     setRevealed(false);
   };
+
+  // ⚡ Bolt: Precompute node map to avoid O(N^2) lookups inside render loops
+  const nodeById = React.useMemo(() => {
+    const map = new Map<ZeroOneNode, { id: ZeroOneNode; x: number; y: number }>();
+    for (const node of NODES) map.set(node.id, node);
+    return map;
+  }, []);
 
   return (
     <VizFrame
@@ -138,8 +152,8 @@ export function ZeroOneDeque({
               </marker>
             </defs>
             {edges.map((edge, index) => {
-              const from = NODES.find((node) => node.id === edge.from)!;
-              const to = NODES.find((node) => node.id === edge.to)!;
+              const from = nodeById.get(edge.from)!;
+              const to = nodeById.get(edge.to)!;
               const active = frame.edgeIndex === index;
               return (
                 <g key={`${edge.from}-${edge.to}-${index}`}>

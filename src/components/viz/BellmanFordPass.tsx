@@ -72,6 +72,13 @@ export function BellmanFordPass({
   };
   const statusColor = frame.status === "negative-cycle" ? PALETTE.destructive : frame.status === "complete" ? PALETTE.c1 : PALETTE.c3;
 
+  // ⚡ Bolt: Precompute node map to avoid O(N^2) lookups inside render loops
+  const nodeById = React.useMemo(() => {
+    const map = new Map<NodeId, { id: NodeId; x: number; y: number }>();
+    for (const node of NODES) map.set(node.id, node);
+    return map;
+  }, []);
+
   return (
     <VizFrame
       caption={caption}
@@ -105,8 +112,8 @@ export function BellmanFordPass({
               </marker>
             </defs>
             {edges.map((edge, index) => {
-              const from = NODES.find((node) => node.id === edge.from)!;
-              const to = NODES.find((node) => node.id === edge.to)!;
+              const from = nodeById.get(edge.from)!;
+              const to = nodeById.get(edge.to)!;
               const active = frame.edgeIndex === index;
               return (
                 <g key={`${edge.from}-${edge.to}-${index}`}>
