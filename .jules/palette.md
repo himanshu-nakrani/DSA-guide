@@ -91,3 +91,7 @@
 **Learning:** Custom interactive elements (e.g., buttons, toggles) must explicitly define keyboard focus styles using Tailwind utilities (e.g., `outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)]`) to ensure clear visual feedback for keyboard navigation, as relying on default browser outlines or hover states alone is insufficient. When elements are inside `overflow-hidden` parents, use `focus-visible:ring-inset` to draw the outline inward so it's not clipped.
 
 **Action:** Ensure explicit focus states (`focus-visible:ring-2`, `focus-visible:ring-offset-*`, etc.) are added to all custom interactive components in the UI system (like `Button`, `TabsTab`, `CollapsibleTrigger`, `Toaster` dismiss buttons).
+
+## 2026-10-26 - Focus Styles in Overflow Hidden Elements
+**Learning:** When applying keyboard focus styles (like `focus-visible:ring`) to interactive elements contained within `overflow-hidden` parents, the focus ring may be clipped and rendered invisible, breaking accessibility for keyboard navigation.
+**Action:** Use `focus-visible:ring-inset` to draw the outline inward, ensuring it remains fully visible within the clipping bounds of the parent element.
