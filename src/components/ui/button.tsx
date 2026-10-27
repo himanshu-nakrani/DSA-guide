@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
  *   <Button variant="ink" render={<Link href="/learn" />}>Browse</Button>
  */
 export const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-medium transition-colors duration-[var(--dur-base)] ease-[var(--ease-out)] select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-medium transition-colors duration-[var(--dur-base)] ease-[var(--ease-out)] select-none outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -41,7 +41,7 @@ export const buttonVariants = cva(
  * plain cva (no Base UI) so viz bundles stay dependency-light.
  */
 export const chipButtonVariants = cva(
-  "font-mono text-caption uppercase tracking-[0.1em] inline-flex items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-[32px] sm:min-w-0 px-3 py-2 sm:px-2.5 sm:py-1 rounded-[var(--radius-sm)] border transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] disabled:opacity-30 disabled:cursor-not-allowed",
+  "font-mono text-caption uppercase tracking-[0.1em] inline-flex items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-[32px] sm:min-w-0 px-3 py-2 sm:px-2.5 sm:py-1 rounded-[var(--radius-sm)] border transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] disabled:opacity-30 disabled:cursor-not-allowed",
   {
     variants: {
       active: {

@@ -35,7 +35,7 @@ export function TabsTab({
   return (
     <Tabs.Tab
       className={cn(
-        "font-mono text-caption uppercase tracking-[0.1em] px-3 py-1.5 min-h-[40px] inline-flex items-center rounded-md border border-transparent text-muted-foreground hover:text-ink-blue transition-colors cursor-pointer",
+        "font-mono text-caption uppercase tracking-[0.1em] px-3 py-1.5 min-h-[40px] inline-flex items-center rounded-md border border-transparent text-muted-foreground hover:text-ink-blue transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ink-blue)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface-1)]",
         "data-[selected]:border-ink-blue/40 data-[selected]:bg-ink-blue-wash data-[selected]:text-ink-blue",
         className,
       )}
