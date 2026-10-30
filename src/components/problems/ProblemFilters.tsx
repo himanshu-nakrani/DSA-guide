@@ -125,6 +125,7 @@ export function ProblemFilters({
           type="button"
           onClick={() => setFiltersOpen((v) => !v)}
           aria-expanded={filtersOpen}
+          aria-controls="filters-region"
           className={cn(
             "inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors",
             activeCount > 0 || filtersOpen
@@ -143,6 +144,7 @@ export function ProblemFilters({
       </div>
 
       <div
+        id="filters-region"
         className={cn(
           "grid gap-4 md:grid-cols-2 xl:grid-cols-5",
           filtersOpen ? "grid" : "hidden md:grid",

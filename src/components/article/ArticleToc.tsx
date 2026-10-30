@@ -139,6 +139,7 @@ export function ArticleTocMobile({ items }: { items: TocItem[] }) {
         aria-label="Jump to section"
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-controls="toc-dialog"
         className="fixed bottom-5 right-5 z-40 inline-flex h-12 items-center gap-2 rounded-full border border-border bg-surface-1 pl-4 pr-5 text-sm font-medium text-foreground shadow-[var(--shadow-pop)] transition-colors hover:border-border-hover"
       >
         <List className="h-4 w-4" strokeWidth={1.75} />
@@ -147,6 +148,7 @@ export function ArticleTocMobile({ items }: { items: TocItem[] }) {
 
       {open && (
         <div
+          id="toc-dialog"
           ref={dialogRef}
           className="fixed inset-0 z-50"
           role="dialog"
