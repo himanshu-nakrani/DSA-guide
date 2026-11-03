@@ -89,3 +89,7 @@
 ## 2026-11-13 - Prevent Chained Array Allocations in Map/Set Initialization
 **Learning:** Initializing a `Map` or `Set` by passing a mapped array or a flat-mapped array (e.g. `new Set(edges.flatMap(e => [e.from, e.to]))` or `new Set(list.map(l => l.id))`) redundantly allocates an intermediate array object before populating the Set.
 **Action:** When extracting a unique list of items, instantiate an empty `Set` and populate it directly using a single-pass `for...of` loop with `.add()`. This avoids the hidden intermediate garbage array allocation.
+
+## 2024-11-14 - Prevent O(N) Lookups in Render Array Chaining
+**Learning:** Initializing a Map from an array of static items `new Map(NODES.map(node => [node.id, node]))` allocates intermediate arrays and goes against codebase patterns. Moreover, resolving nodes in the component with `.find()` inside `edges.map()` creates O(N^2) render complexity.
+**Action:** When creating a dictionary lookup of constants, initialize an empty Map and populate it via a `for...of` loop. Look up nodes with `.get()` to achieve strictly O(1) traversal and avoid intermediate arrays or `.find()`.
