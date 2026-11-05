@@ -27,6 +27,11 @@ const NODES: { id: NodeId; x: number; y: number }[] = [
   { id: "D", x: 430, y: 45 },
 ];
 
+const NODE_BY_ID = new Map<NodeId, { id: NodeId; x: number; y: number }>();
+for (const node of NODES) {
+  NODE_BY_ID.set(node.id, node);
+}
+
 const VARIANTS: Record<Variant, Edge[]> = {
   "negative-edge": [
     { from: "A", to: "B", weight: 4 },
@@ -105,8 +110,8 @@ export function BellmanFordPass({
               </marker>
             </defs>
             {edges.map((edge, index) => {
-              const from = NODES.find((node) => node.id === edge.from)!;
-              const to = NODES.find((node) => node.id === edge.to)!;
+              const from = NODE_BY_ID.get(edge.from)!;
+              const to = NODE_BY_ID.get(edge.to)!;
               const active = frame.edgeIndex === index;
               return (
                 <g key={`${edge.from}-${edge.to}-${index}`}>
