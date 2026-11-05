@@ -25,6 +25,11 @@ const NODES: { id: NodeId; x: number; y: number }[] = [
   { id: "E", x: 258, y: 258 },
 ];
 
+const NODE_BY_ID = new Map<NodeId, { id: NodeId; x: number; y: number }>();
+for (const node of NODES) {
+  NODE_BY_ID.set(node.id, node);
+}
+
 const BASE_EDGES: Edge[] = [
   { from: "A", to: "C" },
   { from: "B", to: "C" },
@@ -88,8 +93,8 @@ export function DAGScheduler({
               </marker>
             </defs>
             {edges.map((edge, index) => {
-              const from = NODES.find((node) => node.id === edge.from)!;
-              const to = NODES.find((node) => node.id === edge.to)!;
+              const from = NODE_BY_ID.get(edge.from)!;
+              const to = NODE_BY_ID.get(edge.to)!;
               const isCycleEdge = safeMode === "cycle" && edge.from === "E" && edge.to === "B";
               const changed = state.current === edge.from;
               return (

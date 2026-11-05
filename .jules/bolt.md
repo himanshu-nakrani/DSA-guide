@@ -89,3 +89,7 @@
 ## 2026-11-13 - Prevent Chained Array Allocations in Map/Set Initialization
 **Learning:** Initializing a `Map` or `Set` by passing a mapped array or a flat-mapped array (e.g. `new Set(edges.flatMap(e => [e.from, e.to]))` or `new Set(list.map(l => l.id))`) redundantly allocates an intermediate array object before populating the Set.
 **Action:** When extracting a unique list of items, instantiate an empty `Set` and populate it directly using a single-pass `for...of` loop with `.add()`. This avoids the hidden intermediate garbage array allocation.
+
+## 2026-11-14 - Prevent O(N²) Array Lookups inside Render Loops
+**Learning:** Performing `Array.prototype.find()` inside a React render loop (e.g. `edges.map(e => NODES.find(n => n.id === e.from))`) causes the component to execute O(N²) operations, which can degrade rendering performance in large lists.
+**Action:** Always resolve references prior to rendering by building an O(1) dictionary (like a `Map`) using a single `for...of` loop over the target array, then use `.get()` instead of `.find()` inside the render loop.
