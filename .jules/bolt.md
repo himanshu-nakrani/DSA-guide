@@ -89,3 +89,7 @@
 ## 2026-11-13 - Prevent Chained Array Allocations in Map/Set Initialization
 **Learning:** Initializing a `Map` or `Set` by passing a mapped array or a flat-mapped array (e.g. `new Set(edges.flatMap(e => [e.from, e.to]))` or `new Set(list.map(l => l.id))`) redundantly allocates an intermediate array object before populating the Set.
 **Action:** When extracting a unique list of items, instantiate an empty `Set` and populate it directly using a single-pass `for...of` loop with `.add()`. This avoids the hidden intermediate garbage array allocation.
+
+## 2024-11-06 - Hidden O(N) array allocations in Set constructor
+**Learning:** Initializing `Set` or `Map` using `.map()` inside their constructors (e.g., `new Set(array.map(...))`) creates a hidden intermediate array that is immediately thrown away, causing unnecessary allocations and garbage collection (GC) pressure, which matters especially in React's `useMemo` block that could re-evaluate on component state changes.
+**Action:** Always instantiate an empty `Set` or `Map` and use a single-pass `for...of` loop with `.add()` or `.set()` instead of functional array chaining when initializing from lists in components, especially in high-frequency rendering components like visualizations or interactive search palettes.
