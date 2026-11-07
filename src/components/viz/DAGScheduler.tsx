@@ -25,6 +25,11 @@ const NODES: { id: NodeId; x: number; y: number }[] = [
   { id: "E", x: 258, y: 258 },
 ];
 
+// ⚡ Bolt: Pre-compute static lookup maps outside React renders using explicit loops
+// to avoid redundant O(N) array intermediate allocations and O(N) .find() during rendering
+const NODE_MAP = new Map<NodeId, typeof NODES[0]>();
+for (const node of NODES) NODE_MAP.set(node.id, node);
+
 const BASE_EDGES: Edge[] = [
   { from: "A", to: "C" },
   { from: "B", to: "C" },
@@ -88,8 +93,8 @@ export function DAGScheduler({
               </marker>
             </defs>
             {edges.map((edge, index) => {
-              const from = NODES.find((node) => node.id === edge.from)!;
-              const to = NODES.find((node) => node.id === edge.to)!;
+              const from = NODE_MAP.get(edge.from)!;
+              const to = NODE_MAP.get(edge.to)!;
               const isCycleEdge = safeMode === "cycle" && edge.from === "E" && edge.to === "B";
               const changed = state.current === edge.from;
               return (
