@@ -27,6 +27,11 @@ const NODES: { id: NodeId; x: number; y: number }[] = [
   { id: "D", x: 430, y: 45 },
 ];
 
+// ⚡ Bolt: Pre-compute static lookup maps outside React renders using explicit loops
+// to avoid redundant O(N) array intermediate allocations and O(N) .find() during rendering
+const NODE_MAP = new Map<NodeId, typeof NODES[0]>();
+for (const node of NODES) NODE_MAP.set(node.id, node);
+
 const VARIANTS: Record<Variant, Edge[]> = {
   "negative-edge": [
     { from: "A", to: "B", weight: 4 },
@@ -105,8 +110,8 @@ export function BellmanFordPass({
               </marker>
             </defs>
             {edges.map((edge, index) => {
-              const from = NODES.find((node) => node.id === edge.from)!;
-              const to = NODES.find((node) => node.id === edge.to)!;
+              const from = NODE_MAP.get(edge.from)!;
+              const to = NODE_MAP.get(edge.to)!;
               const active = frame.edgeIndex === index;
               return (
                 <g key={`${edge.from}-${edge.to}-${index}`}>
