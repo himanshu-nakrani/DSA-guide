@@ -135,6 +135,7 @@ export function Header({
             <div className="lg:hidden">
               <Menu.Root>
                 <Menu.Trigger
+                  aria-haspopup="menu"
                   aria-label="Navigation menu"
                   className="grid h-10 w-10 min-h-[44px] min-w-[44px] place-items-center rounded-md text-muted-foreground hover:bg-surface-2 hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--links)]"
                 >
@@ -174,6 +175,7 @@ export function Header({
           {user ? (
             <Menu.Root>
               <Menu.Trigger
+                aria-haspopup="menu"
                 title={user.email}
                 aria-label={`Account menu (${user.email})`}
                 className="grid h-10 w-10 min-h-[44px] min-w-[44px] sm:h-9 sm:w-9 place-items-center rounded-full bg-surface-2 text-sm font-semibold text-foreground transition-colors outline-none hover:bg-border-light focus-visible:ring-2 focus-visible:ring-[color:var(--links)] data-[popup-open]:bg-border-light"
@@ -249,6 +251,7 @@ export function Header({
         })}
         <Menu.Root>
           <Menu.Trigger
+            aria-haspopup="menu"
             aria-label="More sections"
             className="flex shrink-0 min-h-[44px] items-center gap-1 rounded-md px-3.5 py-2 text-sm text-muted-foreground outline-none transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-[color:var(--links)] data-[popup-open]:bg-surface-2 data-[popup-open]:text-foreground"
           >
