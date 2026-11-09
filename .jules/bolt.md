@@ -89,3 +89,7 @@
 ## 2026-11-13 - Prevent Chained Array Allocations in Map/Set Initialization
 **Learning:** Initializing a `Map` or `Set` by passing a mapped array or a flat-mapped array (e.g. `new Set(edges.flatMap(e => [e.from, e.to]))` or `new Set(list.map(l => l.id))`) redundantly allocates an intermediate array object before populating the Set.
 **Action:** When extracting a unique list of items, instantiate an empty `Set` and populate it directly using a single-pass `for...of` loop with `.add()`. This avoids the hidden intermediate garbage array allocation.
+
+## 2026-11-14 - Pre-computing Topic Summaries Outside of JSX
+**Learning:** Computing topic progress dynamically inside the React render block (`module.topics.map(topic => ... summarizeProblemProgress(...))`) forces the page to manually recount array items and recalculate properties over the full topics list on every render pass.
+**Action:** Always compute derived topic statistics (like `topicReadCount`, `topicProblemSummary`) outside of the JSX render block inside the existing `moduleStats` iteration block. Store the computed results in a mapped object (like `topicStats: Map<string, TopicSummary>`) and perform a simple O(1) lookup inside the `.map()` block to avoid main-thread UI blockage.
