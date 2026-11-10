@@ -99,6 +99,8 @@ export default async function RoadmapPage() {
   const bookmarkIds = user ? await getBookmarkProblemIds(user.id) : new Set<string>();
   const readSlugSet = new Set(readSlugs);
 
+
+
   // One stats pass up front so the "current module" (first one not finished)
   // can be auto-expanded while completed and untouched ones stay folded.
   const moduleStats = track.modules.map((module) => {
@@ -114,6 +116,7 @@ export default async function RoadmapPage() {
       problemCount += topic.problems.length;
 
       let topicReadCount = 0;
+
       for (const article of topic.articles) {
         if (readSlugSet.has(article.slug)) {
           readArticleCount += 1;

@@ -1,3 +1,6 @@
+## 2024-11-08 - Optimized React Render Aggregation
+**Learning:** Computing statistics inside `.map()` functions within JSX logic (e.g., iterating through all articles and problems to sum counts in `src/app/roadmap/page.tsx`) causes redundant `O(N)` loop traversals and array allocations on every component render.
+**Action:** Extract deeply nested data calculations (like aggregating problem progress inside topics inside modules) from the JSX render tree. Instead, compute these aggregations in a single explicit `for...of` loop pass earlier in the component (or in the data-fetching layer) and store them in a pre-allocated `Map`. The JSX can then retrieve the stats using an `O(1)` map lookup (`map.get(id)`), making the render pass extremely fast without sacrificing readability.
 ## 2025-02-18 - Heavy Model Fields and Unpaginated Lists
 **Learning:** In `src/app/problems/page.tsx`, `prisma.problem.findMany` fetched all fields by default on an unpaginated list, loading massive strings like `statementMd`, `examplesJson`, and `starterCodeJson` into memory and transit unnecessarily.
 **Action:** Always prefer `select` over `include` when fetching list views for Prisma models containing large text/JSON columns to avoid ballooning memory and transit size, especially when not paginating.
