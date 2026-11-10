@@ -106,21 +106,38 @@ export default async function RoadmapPage() {
     let problemCount = 0;
     let readArticleCount = 0;
     const moduleProblemIds: string[] = [];
+    const topicStats = new Map<string, { readCount: number; problemSummary: ReturnType<typeof summarizeProblemProgress>; percent: number }>();
 
     // ⚡ Bolt: Single-pass iteration to prevent intermediate array allocations
     for (const topic of module.topics) {
       articleCount += topic.articles.length;
       problemCount += topic.problems.length;
 
+      let topicReadCount = 0;
       for (const article of topic.articles) {
         if (readSlugSet.has(article.slug)) {
           readArticleCount += 1;
+          topicReadCount += 1;
         }
       }
 
+      const topicProblemIds: string[] = [];
       for (const entry of topic.problems) {
         moduleProblemIds.push(entry.problemId);
+        topicProblemIds.push(entry.problemId);
       }
+
+      const topicProblemSummary = summarizeProblemProgress(topicProblemIds, problemProgressMap);
+      const topicPercent =
+        topic.articles.length + topicProblemSummary.total === 0
+          ? 0
+          : Math.round(
+              ((topicReadCount + topicProblemSummary.solved) /
+                (topic.articles.length + topicProblemSummary.total)) *
+                100,
+            );
+
+      topicStats.set(topic.id, { readCount: topicReadCount, problemSummary: topicProblemSummary, percent: topicPercent });
     }
 
     const summary = summarizeProblemProgress(moduleProblemIds, problemProgressMap);
@@ -133,6 +150,7 @@ export default async function RoadmapPage() {
       readArticleCount,
       summary,
       percent,
+      topicStats,
     };
   });
   const currentModuleId =
@@ -267,26 +285,11 @@ export default async function RoadmapPage() {
                             </div>
                             <div className="grid gap-3 md:grid-cols-2">
                               {module.topics.map((topic) => {
-                                let topicReadCount = 0;
-                                for (const article of topic.articles) {
-                                  if (readSlugSet.has(article.slug)) {
-                                    topicReadCount += 1;
-                                  }
-                                }
-
-                                const topicProblemIds = topic.problems.map((entry) => entry.problemId);
-                                const topicProblemSummary = summarizeProblemProgress(
-                                  topicProblemIds,
-                                  problemProgressMap,
-                                );
-                                const topicPercent =
-                                  topic.articles.length + topicProblemSummary.total === 0
-                                    ? 0
-                                    : Math.round(
-                                        ((topicReadCount + topicProblemSummary.solved) /
-                                          (topic.articles.length + topicProblemSummary.total)) *
-                                          100,
-                                      );
+                                const { readCount: topicReadCount, problemSummary: topicProblemSummary, percent: topicPercent } = stats.topicStats.get(topic.id) ?? {
+                                  readCount: 0,
+                                  problemSummary: { total: 0, solved: 0, started: 0, percent: 0 },
+                                  percent: 0,
+                                };
 
                                 return (
                                   <div
