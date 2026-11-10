@@ -96,6 +96,9 @@
 **Learning:** When applying keyboard focus styles (like `focus-visible:ring`) to interactive elements contained within `overflow-hidden` parents, the focus ring may be clipped and rendered invisible, breaking accessibility for keyboard navigation.
 **Action:** Use `focus-visible:ring-inset` to draw the outline inward, ensuring it remains fully visible within the clipping bounds of the parent element.
 
+## 2024-05-18 - Missing accessible interaction context on dropdown menu triggers
+**Learning:** Buttons that trigger popup menus (e.g., dropdowns using `<Menu.Trigger>`) should explicitly communicate their interaction model to assistive technologies. Without `aria-haspopup="menu"`, screen reader users might not anticipate a menu appearing upon activation.
+**Action:** Always include `aria-haspopup="menu"` on buttons that trigger dropdown menus to properly prepare assistive technologies for menu interaction. This complements the existing rule of using `aria-haspopup="dialog"` for modal dialogs and palettes.
 ## 2026-10-26 - Missing accessible interaction context on dropdown menus
 **Learning:** Buttons that trigger popup menus (e.g., dropdowns using `<Menu.Trigger>`) should explicitly communicate their interaction model by including the `aria-haspopup="menu"` attribute. This prepares assistive technologies to interact with a standard menu, complementing `aria-haspopup="dialog"` which is used for modal overlays and palettes.
 **Action:** Always include `aria-haspopup="menu"` on buttons that trigger standard dropdown menus to explicitly communicate the interaction model to assistive technologies before they activate the control.
