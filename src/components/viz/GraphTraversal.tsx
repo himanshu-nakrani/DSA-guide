@@ -75,9 +75,14 @@ export function GraphTraversal({
 
   // ⚡ Bolt: Precompute Sets for O(1) lookups to avoid O(N^2) bottlenecks inside map
   const frontierSet = React.useMemo(() => new Set(f.frontier), [f.frontier]);
-  const traversedEdgesSet = React.useMemo(() => new Set(
-    f.treeEdges.map(([x, y]) => `${Math.min(x, y)}-${Math.max(x, y)}`)
-  ), [f.treeEdges]);
+  const traversedEdgesSet = React.useMemo(() => {
+    // ⚡ Bolt: Prevent intermediate array allocations in Sets
+    const set = new Set<string>();
+    for (const [x, y] of f.treeEdges) {
+      set.add(`${Math.min(x, y)}-${Math.max(x, y)}`);
+    }
+    return set;
+  }, [f.treeEdges]);
 
   const W = 620;
   const H = 260;
