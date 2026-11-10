@@ -125,7 +125,7 @@ export function CommandPalette({ index }: { index: SearchItem[] }) {
       // so the lookup is a plain record.
       const byHref: Record<string, SearchItem> = {};
       for (const x of precomputedIndex) byHref[x.item.href] = x.item;
-      // ⚡ Bolt: Prevent array allocation in Set initialization using explicit iteration
+      // ⚡ Bolt: Prevent intermediate array allocations in Sets
       const inBase = new Set<string>();
       for (const x of base) inBase.add(x.href);
       const recents: SearchItem[] = [];
