@@ -25,7 +25,8 @@ const NODES: { id: NodeId; x: number; y: number }[] = [
   { id: "E", x: 258, y: 258 },
 ];
 
-// ⚡ Bolt: Prevent O(N^2) render complexity by using O(1) Map lookup instead of .find() in loops
+// ⚡ Bolt: Pre-compute static lookup maps outside React renders using explicit loops
+// to avoid redundant O(N) array intermediate allocations and O(N) .find() during rendering
 const NODE_MAP = new Map<NodeId, typeof NODES[0]>();
 for (const node of NODES) NODE_MAP.set(node.id, node);
 
