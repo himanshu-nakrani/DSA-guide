@@ -36,6 +36,11 @@ const NODES: Array<{ id: ZeroOneNode; x: number; y: number }> = [
   { id: "E", x: 358, y: 192 },
 ];
 
+// ⚡ Bolt: Pre-compute static lookup maps outside React renders using explicit loops
+// to avoid redundant O(N) array intermediate allocations and O(N) .find() during rendering
+const NODE_MAP = new Map<ZeroOneNode, typeof NODES[0]>();
+for (const node of NODES) NODE_MAP.set(node.id, node);
+
 const GRAPH: Record<ZeroOneVariant, ZeroOneEdge[]> = {
   valid: [
     { from: "A", to: "B", weight: 1 },
@@ -138,8 +143,8 @@ export function ZeroOneDeque({
               </marker>
             </defs>
             {edges.map((edge, index) => {
-              const from = NODES.find((node) => node.id === edge.from)!;
-              const to = NODES.find((node) => node.id === edge.to)!;
+              const from = NODE_MAP.get(edge.from)!;
+              const to = NODE_MAP.get(edge.to)!;
               const active = frame.edgeIndex === index;
               return (
                 <g key={`${edge.from}-${edge.to}-${index}`}>

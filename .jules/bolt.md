@@ -93,6 +93,9 @@
 **Learning:** Initializing a `Map` or `Set` by passing a mapped array or a flat-mapped array (e.g. `new Set(edges.flatMap(e => [e.from, e.to]))` or `new Set(list.map(l => l.id))`) redundantly allocates an intermediate array object before populating the Set.
 **Action:** When extracting a unique list of items, instantiate an empty `Set` and populate it directly using a single-pass `for...of` loop with `.add()`. This avoids the hidden intermediate garbage array allocation.
 
+## 2025-02-12 - Replaced O(N) array finds with O(1) Map lookups in render functions
+**Learning:** Found an anti-pattern in multiple visualization components (DAGScheduler, ZeroOneDeque, BellmanFordPass, RerootingPropagation) where `Array.prototype.find()` was used inside JSX `.map()` calls to look up nodes for edges. This resulted in O(N²) lookups during React rendering for static configuration data.
+**Action:** Always pre-compute static data lookup maps (using explicit loops to avoid `.map` allocations) outside of React components at the module level. Use `.get()` in render cycles to maintain O(1) complexity.
 ## 2026-11-14 - Pre-computing Topic Summaries Outside of JSX
 **Learning:** Computing topic progress dynamically inside the React render block (`module.topics.map(topic => ... summarizeProblemProgress(...))`) forces the page to manually recount array items and recalculate properties over the full topics list on every render pass.
 **Action:** Always compute derived topic statistics (like `topicReadCount`, `topicProblemSummary`) outside of the JSX render block inside the existing `moduleStats` iteration block. Store the computed results in a mapped object (like `topicStats: Map<string, TopicSummary>`) and perform a simple O(1) lookup inside the `.map()` block to avoid main-thread UI blockage.
