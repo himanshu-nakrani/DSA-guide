@@ -497,11 +497,17 @@ function WeekStrip({
   activityDays: { dateKey: string; count: number }[];
   moduleCompletion: ModuleCompletion[];
 }) {
-  const activeDays = activityDays.filter((d) => d.count > 0).length;
+  let activeDays = 0;
+  for (const d of activityDays) {
+    if (d.count > 0) activeDays++;
+  }
   const todayActive = (activityDays[activityDays.length - 1]?.count ?? 0) > 0;
-  const weakest = moduleCompletion
-    .filter((m) => m.total > 0)
-    .sort((a, b) => a.pct - b.pct)[0];
+
+  // ⚡ Bolt: Removed .filter().sort()[0] array chaining to find the weakest module. Using single-pass iteration reduces time complexity from O(N log N) to O(N) and prevents intermediate array allocations during component render.
+  let weakest: ModuleCompletion | undefined = undefined;
+  for (const m of moduleCompletion) {
+    if (m.total > 0 && (!weakest || m.pct < weakest.pct)) weakest = m;
+  }
 
   return (
     <section className="grid gap-4 md:grid-cols-2">

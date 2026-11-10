@@ -100,13 +100,6 @@ export default async function RoadmapPage() {
   const readSlugSet = new Set(readSlugs);
 
 
-  // ⚡ Bolt: Pre-allocate a topicStatsMap outside the render tree to prevent O(N) redundant
-  // loops and array allocations (.map, .reduce, .filter) during JSX execution.
-  const topicStatsMap = new Map<string, {
-    readCount: number;
-    problemSummary: { total: number; solved: number; started: number; percent: number; };
-    percent: number;
-  }>();
 
   // One stats pass up front so the "current module" (first one not finished)
   // can be auto-expanded while completed and untouched ones stay folded.
@@ -115,6 +108,7 @@ export default async function RoadmapPage() {
     let problemCount = 0;
     let readArticleCount = 0;
     const moduleProblemIds: string[] = [];
+    const topicStats = new Map<string, { readCount: number; problemSummary: ReturnType<typeof summarizeProblemProgress>; percent: number }>();
 
     // ⚡ Bolt: Single-pass iteration to prevent intermediate array allocations
     for (const topic of module.topics) {
@@ -122,7 +116,6 @@ export default async function RoadmapPage() {
       problemCount += topic.problems.length;
 
       let topicReadCount = 0;
-      const topicProblemIds: string[] = [];
 
       for (const article of topic.articles) {
         if (readSlugSet.has(article.slug)) {
@@ -131,22 +124,23 @@ export default async function RoadmapPage() {
         }
       }
 
+      const topicProblemIds: string[] = [];
       for (const entry of topic.problems) {
         moduleProblemIds.push(entry.problemId);
         topicProblemIds.push(entry.problemId);
       }
 
       const topicProblemSummary = summarizeProblemProgress(topicProblemIds, problemProgressMap);
-      const topicTotalItems = topic.articles.length + topicProblemSummary.total;
-      const topicPercent = topicTotalItems === 0
-        ? 0
-        : Math.round(((topicReadCount + topicProblemSummary.solved) / topicTotalItems) * 100);
+      const topicPercent =
+        topic.articles.length + topicProblemSummary.total === 0
+          ? 0
+          : Math.round(
+              ((topicReadCount + topicProblemSummary.solved) /
+                (topic.articles.length + topicProblemSummary.total)) *
+                100,
+            );
 
-      topicStatsMap.set(topic.id, {
-        readCount: topicReadCount,
-        problemSummary: topicProblemSummary,
-        percent: topicPercent,
-      });
+      topicStats.set(topic.id, { readCount: topicReadCount, problemSummary: topicProblemSummary, percent: topicPercent });
     }
 
     const summary = summarizeProblemProgress(moduleProblemIds, problemProgressMap);
@@ -159,6 +153,7 @@ export default async function RoadmapPage() {
       readArticleCount,
       summary,
       percent,
+      topicStats,
     };
   });
   const currentModuleId =
@@ -293,7 +288,7 @@ export default async function RoadmapPage() {
                             </div>
                             <div className="grid gap-3 md:grid-cols-2">
                               {module.topics.map((topic) => {
-                                const topicStats = topicStatsMap.get(topic.id) ?? {
+                                const { readCount: topicReadCount, problemSummary: topicProblemSummary, percent: topicPercent } = stats.topicStats.get(topic.id) ?? {
                                   readCount: 0,
                                   problemSummary: { total: 0, solved: 0, started: 0, percent: 0 },
                                   percent: 0,
@@ -310,17 +305,17 @@ export default async function RoadmapPage() {
                                           {topic.name}
                                         </div>
                                         <div className="mt-1 text-caption font-mono uppercase tracking-[0.1em] text-muted-foreground">
-                                          {topicStats.readCount}/{topic.articles.length} read · {topicStats.problemSummary.solved}/{topicStats.problemSummary.total} solved
+                                          {topicReadCount}/{topic.articles.length} read · {topicProblemSummary.solved}/{topicProblemSummary.total} solved
                                         </div>
                                       </div>
                                       <span className="text-caption font-mono tabular-nums text-muted-foreground">
-                                        {topicStats.percent}%
+                                        {topicPercent}%
                                       </span>
                                     </div>
                                     <div className="mt-3 h-1.5 rounded-full bg-border overflow-hidden">
                                       <div
                                         className="h-full bg-ink-blue transition-[width]"
-                                        style={{ width: `${topicStats.percent}%` }}
+                                        style={{ width: `${topicPercent}%` }}
                                       />
                                     </div>
                                   </div>
