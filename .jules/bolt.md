@@ -93,3 +93,6 @@
 ## 2026-11-14 - Pre-computing Topic Summaries Outside of JSX
 **Learning:** Computing topic progress dynamically inside the React render block (`module.topics.map(topic => ... summarizeProblemProgress(...))`) forces the page to manually recount array items and recalculate properties over the full topics list on every render pass.
 **Action:** Always compute derived topic statistics (like `topicReadCount`, `topicProblemSummary`) outside of the JSX render block inside the existing `moduleStats` iteration block. Store the computed results in a mapped object (like `topicStats: Map<string, TopicSummary>`) and perform a simple O(1) lookup inside the `.map()` block to avoid main-thread UI blockage.
+## 2024-05-19 - Replacing Chained Array Methods with Single-Pass Iteration for Component Data
+**Learning:** Utilizing chained array methods like `.filter().sort()[0]` to determine extreme values like the weakest module causes redundant O(N log N) processing and intermediate array allocations, reducing performance during component renders.
+**Action:** Replace functional array chaining used for aggregations inside components with an explicit single-pass iteration (`for...of` loops) and standard variables to track extremal values.
