@@ -1,3 +1,6 @@
+## 2024-11-08 - Optimized React Render Aggregation
+**Learning:** Computing statistics inside `.map()` functions within JSX logic (e.g., iterating through all articles and problems to sum counts in `src/app/roadmap/page.tsx`) causes redundant `O(N)` loop traversals and array allocations on every component render.
+**Action:** Extract deeply nested data calculations (like aggregating problem progress inside topics inside modules) from the JSX render tree. Instead, compute these aggregations in a single explicit `for...of` loop pass earlier in the component (or in the data-fetching layer) and store them in a pre-allocated `Map`. The JSX can then retrieve the stats using an `O(1)` map lookup (`map.get(id)`), making the render pass extremely fast without sacrificing readability.
 ## 2025-02-18 - Heavy Model Fields and Unpaginated Lists
 **Learning:** In `src/app/problems/page.tsx`, `prisma.problem.findMany` fetched all fields by default on an unpaginated list, loading massive strings like `statementMd`, `examplesJson`, and `starterCodeJson` into memory and transit unnecessarily.
 **Action:** Always prefer `select` over `include` when fetching list views for Prisma models containing large text/JSON columns to avoid ballooning memory and transit size, especially when not paginating.
@@ -89,3 +92,10 @@
 ## 2026-11-13 - Prevent Chained Array Allocations in Map/Set Initialization
 **Learning:** Initializing a `Map` or `Set` by passing a mapped array or a flat-mapped array (e.g. `new Set(edges.flatMap(e => [e.from, e.to]))` or `new Set(list.map(l => l.id))`) redundantly allocates an intermediate array object before populating the Set.
 **Action:** When extracting a unique list of items, instantiate an empty `Set` and populate it directly using a single-pass `for...of` loop with `.add()`. This avoids the hidden intermediate garbage array allocation.
+
+## 2026-11-14 - Pre-computing Topic Summaries Outside of JSX
+**Learning:** Computing topic progress dynamically inside the React render block (`module.topics.map(topic => ... summarizeProblemProgress(...))`) forces the page to manually recount array items and recalculate properties over the full topics list on every render pass.
+**Action:** Always compute derived topic statistics (like `topicReadCount`, `topicProblemSummary`) outside of the JSX render block inside the existing `moduleStats` iteration block. Store the computed results in a mapped object (like `topicStats: Map<string, TopicSummary>`) and perform a simple O(1) lookup inside the `.map()` block to avoid main-thread UI blockage.
+## 2024-05-19 - Replacing Chained Array Methods with Single-Pass Iteration for Component Data
+**Learning:** Utilizing chained array methods like `.filter().sort()[0]` to determine extreme values like the weakest module causes redundant O(N log N) processing and intermediate array allocations, reducing performance during component renders.
+**Action:** Replace functional array chaining used for aggregations inside components with an explicit single-pass iteration (`for...of` loops) and standard variables to track extremal values.
