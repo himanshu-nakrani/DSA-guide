@@ -26,6 +26,11 @@ const NODES: NodeLayout[] = [
   { id: "E", x: 448, y: 228, parent: "C", children: [] },
 ];
 
+// ⚡ Bolt: Pre-compute static lookup maps outside React renders using explicit loops
+// to avoid redundant O(N) array intermediate allocations and O(N) .find() during rendering
+const NODE_MAP = new Map<RerootNode, NodeLayout>();
+for (const node of NODES) NODE_MAP.set(node.id, node);
+
 export function buildRerootingFrames(): RerootingFrame[] {
   const sizes: Partial<Record<RerootNode, number>> = {};
   const subtreeDistance: Partial<Record<RerootNode, number>> = {};
@@ -35,7 +40,7 @@ export function buildRerootingFrames(): RerootingFrame[] {
   const add = (frame: Omit<RerootingFrame, "step">) => frames.push({ ...frame, step: step++ });
 
   for (const node of ["D", "E", "B", "C", "A"] as RerootNode[]) {
-    const layout = NODES.find((candidate) => candidate.id === node)!;
+    const layout = NODE_MAP.get(node)!;
     const childSizes = layout.children.reduce((sum, child) => sum + (sizes[child] ?? 0), 0);
     const childDistances = layout.children.reduce((sum, child) => sum + (subtreeDistance[child] ?? 0) + (sizes[child] ?? 0), 0);
     sizes[node] = 1 + childSizes;
@@ -52,7 +57,7 @@ export function buildRerootingFrames(): RerootingFrame[] {
   add({ phase: "root", current: "A", sizes: { ...sizes }, subtreeDistance: { ...subtreeDistance }, answers: { ...answers }, formula: `answer(A) = subDist(A) = ${answers.A}`, title: "Seed the all-tree answer", explanation: "The first DFS gives the sum of distances from A to every node. This is the seed that the second DFS will transport to every other root." });
 
   for (const node of ["B", "C", "D", "E"] as RerootNode[]) {
-    const parent = NODES.find((candidate) => candidate.id === node)!.parent!;
+    const parent = NODE_MAP.get(node)!.parent!;
     const childSize = sizes[node] ?? 0;
     answers[node] = (answers[parent] ?? 0) + NODES.length - 2 * childSize;
     add({ phase: "propagate", current: node, sizes: { ...sizes }, subtreeDistance: { ...subtreeDistance }, answers: { ...answers }, formula: `answer(${node}) = answer(${parent}) + n − 2·size(${node}) = ${answers[parent]} + 5 − 2·${childSize} = ${answers[node]}`, title: `Move the root A → ${node}`, explanation: `Crossing the ${parent}–${node} edge makes every node in ${node}'s subtree one step closer and every other node one step farther. The net change is n − 2·size(${node}).` });
